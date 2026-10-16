@@ -34,7 +34,6 @@ which runs for the first time on the first push.
 
 - Push to GitHub depends on the repo being attached to the session.
 - CI has never run (first push will tell).
-- `follow_wall` wobbles visibly; harmless, but smoothing would read better on screen.
 - `keep_distance` and `move_towards beacon` can alternate quickly at the edge of a range (zigzag).
   The 12 px margin helps but doesn't remove it. Watch whether players find it readable.
 - The plan's open decisions (win condition = survey fleet, success transmission, etc.) are
