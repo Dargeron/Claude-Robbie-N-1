@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-16, end of session 2.
+Updated 2026-10-16, after hourly block 1 (22:38 UTC).
 
 ## Where we are
 
@@ -25,9 +25,9 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 ## Next three tasks
 
-1. Verify the web page inside the claude.ai frame; fix or fall back.
-2. Onboarding for the first minute, and a 2x watch mode for the monitor.
-3. Station memory (map from every past dive) and the Wall of Robbies.
+1. Verify the web page inside the claude.ai frame (needs Albert's eyes); fix or fall back.
+2. Sound: ambience and a few effects, procedural.
+3. The Wall of Robbies, and live first viewing.
 
 ## Known issues and open questions
 

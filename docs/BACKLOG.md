@@ -14,11 +14,12 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 - [x] **Why? panel**: the rule-by-rule explanation for the moment under the playhead (s02).
 - [x] **Robbie's voice v1**: subtitles and last words, 40 lines (s02).
 - [ ] **Wall of Robbies**: a screen of every serial with its epitaph; doubles as the score.
-- [ ] **Station memory**: the room map assembled from every past dive's lamp, shown faintly.
+- [x] **Station memory**: the faint chart of what earlier Robbies saw (block 1).
 - [x] **Survey fleet in the UI** (s02).
 - [x] **Save/load** programs and the archive (s02).
-- [ ] **Onboarding:** the first minute must teach the editor without a manual (see P0c).
-- [ ] **Readability pass on the monitor:** at 1:1 the dive is small; offer a 2x "watch" mode.
+- [~] **Onboarding:** mission-control lines and hints are in (block 1); still to do: a pre-broken first program
+      and pointing at the editor on the first visit.
+- [x] **Watch large** mode at 2x (block 1).
 
 ## Next: P0c, readable and charming
 
