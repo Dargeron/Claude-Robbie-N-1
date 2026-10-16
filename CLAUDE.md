@@ -61,6 +61,7 @@ Rendering works here too: `xvfb-run -a tools/godot.sh --path game --rendering-dr
   run in `timeout` (`ROBBIE_TIMEOUT`, default 900 s).
 - Class names resolve only after an import: `tools/bootstrap.sh` runs `--import`. If a new
   `class_name` is "not declared", run bootstrap again.
+- `tools/test.sh | tail` hides a failure behind tail's exit code: run commands with `set -o pipefail`.
 - Integer division warnings are disabled in `project.godot`; integer division is intended everywhere.
 
 ## Definition of done
