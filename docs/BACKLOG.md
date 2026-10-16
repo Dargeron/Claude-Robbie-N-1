@@ -7,16 +7,18 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 
 ## Now: P0b, the first playable
 
-- [~] **Station screen**: monitor + rule editor + CPU meter + launch + archive in one screen (s02).
-- [ ] **Builds Albert can run**: Linux/Windows/macOS zips; a web build; one place to download them.
-- [ ] **Replay controls on screen**: clickable transport, a timeline with markers (hits, lurker, valve,
-      rule switches, end), click-to-seek.
-- [ ] **Why? panel**: the rule-by-rule explanation for the moment under the playhead.
-- [ ] **Robbie's voice v1**: subtitles for events, a last transmission chosen by cause and history,
-      a Wall of Robbies with epitaphs. About 30 lines, curated tone: helpful, good-natured, chatty.
+- [x] **Station screen**: monitor + rule editor + CPU meter + launch + archive in one screen (s02).
+- [x] **Builds Albert can run**: Linux/Windows/macOS zips; web build on a claude.ai page (s02).
+- [ ] **Verify the web page inside the claude.ai frame** (WebAssembly may be blocked there).
+- [x] **Replay controls on screen**: transport, timeline with markers, click-to-seek (s02).
+- [x] **Why? panel**: the rule-by-rule explanation for the moment under the playhead (s02).
+- [x] **Robbie's voice v1**: subtitles and last words, 40 lines (s02).
+- [ ] **Wall of Robbies**: a screen of every serial with its epitaph; doubles as the score.
 - [ ] **Station memory**: the room map assembled from every past dive's lamp, shown faintly.
-- [ ] **Survey fleet in the UI**: after a first exit, send the fleet, list failures, replay any of them.
-- [ ] **Save/load** programs and the archive (user://).
+- [x] **Survey fleet in the UI** (s02).
+- [x] **Save/load** programs and the archive (s02).
+- [ ] **Onboarding:** the first minute must teach the editor without a manual (see P0c).
+- [ ] **Readability pass on the monitor:** at 1:1 the dive is small; offer a 2x "watch" mode.
 
 ## Next: P0c, readable and charming
 

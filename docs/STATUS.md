@@ -1,11 +1,12 @@
 # Status
 
-Updated 2026-10-16, end of session 1.
+Updated 2026-10-16, end of session 2.
 
 ## Where we are
 
-**Phase M1, step P0a (sim in a terminal): done.** M0 foundations are in place, apart from CI,
-which runs for the first time on the first push.
+**Phase M1, step P0b (first playable): done in a first version.** The station screen runs the whole loop:
+write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Windows, macOS and the web
+(https://claude.ai/artifact/EtAUzrsTr2DVgwN4zAeCuE). Next: P0c, readable and charming. See docs/BACKLOG.md.
 
 ## What works
 
@@ -22,18 +23,15 @@ which runs for the first time on the first push.
   sim), golden replays, reference programs.
 - A dive takes about 0.1 s to simulate. The solver bot is cheaper than we feared.
 
-## Next three tasks (P0b, first playable)
+## Next three tasks
 
-1. **Replay controls on screen:** the dive view already draws recordings (`view/replay_scene.tscn`,
-   keyboard VCR controls, VHS lines); it needs clickable controls, a timeline with event markers
-   and the Why? panel.
-2. **Rule editor:** click-built rules (New → order → parameter → + if → condition) with a CPU meter.
-3. **The loop:** launch → watch with the active rule lit up → edit → relaunch. A web build for Albert.
+1. Verify the web page inside the claude.ai frame; fix or fall back.
+2. Onboarding for the first minute, and a 2x watch mode for the monitor.
+3. Station memory (map from every past dive) and the Wall of Robbies.
 
 ## Known issues and open questions
 
-- Push to GitHub depends on the repo being attached to the session.
-- CI has never run (first push will tell).
+- GitHub is parked at Albert's request; backups go to the session outputs folder (tools/save.sh).
 - `keep_distance` and `move_towards beacon` can alternate quickly at the edge of a range (zigzag).
   The 12 px margin helps but doesn't remove it. Watch whether players find it readable.
 - The plan's open decisions (win condition = survey fleet, success transmission, etc.) are
