@@ -30,6 +30,11 @@ Then post a short plan to Albert: the goal, three to six tasks, what he will see
 | `tools/bless.sh` | Re-record golden replays after a deliberate sim change |
 | `tools/godot.sh --headless --path game --script res://tools/hunt.gd -- <room> [seeds]` | Exploit hunt over all 1-rule and most 2-rule programs (slow) |
 | `tools/movie.sh <room> <prog.rbt> [seed] [out.mp4] [speed] [serial]` | Record the replay as MP4 (GIF=1 for a GIF too) under a virtual display |
+| `xvfb-run -a tools/godot.sh --path game --rendering-driver opengl3 --audio-driver Dummy res://tools/shots.tscn -- <out_dir>` | Scripted tour of the station UI, saving screenshots to look at |
+| `tools/godot.sh --headless --path game --export-release <Linux/Windows/macOS/Web> <path>` | Builds (templates in ~/.local/share/godot/export_templates/4.7.2.stable) |
+| `tools/web_artifact.sh` | Web build packed for a claude.ai page (engine gzipped inside a script); then publish build/artifact/robbie-play.html with its files |
+| `tools/fleet.sh [glob] [n]` | Survey fleet summary for every reference program |
+| `tools/save.sh` / `tools/restore.sh` | Back up the repo to /mnt/user-data/outputs, or rebuild it from there |
 | `python3 tools/gen_fx_tables.py` | Regenerate the integer trig tables (never needed unless Fx changes) |
 
 Rendering works here too: `xvfb-run -a tools/godot.sh --path game --rendering-driver opengl3 --write-movie out/x.png --fixed-fps 30 --quit-after N` writes frames you can look at with the Read tool.
@@ -72,6 +77,15 @@ Rendering works here too: `xvfb-run -a tools/godot.sh --path game --rendering-dr
 - Commit messages: what changed and why, in plain words. End with the attribution lines the session
   gives you (Co-Authored-By and Claude-Session).
 - Tag finished phases: `m0-foundations`, `m1-prototype`, ...
+
+## Hourly work loop
+
+Albert asked for continuous iteration: one work block per hour, woken by a scheduled message.
+Each block: read `docs/BACKLOG.md`, pick the most valuable item, build it, test it, look at it,
+update STATUS/BACKLOG/devlog, commit to main, run `tools/save.sh`, send Albert a short update
+(with a clip, screenshot or new build when there is something to see), then schedule the next block.
+The playable web page is https://claude.ai/artifact/EtAUzrsTr2DVgwN4zAeCuE ; republish it from
+`build/artifact/robbie-play.html` after `tools/web_artifact.sh`.
 
 ## Talking with Albert
 

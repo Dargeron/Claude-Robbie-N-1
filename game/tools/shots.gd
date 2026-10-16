@@ -1,0 +1,69 @@
+extends Node
+## Scripted screenshots of the station, for checking the UI without a human.
+##   xvfb-run -a godot --path game --rendering-driver opengl3 res://tools/shots.tscn -- <out_dir> [script]
+## Scripts: "tour" (default) launches naive and intended programs in each room and captures moments.
+
+var out_dir := "/tmp/shots"
+var station: Control
+var steps: Array = []
+var frame := 0
+var wait := 0
+var shot_n := 0
+
+
+func _ready() -> void:
+	var args := OS.get_cmdline_user_args()
+	if args.size() > 0:
+		out_dir = args[0]
+	DirAccess.make_dir_recursive_absolute(out_dir)
+	station = load("res://station/station.tscn").instantiate()
+	station.state.reset()
+	add_child(station)
+	steps = [
+		["wait", 10], ["shot", "01-empty"],
+		["launch"], ["seek", 0.35], ["wait", 5], ["shot", "02-dark-naive-mid"],
+		["seek", 1.0], ["wait", 5], ["shot", "03-dark-naive-end"],
+		["program", "follow_wall left"], ["launch"], ["seek", 0.5], ["wait", 5], ["shot", "04-dark-intended-mid"],
+		["seek", 1.0], ["wait", 5], ["shot", "05-dark-intended-end"],
+		["survey"], ["wait", 5], ["shot", "06-dark-certified"],
+		["room", "valve"], ["program", "keep_distance 4\nstop if valve_shut\nmove_towards beacon"], ["launch"],
+		["seek_tick", 362], ["wait", 5], ["shot", "07-valve-lurker"],
+		["room", "jellyfish"], ["program", "move_towards beacon"], ["launch"], ["seek", 0.85], ["wait", 5], ["shot", "08-jellyfish-naive"],
+		["quit"],
+	]
+
+
+func _process(_d: float) -> void:
+	frame += 1
+	if wait > 0:
+		wait -= 1
+		return
+	if steps.is_empty():
+		return
+	var s: Array = steps.pop_front()
+	match s[0]:
+		"wait":
+			wait = s[1]
+		"shot":
+			await RenderingServer.frame_post_draw
+			var img := get_viewport().get_texture().get_image()
+			img.save_png("%s/%s.png" % [out_dir, s[1]])
+			print("shot ", s[1])
+		"launch":
+			station._launch()
+		"seek":
+			station.replay.seek(s[1] * float(station.replay.view.last_tick()))
+			station.replay.playing = false
+		"seek_tick":
+			station.replay.seek(float(s[1]))
+			station.replay.playing = false
+		"program":
+			station.program = Program.parse(s[1])
+			station.editor.set_program(station.program)
+			station._on_program_changed()
+		"survey":
+			station._survey()
+		"room":
+			station._select_room(s[1])
+		"quit":
+			get_tree().quit()

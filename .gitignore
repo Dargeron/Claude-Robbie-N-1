@@ -13,3 +13,5 @@ out/
 *.pem
 service-account*.json
 .env
+# Packaged web build (regenerate with tools/web_artifact.sh)
+build/

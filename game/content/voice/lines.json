@@ -1,0 +1,72 @@
+{
+  "_about": "Robbie's lines. Helpful, good-natured, chatty, a little naive; it will learn. {n} = this Robbie, {next} = the next one, {prev} = the previous one, {cause} = what got the previous one. Edit freely: the game picks one per moment, the same one every time for the same Robbie.",
+  "launch": [
+    "Robbie {n}, descending. I have a very good feeling about this.",
+    "Hello, Jupiter! Robbie {n} here, ready to be helpful.",
+    "Descent started. I have read every report from my predecessors. Twice.",
+    "Robbie {n} online. Statistically, this is the best day of my life.",
+    "Going down! Please tell the station I said hello."
+  ],
+  "first_jellyfish": [
+    "Oh! Glowing friends.",
+    "Jellyfish detected. They look very soft.",
+    "Something is glowing. For the record: lovely."
+  ],
+  "lurker_wakes": [
+    "The rock has eyes. Noted.",
+    "That wall is looking at me.",
+    "Eyes! Backing away politely."
+  ],
+  "hurt_jellyfish": [
+    "Ow. Soft, but not friendly.",
+    "Stung. Updating my opinion of jellyfish."
+  ],
+  "hurt_wall": [
+    "The wall is still there. Confirmed.",
+    "Minor contact with geology."
+  ],
+  "hurt_valve": [
+    "The valve bites! Good to know.",
+    "Ouch. That door has opinions."
+  ],
+  "low_energy": [
+    "Energy at a quarter. I will talk less. (I won't.)",
+    "Running low. Still enjoying myself."
+  ],
+  "exit": [
+    "Beacon reached! Firing the burst. Tell {next} the way is clear.",
+    "I made it! Transmitting everything. It was an honour.",
+    "Exit found. Sending the whole trip, including the boring bits."
+  ],
+  "last_wall": [
+    "Please note: the wall was exactly where the map said it would be.",
+    "I hit the same rock three times. In my defence, it didn't move.",
+    "Tell {next}: walls are not optional."
+  ],
+  "last_jellyfish": [
+    "Please note for the record that I was right about the jellyfish.",
+    "They were attracted to my light. I understand them completely.",
+    "Tell {next}: the glow is not a greeting."
+  ],
+  "last_lurker": [
+    "I backed away exactly as instructed. Just not far enough.",
+    "The rock had teeth. I would like that added to the map.",
+    "Tell {next} to mind the wall with eyes."
+  ],
+  "last_valve": [
+    "The valve closed. I was in the way. We both regret it.",
+    "Tell {next}: wait for the door. Doors don't wait for you."
+  ],
+  "last_energy": [
+    "Energy gone. I'll describe the exit from memory: it was probably lovely.",
+    "Out of power. I spent it all on enthusiasm."
+  ],
+  "last_timeout": [
+    "I waited as long as I could."
+  ],
+  "same_death": [
+    "Same {cause} as {prev}. Different me.",
+    "{prev} and I agree about {cause}.",
+    "{prev} was right about {cause}. I checked."
+  ]
+}

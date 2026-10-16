@@ -1,0 +1,179 @@
+<title>Robbie N+1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one full-bleed game stage; a quiet loading card in the middle until the engine is up. */
+:root {
+  --void: #05080c;       /* Jupiter's dark water */
+  --panel: #10161e;
+  --edge: #243041;
+  --lamp: #ffc35a;       /* Robbie's lamp, the only warm colour */
+  --text: #ddd6c6;
+  --dim: #8b8f94;
+  --font-ui: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--font-ui);
+  overflow: hidden;
+  padding-left: max(0px, env(safe-area-inset-left, 0px));
+  padding-right: max(0px, env(safe-area-inset-right, 0px));
+}
+#canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  touch-action: none;
+  background: var(--void);
+}
+#status {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: var(--void);
+}
+.card {
+  width: min(28rem, 100%);
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.4rem 1.5rem;
+  border: 1px solid var(--edge);
+  border-radius: 6px;
+  background: var(--panel);
+}
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+  color: var(--lamp);
+  text-wrap: balance;
+}
+.bar {
+  height: 6px;
+  border-radius: 3px;
+  background: #0b1016;
+  border: 1px solid var(--edge);
+  overflow: hidden;
+}
+.bar > span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--lamp);
+  transition: width 0.2s linear;
+}
+#status-text { font-size: 0.85rem; color: var(--text); font-variant-numeric: tabular-nums; }
+.hint { font-size: 0.78rem; line-height: 1.5; color: var(--dim); }
+#status-error { white-space: pre-wrap; font-size: 0.8rem; color: #ff8a7a; }
+@media (prefers-reduced-motion: reduce) { .bar > span { transition: none; } }
+</style>
+
+<canvas id="canvas" tabindex="0">Your browser can't show the game canvas.</canvas>
+
+<div id="status" role="status" aria-live="polite">
+  <div class="card">
+    <div class="eyebrow">Jupiter orbital station · prototype P0b</div>
+    <h1>ROBBIE N+1</h1>
+    <div class="bar"><span id="status-bar"></span></div>
+    <div id="status-text">Receiving the station software…</div>
+    <div class="hint">Write Robbie's rules on the right, press Launch, watch the transmission on the left.
+      Best on a computer, or a phone held sideways. About 14 MB to load.</div>
+    <div id="status-error" hidden></div>
+  </div>
+</div>
+
+<script src="index.js"></script>
+<script>
+(function () {
+  const bar = document.getElementById("status-bar");
+  const text = document.getElementById("status-text");
+  const errorBox = document.getElementById("status-error");
+  const overlay = document.getElementById("status");
+
+  // The engine and game data ship inside two plain script files (the hosting limit
+  // is 15 MB per file, the engine is 39 MB raw). Unpack them when the engine asks.
+  function b64ToBytes(b64) {
+    if (Uint8Array.fromBase64) { return Uint8Array.fromBase64(b64); }
+    const bin = atob(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) { out[i] = bin.charCodeAt(i); }
+    return out;
+  }
+  function extract(src) {
+    return src.slice(src.indexOf('"') + 1, src.lastIndexOf('"'));
+  }
+  const realFetch = window.fetch.bind(window);
+  window.fetch = function (input, init) {
+    const url = typeof input === "string" ? input : (input && input.url) || "";
+    if (/index\.wasm(\?|$)/.test(url)) {
+      text.textContent = "Receiving the station software…";
+      return realFetch("engine_data.js").then(function (r) { return r.text(); }).then(function (src) {
+        text.textContent = "Unpacking…";
+        const gz = b64ToBytes(extract(src));
+        const body = new Blob([gz]).stream().pipeThrough(new DecompressionStream("gzip"));
+        return new Response(body, { status: 200, headers: { "Content-Type": "application/wasm" } });
+      });
+    }
+    if (/index\.pck(\?|$)/.test(url)) {
+      return realFetch("game_data.js").then(function (r) { return r.text(); }).then(function (src) {
+        return new Response(b64ToBytes(extract(src)), { status: 200, headers: { "Content-Type": "application/octet-stream" } });
+      });
+    }
+    return realFetch(input, init);
+  };
+
+
+  function fail(err) {
+    console.error(err);
+    errorBox.hidden = false;
+    errorBox.textContent = "The station software could not start here.\n" + (err && err.message ? err.message : String(err));
+    text.textContent = "Transmission lost.";
+  }
+
+  if (typeof DecompressionStream === "undefined") {
+    fail(new Error("This browser is missing DecompressionStream. Try a recent Chrome, Firefox or Safari."));
+    return;
+  }
+
+  const engine = new Engine({
+    args: [],
+    canvasResizePolicy: 2,
+    executable: "index",
+    mainPack: "index.pck",
+    fileSizes: { "index.pck": __PCK_SIZE__, "index.wasm": __WASM_SIZE__ },
+    focusCanvas: true,
+    ensureCrossOriginIsolationHeaders: false,
+    gdextensionLibs: [],
+  });
+
+  const missing = Engine.getMissingFeatures({ threads: false });
+  if (missing.length) {
+    fail(new Error("Missing browser features: " + missing.join(", ")));
+    return;
+  }
+
+  engine.startGame({
+    onProgress: function (current, total) {
+      if (current > 0 && total > 0) {
+        const pct = Math.min(100, Math.round((current / total) * 100));
+        bar.style.width = pct + "%";
+        text.textContent = "Receiving the station software… " + pct + "%";
+      }
+    },
+  }).then(function () {
+    overlay.remove();
+  }, fail);
+})();
+</script>

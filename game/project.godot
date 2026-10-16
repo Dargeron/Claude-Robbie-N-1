@@ -7,8 +7,8 @@ config_version=5
 
 config/name="Robbie N+1"
 config/description="Program Robbie, send it into Jupiter's dark ocean, watch it die, send the next one."
-config/version="0.0.1-p0a"
-run/main_scene="res://station/boot.tscn"
+config/version="0.0.2-p0b"
+run/main_scene="res://station/station.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [debug]
@@ -18,15 +18,14 @@ gdscript/warnings/narrowing_conversion=0
 
 [display]
 
-window/size/viewport_width=640
-window/size/viewport_height=360
-window/size/window_width_override=1280
-window/size/window_height_override=720
-window/stretch/mode="viewport"
-window/stretch/scale_mode="integer"
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
 
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
+textures/vram_compression/import_etc2_astc=true
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
