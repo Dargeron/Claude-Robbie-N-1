@@ -1,0 +1,5 @@
+# certify: no
+# Found by the exploit hunt: hugging the far wall kept Robbie out of the lurker's reach.
+# A second lurker in the south wall closes it.
+move 135 if not wall_ahead
+follow_wall right
