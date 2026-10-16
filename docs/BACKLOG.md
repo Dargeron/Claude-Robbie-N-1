@@ -32,7 +32,8 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 
 ## Simulation and design
 
-- [ ] Rerun exploit hunts for The Jellyfish and The Valve on the current sim (killed by a restart).
+- [~] Exploit hunts (resumable, tools/hunt.sh): jellyfish wall-hug fixed (block 1); valve open-water
+      solution found, decide whether it skips the lurker lesson.
 - [ ] The keep_distance / beacon zigzag at the edge of a range: decide whether it needs a fix.
 - [ ] Jellyfish turn smoothly instead of snapping to a new heading.
 - [ ] More rooms for the slice: a current, a vent, a second lurker type; one room that rewards the laser.

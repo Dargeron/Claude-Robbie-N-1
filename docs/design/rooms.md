@@ -83,6 +83,7 @@ CPU budget 8 · energy 6000
 | `shoot if hostile_near 4` / `move_towards beacon` (intended, loud) | 8 | 20/20 | Faster (about 20 s) but spends energy on every shot |
 | `move_towards beacon` | 2 | 1/20 | Lit jellyfish dart at the lamp faster than Robbie swims |
 | `keep_distance 2` / `move_towards beacon` | 5 | 0/20 | Backing away with the lamp on: the swarm follows |
+| `follow_wall left` | 3 | 9/20 | Found by the exploit hunt: skirting the swarm along the rock. Jellyfish now rest along the walls too, so it fails the survey fleet |
 
 ![The Jellyfish intended](../devlog/img/s01/jellyfish-intended_dark.png)
 

@@ -1,0 +1,4 @@
+# expect: fail
+# certify: no
+# Hugging the outer wall skirts the swarm, but jellyfish rest along the rock too.
+follow_wall left
