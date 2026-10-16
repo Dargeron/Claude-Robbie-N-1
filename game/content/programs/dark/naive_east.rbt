@@ -1,0 +1,3 @@
+# expect: fail
+# certify: no
+move 90

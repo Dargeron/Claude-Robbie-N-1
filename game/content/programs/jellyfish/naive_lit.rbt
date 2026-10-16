@@ -1,0 +1,5 @@
+# expect: fail
+# certify: no
+# Keeping distance with the lamp on: the whole swarm follows.
+keep_distance 2
+move_towards beacon

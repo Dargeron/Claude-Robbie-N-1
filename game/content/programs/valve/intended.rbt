@@ -1,0 +1,6 @@
+# expect: exit
+# certify: yes
+# Flinch from the lurker; wait while the valve is shut.
+keep_distance 4
+stop if valve_shut
+move_towards beacon

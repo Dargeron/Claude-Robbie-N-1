@@ -1,0 +1,4 @@
+# expect: fail
+# certify: no
+# The beacon is not a path.
+move_towards beacon

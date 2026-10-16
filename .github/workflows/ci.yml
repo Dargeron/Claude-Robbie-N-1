@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/robbie
+          key: godot-4.7.2-stable-linux-x86_64
+      - name: Install pinned Godot
+        run: tools/bootstrap.sh
+      - name: Run tests (unit, determinism, golden replays, reference programs)
+        run: tools/test.sh

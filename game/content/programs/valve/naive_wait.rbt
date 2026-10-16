@@ -1,0 +1,6 @@
+# expect: fail
+# certify: no
+# Waits for the valve but walks straight into the lurker.
+move_towards beacon if valve_open
+stop if wall_ahead
+move_towards beacon

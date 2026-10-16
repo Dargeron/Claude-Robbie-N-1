@@ -1,0 +1,5 @@
+# expect: fail
+# certify: no
+# Flinches from the lurker but ignores the valve.
+keep_distance 4
+move_towards beacon

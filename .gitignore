@@ -1,0 +1,15 @@
+# Godot
+game/.godot/
+game/.import/
+*.translation
+# Builds and local caches
+build/
+exports/
+tools/.cache/
+out/
+*.tmp
+# Secrets never go in the repo
+*.key
+*.pem
+service-account*.json
+.env

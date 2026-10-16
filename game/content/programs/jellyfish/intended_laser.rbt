@@ -1,0 +1,5 @@
+# expect: exit
+# certify: yes
+# The loud way: shoot whatever comes close.
+shoot if hostile_near 4
+move_towards beacon

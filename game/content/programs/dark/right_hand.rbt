@@ -1,0 +1,4 @@
+# expect: fail
+# certify: no
+# The right-hand wall leads through the big cave; Robbie runs out of energy.
+follow_wall right

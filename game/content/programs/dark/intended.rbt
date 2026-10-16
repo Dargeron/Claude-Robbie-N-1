@@ -1,0 +1,4 @@
+# expect: exit
+# certify: yes
+# Keep the wall on your left and it leads you out.
+follow_wall left

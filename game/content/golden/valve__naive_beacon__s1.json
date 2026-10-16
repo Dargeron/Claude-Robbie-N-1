@@ -1,0 +1,19 @@
+{
+  "cause": "valve",
+  "final_hash": 1179507507,
+  "hashes": [
+    2099930857,
+    3092358307,
+    778387651,
+    516617625,
+    1410109512,
+    1078611526,
+    4021931237,
+    985250372
+  ],
+  "program": "valve/naive_beacon.rbt",
+  "result": "destroyed",
+  "room": "valve",
+  "seed": 1,
+  "ticks": 248
+}

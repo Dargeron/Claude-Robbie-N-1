@@ -1,0 +1,6 @@
+# expect: exit
+# certify: yes
+# Darkness hides Robbie from the jellyfish; their glow still warns it.
+lamp off
+keep_distance 2
+move_towards beacon
