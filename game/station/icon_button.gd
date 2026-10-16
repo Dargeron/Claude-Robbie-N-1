@@ -2,7 +2,7 @@ class_name IconButton
 extends Button
 ## A button whose symbol is drawn as shapes, so it looks the same everywhere
 ## (the web build has no system fonts to borrow arrows and triangles from).
-## icon_name: restart, rewind, play, pause, faster, up, down, close
+## icon_name: restart, rewind, play, pause, faster, up, down, close, expand
 
 var icon_name := "play"
 
@@ -47,6 +47,11 @@ func _draw() -> void:
 			draw_colored_polygon(PackedVector2Array([c + Vector2(0, -5), c + Vector2(5, 3), c + Vector2(-5, 3)]), col)
 		"down":
 			draw_colored_polygon(PackedVector2Array([c + Vector2(0, 5), c + Vector2(5, -3), c + Vector2(-5, -3)]), col)
+		"expand":
+			for corner: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
+				var p0: Vector2 = c + corner * 6.0
+				draw_line(p0, p0 - Vector2(corner.x * 4.0, 0), col, 2.0)
+				draw_line(p0, p0 - Vector2(0, corner.y * 4.0), col, 2.0)
 		"close":
 			draw_line(c + Vector2(-4, -4), c + Vector2(4, 4), col, 2.0)
 			draw_line(c + Vector2(-4, 4), c + Vector2(4, -4), col, 2.0)

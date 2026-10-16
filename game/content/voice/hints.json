@@ -1,0 +1,30 @@
+{
+  "_about": "Mission control's hints. Shown in the station after Robbies keep failing the same way in a room. Keys: <room>/<cause>, then general ones. 'after' = consecutive Robbies lost to that cause before the hint appears. Hints nudge; they never give the answer.",
+  "start": "Mission control: Robbie {n} is ready with a one-rule program. Press LAUNCH and watch what it does.",
+  "first_loss": "Mission control: Drag along the timeline under the monitor. The panel below it says which rule Robbie was following, and why. Change a rule, then launch the next Robbie.",
+  "rooms": {
+    "dark/wall": [
+      {"after": 2, "text": "The beacon tells Robbie where the exit is, not how to get there. In a cave, something that keeps in touch with the rock might go further."}
+    ],
+    "dark/energy": [
+      {"after": 1, "text": "That Robbie took the long way round. In this cave, left and right are not the same."}
+    ],
+    "jellyfish/jellyfish": [
+      {"after": 2, "text": "Watch what the jellyfish do when Robbie's lamp touches them. What if Robbie stopped shining at them?"},
+      {"after": 4, "text": "In the dark, Robbie can still see a jellyfish's own glow. Keeping a little distance might be enough."}
+    ],
+    "jellyfish/wall": [
+      {"after": 2, "text": "Backing away from one thing can mean backing into another."}
+    ],
+    "valve/valve": [
+      {"after": 2, "text": "The valve has a rhythm. Robbie can tell whether it is shut, as long as the valve is ahead of it."}
+    ],
+    "valve/lurker": [
+      {"after": 2, "text": "The rock's eyes glow just before it strikes. A Robbie that keeps its distance from what it sees might live."}
+    ],
+    "valve/energy": [
+      {"after": 1, "text": "Waiting costs energy too. A Robbie that never moves on runs dry."}
+    ]
+  },
+  "stuck": {"after": 5, "text": "Every rule costs CPU, but a second rule can catch what the first one misses. Rules are read from the top: the first one that applies wins."}
+}

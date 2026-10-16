@@ -13,6 +13,9 @@ var _last_why_tick := -1
 
 # UI
 var replay: ReplayPlayer
+var monitor: SubViewportContainer
+var watch_large := false
+var watch_hint: Label
 var monitor_hint: Label
 var room_buttons := {}
 var serial_label: Label
@@ -86,7 +89,12 @@ func _build() -> void:
 	svc.size = Vector2(640, 360)
 	svc.stretch = true
 	svc.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	svc.mouse_filter = Control.MOUSE_FILTER_STOP
+	svc.gui_input.connect(func(e: InputEvent) -> void:
+		if watch_large and e is InputEventMouseButton and e.pressed:
+			_toggle_watch())
 	add_child(svc)
+	monitor = svc
 	var sv := SubViewport.new()
 	sv.size = Vector2i(640, 360)
 	sv.handle_input_locally = false
@@ -120,6 +128,7 @@ func _build() -> void:
 	speed_btn = _button("×1", "Playback speed", func() -> void: replay.cycle_speed())
 	speed_btn.custom_minimum_size = Vector2(44, 0)
 	transport.add_child(speed_btn)
+	transport.add_child(IconButton.make("expand", "Watch large (F)", _toggle_watch))
 	timeline = Timeline.new()
 	timeline.position = Vector2(200, 418)
 	timeline.size = Vector2(456, 30)
@@ -279,6 +288,11 @@ func _refresh() -> void:
 func _refresh_status() -> void:
 	var rs := state.room_state(room_id)
 	var lines: Array[String] = []
+	if not rs.certified:
+		var hint := Voice.mission_control(room_id, state.own_dives(room_id).size(), state.loss_streak(room_id),
+			state.losses_since_success(room_id), state.next_serial)
+		if hint != "":
+			lines.append("[color=#7fd8ff]%s[/color]" % hint)
 	if program.cpu() > rs.room.cpu_budget:
 		lines.append("[color=#ff6a5a]Over the CPU budget: Robbie can't hold this program. Remove or simplify a rule.[/color]")
 	if rs.certified:
@@ -326,6 +340,7 @@ func _show(dive: Dive, entry: Dictionary, history: Dictionary) -> void:
 	monitor_hint.visible = false
 	var serial: int = entry["serial"]
 	replay.play(dive, maxi(serial, 0), Voice.captions(dive, maxi(serial, 1), history) if serial > 0 else [])
+	replay.view.station_memory = state.memory_before(room_id, entry)
 	timeline.set_dive(dive)
 	_last_why_tick = -1
 
@@ -427,10 +442,19 @@ func _why_text(k: int) -> String:
 			else:
 				out += "[color=#8b8f94]· %s[/color]\n" % l
 	var recent := PackedStringArray()
+	var counts := {}
 	for e in current_dive.world.events:
 		var t: int = e["t"]
 		if t <= k and k - t <= 60:
-			recent.append(_event_text(e))
+			var txt := _event_text(e)
+			if counts.has(txt):
+				counts[txt] += 1
+			else:
+				counts[txt] = 1
+				recent.append(txt)
+	for i in recent.size():
+		if counts[recent[i]] > 1:
+			recent[i] = "%s (x%d)" % [recent[i], counts[recent[i]]]
 	if not recent.is_empty():
 		out += "\n[color=#ffc35a]Just happened:[/color] " + "  ·  ".join(recent)
 	if k >= current_dive.rec.ticks - 1:
@@ -463,9 +487,38 @@ func _event_text(e: Dictionary) -> String:
 	return e["type"]
 
 
+func _toggle_watch() -> void:
+	watch_large = not watch_large
+	if watch_large:
+		monitor.stretch_shrink = 2
+		monitor.position = Vector2.ZERO
+		monitor.size = Vector2(1280, 720)
+		move_child(monitor, get_child_count() - 1)
+		if watch_hint == null:
+			watch_hint = Label.new()
+			watch_hint.text = "Click the picture or press F to go back to the station  ·  Space pauses  ·  arrow keys step 1 s"
+			watch_hint.add_theme_color_override("font_color", Color(1, 1, 1, 0.55))
+			watch_hint.add_theme_font_size_override("font_size", 12)
+			watch_hint.position = Vector2(16, 34)
+			add_child(watch_hint)
+		watch_hint.visible = true
+		watch_hint.modulate.a = 1.0
+		move_child(watch_hint, get_child_count() - 1)
+		create_tween().tween_property(watch_hint, "modulate:a", 0.0, 1.5).set_delay(3.0)
+	else:
+		monitor.stretch_shrink = 1
+		monitor.position = Vector2(16, 48)
+		monitor.size = Vector2(640, 360)
+		if watch_hint != null:
+			watch_hint.visible = false
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
+			KEY_F:
+				_toggle_watch()
+				accept_event()
 			KEY_SPACE:
 				replay.playing = not replay.playing
 				accept_event()

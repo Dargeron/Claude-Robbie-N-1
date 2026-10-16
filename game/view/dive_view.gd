@@ -7,6 +7,8 @@ extends Node2D
 
 const C_ROCK_LIT := Color(0.50, 0.42, 0.35)
 const C_ROCK_MEMORY := Color(0.13, 0.12, 0.12)
+const C_ROCK_CHART := Color(0.075, 0.075, 0.085)    # known from earlier Robbies
+const C_WATER_CHART := Color(0.012, 0.028, 0.05)
 const C_LAMP := Color(1.0, 0.82, 0.48)
 const C_JELLY := Color(0.45, 0.9, 1.0)
 const C_JELLY_LIT := Color(1.0, 0.6, 0.95)
@@ -19,7 +21,8 @@ const LAMP_RAYS := 33
 
 var dive: Dive
 var t := 0.0                         # playback position in ticks (fractional)
-var first_seen := PackedInt32Array() # tick at which each tile entered the station's memory
+var first_seen := PackedInt32Array() # tick at which each tile entered this dive's memory
+var station_memory := PackedByteArray()  # tiles any Robbie in this room has ever seen
 
 
 func setup(d: Dive) -> void:
@@ -110,9 +113,19 @@ func _lerp_pos(xs: PackedInt32Array, ys: PackedInt32Array, k: int, k2: int, f: f
 
 func _draw_memory(k: int) -> void:
 	var room := dive.room
+	var has_station := station_memory.size() == room.w * room.h
 	for ty in room.h:
 		for tx in room.w:
 			if first_seen[ty * room.w + tx] > k:
+				# Not seen by this Robbie yet: the station's chart, very faint.
+				if has_station and station_memory[ty * room.w + tx] == 1:
+					var t2 := room.tile_at(tx, ty)
+					if t2 == Room.Tile.ROCK:
+						draw_rect(Rect2(tx * 16, ty * 16, 16, 16), C_ROCK_CHART)
+					elif room.is_exit(tx, ty):
+						draw_rect(Rect2(tx * 16, ty * 16, 16, 16), Color(0.02, 0.07, 0.035))
+					else:
+						draw_rect(Rect2(tx * 16, ty * 16, 16, 16), C_WATER_CHART)
 				continue
 			var tile := room.tile_at(tx, ty)
 			if tile == Room.Tile.ROCK:

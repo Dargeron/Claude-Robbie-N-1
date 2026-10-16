@@ -191,6 +191,8 @@ class Hud:
 		if k >= v.last_tick():
 			var ok := d.world.result == World.Result.EXIT
 			var msg := "REACHED THE EXIT" if ok else "LOST: %s" % Voice.cause_label(d.world.cause).to_upper()
-			draw_rect(Rect2(170, 22, 300, 40), Color(0, 0, 0, 0.75))
-			draw_string(font, Vector2(170, 38), "TRANSMISSION ENDS", HORIZONTAL_ALIGNMENT_CENTER, 300, 10, dim)
-			draw_string(font, Vector2(170, 55), msg, HORIZONTAL_ALIGNMENT_CENTER, 300, 12, Color(0.5, 1, 0.6) if ok else Color(1, 0.45, 0.4))
+			# Keep the card away from where Robbie ended.
+			var cy := 22.0 if rec.ry[k] / Fx.ONE > 150 else 270.0
+			draw_rect(Rect2(170, cy, 300, 40), Color(0, 0, 0, 0.75))
+			draw_string(font, Vector2(170, cy + 16), "TRANSMISSION ENDS", HORIZONTAL_ALIGNMENT_CENTER, 300, 10, dim)
+			draw_string(font, Vector2(170, cy + 33), msg, HORIZONTAL_ALIGNMENT_CENTER, 300, 12, Color(0.5, 1, 0.6) if ok else Color(1, 0.45, 0.4))

@@ -106,3 +106,32 @@ static func final_line(dive: Dive, serial: int, history: Dictionary) -> String:
 ## The epitaph for the Wall of Robbies.
 static func last_words(dive: Dive, serial: int, history: Dictionary) -> String:
 	return final_line(dive, serial, history)
+
+
+const HINTS_PATH := "res://content/voice/hints.json"
+static var _hints: Dictionary = {}
+
+
+static func hints() -> Dictionary:
+	if _hints.is_empty():
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(HINTS_PATH))
+		_hints = parsed if typeof(parsed) == TYPE_DICTIONARY else {}
+	return _hints
+
+
+## Mission control's line for the station, or "" when it has nothing to add.
+## streak = [n, cause] (consecutive losses to one cause); losses = losses since the last success.
+static func mission_control(room_id: String, own_count: int, streak: Array, losses: int, next_serial: int) -> String:
+	var h := hints()
+	if own_count == 0:
+		return str(h.get("start", "")).format({"n": "%03d" % next_serial})
+	var best := ""
+	var key := "%s/%s" % [room_id, streak[1]]
+	for step in h.get("rooms", {}).get(key, []):
+		if int(streak[0]) >= int(step["after"]):
+			best = "Mission control: " + str(step["text"])
+	if best == "" and losses >= int(h.get("stuck", {}).get("after", 99)):
+		best = "Mission control: " + str(h["stuck"]["text"])
+	if best == "" and own_count == 1 and losses == 1:
+		best = str(h.get("first_loss", ""))
+	return best

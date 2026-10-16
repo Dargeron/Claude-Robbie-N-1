@@ -57,6 +57,7 @@ func launch(id: String, program: Program) -> Dictionary:
 		"serial": serial, "seed": seed_v, "text": program.to_text(), "result": o["result"],
 		"cause": o["cause"], "seconds": o["seconds"], "cpu": program.cpu(), "survey": false,
 		"last_words": Voice.last_words(dive, serial, history),
+		"seen": Marshalls.raw_to_base64(dive.world.seen),
 	}
 	rs.program_text = program.to_text()
 	rs.dives.append(entry)
@@ -101,6 +102,47 @@ func program_made_it(id: String, text: String) -> bool:
 		if e["text"] == text and e["result"] == "exit":
 			return true
 	return false
+
+
+## What the station knew about the room before this Robbie dived: the union of
+## everything earlier Robbies saw (so a replay never shows its own future path).
+func memory_before(id: String, entry: Dictionary) -> PackedByteArray:
+	var rs := room_state(id)
+	var mem := PackedByteArray()
+	mem.resize(rs.room.w * rs.room.h)
+	for e in own_dives(id):
+		if e == entry or int(e["serial"]) >= int(entry.get("serial", 1 << 30)) and int(entry.get("serial", -1)) > 0:
+			break
+		var seen := Marshalls.base64_to_raw(str(e.get("seen", "")))
+		if seen.size() == mem.size():
+			for i in mem.size():
+				if seen[i] == 1:
+					mem[i] = 1
+	return mem
+
+
+## How many of this room's latest own Robbies were lost to the same cause, and which.
+func loss_streak(id: String) -> Array:
+	var own := own_dives(id)
+	if own.is_empty() or own.back()["result"] == "exit":
+		return [0, ""]
+	var cause: String = own.back()["cause"]
+	var n := 0
+	for i in range(own.size() - 1, -1, -1):
+		if own[i]["result"] == "exit" or own[i]["cause"] != cause:
+			break
+		n += 1
+	return [n, cause]
+
+
+func losses_since_success(id: String) -> int:
+	var n := 0
+	var own := own_dives(id)
+	for i in range(own.size() - 1, -1, -1):
+		if own[i]["result"] == "exit":
+			break
+		n += 1
+	return n
 
 
 func _remember(rs: RoomState, dive: Dive) -> void:
