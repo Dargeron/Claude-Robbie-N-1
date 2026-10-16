@@ -52,6 +52,15 @@ func _draw() -> void:
 				var p0: Vector2 = c + corner * 6.0
 				draw_line(p0, p0 - Vector2(corner.x * 4.0, 0), col, 2.0)
 				draw_line(p0, p0 - Vector2(0, corner.y * 4.0), col, 2.0)
+		"sound", "muted":
+			draw_colored_polygon(PackedVector2Array([c + Vector2(-6, -2), c + Vector2(-3, -2), c + Vector2(1, -6),
+				c + Vector2(1, 6), c + Vector2(-3, 2), c + Vector2(-6, 2)]), col)
+			if icon_name == "sound":
+				draw_arc(c + Vector2(1, 0), 4.0, -0.9, 0.9, 8, col, 1.5)
+				draw_arc(c + Vector2(1, 0), 7.0, -0.9, 0.9, 10, col, 1.5)
+			else:
+				draw_line(c + Vector2(4, -4), c + Vector2(9, 4), UiTheme.RED, 2.0)
+				draw_line(c + Vector2(4, 4), c + Vector2(9, -4), UiTheme.RED, 2.0)
 		"close":
 			draw_line(c + Vector2(-4, -4), c + Vector2(4, 4), col, 2.0)
 			draw_line(c + Vector2(-4, 4), c + Vector2(4, -4), col, 2.0)

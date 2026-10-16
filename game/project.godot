@@ -11,6 +11,10 @@ config/version="0.0.2-p0b"
 run/main_scene="res://station/station.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
+[autoload]
+
+Sfx="*res://view/sfx.gd"
+
 [debug]
 
 gdscript/warnings/integer_division=0

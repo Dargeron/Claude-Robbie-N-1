@@ -15,6 +15,7 @@ var _last_why_tick := -1
 var replay: ReplayPlayer
 var monitor: SubViewportContainer
 var watch_large := false
+var mute_btn: IconButton
 var watch_hint: Label
 var monitor_hint: Label
 var room_buttons := {}
@@ -129,9 +130,11 @@ func _build() -> void:
 	speed_btn.custom_minimum_size = Vector2(44, 0)
 	transport.add_child(speed_btn)
 	transport.add_child(IconButton.make("expand", "Watch large (F)", _toggle_watch))
+	mute_btn = IconButton.make("sound", "Sound on/off (M)", _toggle_mute)
+	transport.add_child(mute_btn)
 	timeline = Timeline.new()
-	timeline.position = Vector2(200, 418)
-	timeline.size = Vector2(456, 30)
+	timeline.position = Vector2(244, 418)
+	timeline.size = Vector2(412, 30)
 	timeline.tooltip_text = "Click or drag to jump. Red: hits. Pink: the lurker wakes. Colours: which rule was driving."
 	timeline.seek_requested.connect(func(t: float) -> void:
 		replay.seek(t)
@@ -217,6 +220,14 @@ func _button(text: String, tip: String, on_press: Callable) -> Button:
 	b.tooltip_text = tip
 	b.pressed.connect(on_press)
 	return b
+
+
+func _input(event: InputEvent) -> void:
+	# Browsers allow sound only after the player touches something.
+	if event is InputEventMouseButton and event.pressed:
+		Sfx.start_ambience()
+		if get_viewport().gui_get_hovered_control() is BaseButton:
+			Sfx.play("ui_click", -10.0)
 
 
 # ---------------------------------------------------------------- rooms and program
@@ -309,6 +320,7 @@ func _refresh_status() -> void:
 func _launch() -> void:
 	if program.rules.is_empty() or program.cpu() > state.room_state(room_id).room.cpu_budget:
 		return
+	Sfx.play("ui_launch", -4.0)
 	var res := state.launch(room_id, program)
 	_refresh_archive()
 	_show(res["dive"], res["entry"], res["history"])
@@ -487,6 +499,11 @@ func _event_text(e: Dictionary) -> String:
 	return e["type"]
 
 
+func _toggle_mute() -> void:
+	Sfx.set_muted(not Sfx.muted)
+	mute_btn.set_icon("muted" if Sfx.muted else "sound")
+
+
 func _toggle_watch() -> void:
 	watch_large = not watch_large
 	if watch_large:
@@ -518,6 +535,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.keycode:
 			KEY_F:
 				_toggle_watch()
+				accept_event()
+			KEY_M:
+				_toggle_mute()
 				accept_event()
 			KEY_SPACE:
 				replay.playing = not replay.playing

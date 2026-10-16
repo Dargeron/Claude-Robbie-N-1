@@ -11,11 +11,17 @@ xvfb-run -a -s "-screen 0 1280x720x24" "$ROOT/tools/godot.sh" --path "$ROOT/game
   --write-movie "$FRAMES/f.png" --fixed-fps 30 --quit-after 9000 res://view/replay_scene.tscn -- \
   "$ROOM" "$PROG" "$SEED" "speed=$SPEED" "serial=$SERIAL" hold=30 movie > /dev/null 2>&1
 mkdir -p "$(dirname "$OUT")"
-ffmpeg -y -loglevel error -framerate 30 -i "$FRAMES/f%08d.png" -vf "scale=1280:720:flags=neighbor" \
-  -c:v libx264 -pix_fmt yuv420p -crf 18 "$OUT"
+if [[ -f "$FRAMES/f.wav" ]]; then
+  ffmpeg -y -loglevel error -framerate 30 -i "$FRAMES/f%08d.png" -i "$FRAMES/f.wav" -vf "scale=1280:720:flags=neighbor" \
+    -c:v libx264 -pix_fmt yuv420p -crf 18 -c:a aac -b:a 128k -shortest "$OUT"
+else
+  ffmpeg -y -loglevel error -framerate 30 -i "$FRAMES/f%08d.png" -vf "scale=1280:720:flags=neighbor" \
+    -c:v libx264 -pix_fmt yuv420p -crf 18 "$OUT"
+fi
 if [[ "${GIF:-0}" == "1" ]]; then
   ffmpeg -y -loglevel error -framerate 30 -i "$FRAMES/f%08d.png" \
     -vf "fps=15,split[a][b];[a]palettegen=max_colors=64[p];[b][p]paletteuse=dither=none" "${OUT%.mp4}.gif"
 fi
+[[ -n "${KEEP_WAV:-}" && -f "$FRAMES/f.wav" ]] && cp "$FRAMES/f.wav" "${OUT%.mp4}.wav"
 rm -rf "$FRAMES"
 echo "$OUT"

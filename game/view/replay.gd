@@ -23,6 +23,7 @@ var standalone := false
 var auto_quit := false
 var hold_frames := 45
 var _ended := false
+var _sound_tick := -1
 
 
 func _ready() -> void:
@@ -30,6 +31,9 @@ func _ready() -> void:
 	if not standalone:
 		return
 	scale = Vector2(2, 2)   # the canvas is 1280x720; dives are drawn at 640x360
+	var sfx := get_node_or_null("/root/Sfx")
+	if sfx != null:
+		sfx.start_ambience()
 	var args := OS.get_cmdline_user_args()
 	var room_id := args[0] if args.size() > 0 else "valve"
 	var prog_path := args[1] if args.size() > 1 else "res://content/programs/valve/intended.rbt"
@@ -64,6 +68,7 @@ func play(dive: Dive, serial_number: int, caption_list: Array = []) -> void:
 	playing = true
 	rewinding = false
 	_ended = false
+	_sound_tick = -1
 
 
 func has_dive() -> bool:
@@ -100,6 +105,7 @@ func _process(delta: float) -> void:
 		view.t = clampf(view.t + dir * ticks_per_second * delta, 0.0, float(view.last_tick()))
 		if rewinding and view.t <= 0.0:
 			rewinding = false
+	_sounds()
 	if view.t >= float(view.last_tick()) and not _ended:
 		_ended = true
 		reached_end.emit()
@@ -107,6 +113,65 @@ func _process(delta: float) -> void:
 		hold_frames -= 1
 		if hold_frames <= 0:
 			get_tree().quit()
+
+
+## Sounds for everything the playhead passed since last frame, but only while
+## watching forwards at up to double speed (scrubbing and fast-forward stay quiet).
+func _sounds() -> void:
+	var sfx := get_node_or_null("/root/Sfx")
+	var k := tick()
+	if sfx == null:
+		return
+	sfx.set_dive_level(1.0 if playing and not _ended else 0.25)
+	if not playing or rewinding or speed() > 2.0 or k < _sound_tick or k - _sound_tick > 20:
+		_sound_tick = k
+		return
+	var d := view.dive
+	for e in d.world.events:
+		var t: int = e["t"]
+		if t <= _sound_tick or t > k:
+			continue
+		match e["type"]:
+			"damage":
+				match e["cause"]:
+					"jellyfish":
+						sfx.play("sting", -4.0)
+					"wall":
+						sfx.play("crash", -3.0)
+					"valve":
+						sfx.play("sting", -4.0, 0.7)
+					"lurker":
+						sfx.play("strike")
+			"lurker_wakes":
+				sfx.play("lurker_wake", -2.0)
+			"lurker_strikes":
+				if not e["hit"]:
+					sfx.play("strike", -8.0, 1.3)
+			"valve":
+				if e["state"] == "closing":
+					sfx.play("valve", -6.0)
+			"laser":
+				sfx.play("laser", -5.0)
+			"exit":
+				sfx.play("exit", -3.0)
+	for c in captions:
+		var ct: int = c[0]
+		if ct > _sound_tick and ct <= k:
+			_babble(sfx, str(c[1]))
+	if _sound_tick < 0 and k <= 1:
+		sfx.play("launch", -4.0)
+	if k >= view.last_tick() and _sound_tick < view.last_tick():
+		sfx.play("burst", -6.0)
+	_sound_tick = k
+
+
+## Robbie's voice: a few blips whose pitch follows the words.
+func _babble(sfx: Node, text: String) -> void:
+	var n := clampi(text.length() / 9, 2, 6)
+	for i in n:
+		var ch := text.unicode_at((i * 7) % maxi(text.length(), 1))
+		var pitch := 0.85 + float((ch * 7 + serial * 13) % 40) / 100.0
+		get_tree().create_timer(0.07 * i).timeout.connect(func() -> void: sfx.play("blip", -12.0, pitch))
 
 
 func _unhandled_input(event: InputEvent) -> void:

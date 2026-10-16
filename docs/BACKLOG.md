@@ -26,14 +26,14 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 - [ ] Live first viewing (fast-forward only until the transmission ends), then full scrubbing.
 - [ ] Fast-forward that slows down by itself at markers.
 - [ ] Ghost of the previous Robbie's path in the replay.
-- [ ] Sound: underwater ambience, sonar-ish blips, the burst; procedural to start.
+- [x] Sound v1: 15 synthesised sounds, event-synced, mute (block 2).
 - [ ] Histograms per room: CPU and Robbies spent (seeded from solver runs).
 - [ ] Onboarding: Room 1 opens with a pre-written broken program and one hint.
 
 ## Simulation and design
 
-- [~] Exploit hunts (resumable, tools/hunt.sh): jellyfish wall-hug fixed (block 1); valve open-water
-      solution found, decide whether it skips the lurker lesson.
+- [~] Exploit hunts (resumable, tools/hunt.sh): jellyfish wall-hug fixed (block 1); valve far-wall
+      shortcut fixed with a second lurker (block 2). Hunts re-running on the new maps.
 - [ ] The keep_distance / beacon zigzag at the edge of a range: decide whether it needs a fix.
 - [ ] Jellyfish turn smoothly instead of snapping to a new heading.
 - [ ] More rooms for the slice: a current, a vent, a second lurker type; one room that rewards the laser.

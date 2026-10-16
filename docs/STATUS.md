@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-16, after hourly block 1 (22:38 UTC).
+Updated 2026-10-16, after hourly block 2 (23:50 UTC).
 
 ## Where we are
 
@@ -26,8 +26,8 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 ## Next three tasks
 
 1. Verify the web page inside the claude.ai frame (needs Albert's eyes); fix or fall back.
-2. Sound: ambience and a few effects, procedural.
-3. The Wall of Robbies, and live first viewing.
+2. The Wall of Robbies, and live first viewing.
+3. Onboarding: a pre-broken first program and a pointer at the editor.
 
 ## Known issues and open questions
 

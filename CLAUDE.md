@@ -35,6 +35,8 @@ Then post a short plan to Albert: the goal, three to six tasks, what he will see
 | `tools/web_artifact.sh` | Web build packed for a claude.ai page (engine gzipped inside a script); then publish build/artifact/robbie-play.html with its files |
 | `tools/fleet.sh [glob] [n]` | Survey fleet summary for every reference program |
 | `tools/save.sh` / `tools/restore.sh` | Back up the repo to /mnt/user-data/outputs, or rebuild it from there |
+| `python3 tools/gen_audio.py` | Regenerate the synthesised sounds in game/audio/ |
+| `tools/hunt.sh <room>` | Resumable exploit hunt in the background; results in out/hunt/<room>.json |
 | `python3 tools/gen_fx_tables.py` | Regenerate the integer trig tables (never needed unless Fx changes) |
 
 Rendering works here too: `xvfb-run -a tools/godot.sh --path game --rendering-driver opengl3 --write-movie out/x.png --fixed-fps 30 --quit-after N` writes frames you can look at with the Read tool.
