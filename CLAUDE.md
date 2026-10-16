@@ -29,6 +29,7 @@ Then post a short plan to Albert: the goal, three to six tasks, what he will see
 | `tools/certify.sh <room> <prog.rbt> [fleet] [first_seed]` | Survey fleet: pass rate over seeds |
 | `tools/bless.sh` | Re-record golden replays after a deliberate sim change |
 | `tools/godot.sh --headless --path game --script res://tools/hunt.gd -- <room> [seeds]` | Exploit hunt over all 1-rule and most 2-rule programs (slow) |
+| `tools/movie.sh <room> <prog.rbt> [seed] [out.mp4] [speed] [serial]` | Record the replay as MP4 (GIF=1 for a GIF too) under a virtual display |
 | `python3 tools/gen_fx_tables.py` | Regenerate the integer trig tables (never needed unless Fx changes) |
 
 Rendering works here too: `xvfb-run -a tools/godot.sh --path game --rendering-driver opengl3 --write-movie out/x.png --fixed-fps 30 --quit-after N` writes frames you can look at with the Read tool.

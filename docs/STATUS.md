@@ -24,8 +24,9 @@ which runs for the first time on the first push.
 
 ## Next three tasks (P0b, first playable)
 
-1. **Dive view:** draw a recording in Godot. Darkness, the lamp cone from the sim's own line of
-   sight, glowing creatures, the valve; play, pause, scrub, fast-forward with VHS lines.
+1. **Replay controls on screen:** the dive view already draws recordings (`view/replay_scene.tscn`,
+   keyboard VCR controls, VHS lines); it needs clickable controls, a timeline with event markers
+   and the Why? panel.
 2. **Rule editor:** click-built rules (New → order → parameter → + if → condition) with a CPU meter.
 3. **The loop:** launch → watch with the active rule lit up → edit → relaunch. A web build for Albert.
 

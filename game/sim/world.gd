@@ -689,6 +689,43 @@ func _mark_seen(tx: int, ty: int) -> void:
 		seen_count += 1
 
 
+# ---------------------------------------------------------------- views
+
+## Solidity with an explicit valve state, for views replaying a recording.
+func solid_at_state(tx: int, ty: int, gstate: int) -> bool:
+	var t := room.tile_at(tx, ty)
+	if t == Room.Tile.ROCK:
+		return true
+	if t == Room.Tile.GATE:
+		return gstate == GateState.CLOSED
+	return false
+
+
+## Endpoints of n lamp rays from (x, y) facing angle, each stopping at the first
+## solid tile or at LAMP_RANGE. Flat array: x0, y0, x1, y1, ... in sub-pixels.
+## The view draws the lit cone from these, so the picture matches the sim.
+func lamp_ray_ends(x: int, y: int, angle: int, gstate: int, n: int) -> PackedInt32Array:
+	var out := PackedInt32Array()
+	for k in n:
+		var a := Fx.norm(angle - LAMP_HALF + (2 * LAMP_HALF * k) / maxi(n - 1, 1))
+		var dxu := Fx.dir_x(a)
+		var dyu := Fx.dir_y(a)
+		var ex := x + Fx.mul_trig(LAMP_RANGE, dxu)
+		var ey := y + Fx.mul_trig(LAMP_RANGE, dyu)
+		var steps := LAMP_RANGE / RAY_STEP
+		for i in range(1, steps + 1):
+			var dl := i * RAY_STEP
+			var px_ := x + Fx.mul_trig(dl, dxu)
+			var py_ := y + Fx.mul_trig(dl, dyu)
+			if solid_at_state(px_ / Fx.TILE, py_ / Fx.TILE, gstate):
+				ex = px_
+				ey = py_
+				break
+		out.append(ex)
+		out.append(ey)
+	return out
+
+
 # ---------------------------------------------------------------- checks
 
 ## FNV-1a over the full state. Two runs that agree here agree everywhere.
