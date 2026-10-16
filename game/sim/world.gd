@@ -430,7 +430,11 @@ func follow_wall_heading(side: int) -> int:
 	if lateral >= 30 * Fx.ONE and diag >= probe:
 		return Fx.norm(a + side * 500)        # lost the wall: curl towards it
 	var err := lateral - 12 * Fx.ONE        # positive: too far from the wall
-	var adj := clampi(err / 16, -400, 400)
+	# Converging on the wall? Parallel to a straight wall, diag = lateral * sqrt(2).
+	var conv := 0
+	if diag < probe:
+		conv = lateral * 181 / 128 - diag     # positive: heading into the wall
+	var adj := clampi(err / 40 - conv / 24, -300, 300)
 	return Fx.norm(a + side * adj)
 
 
