@@ -290,9 +290,15 @@ func _build() -> void:
 ## Room tabs: number and name; certified rooms turn green.
 func _label_room_tab(b: Button, rid: String) -> void:
 	var done := state.room_state(rid).certified
-	b.text = "%d · %s" % [GameState.ROOMS.find(rid) + 1, _room_name(rid)]
+	var i := GameState.ROOMS.find(rid)
+	var open := state.room_unlocked(rid)
+	b.text = "%d · %s" % [i + 1, _room_name(rid)]
+	b.disabled = not open
 	b.add_theme_color_override("font_color", UiTheme.GREEN if done else UiTheme.TEXT)
-	b.tooltip_text = "Certified by the survey fleet" if done else "Not certified yet"
+	if not open:
+		b.tooltip_text = "Locked: certify %s to open it" % _room_name(GameState.ROOMS[i - 1])
+	else:
+		b.tooltip_text = "Certified by the survey fleet" if done else "Not certified yet"
 
 
 func _room_name(id: String) -> String:
@@ -401,9 +407,14 @@ func _refresh_status() -> void:
 	if program.cpu() > rs.room.cpu_budget:
 		lines.append("[color=#ff6a5a]Over the CPU budget: Robbie can't hold this program. Remove or simplify a rule.[/color]")
 	if rs.certified:
-		lines.append("[color=#7dffa0]Certified: the survey fleet made it %d/%d.[/color]" % [rs.survey.get("passed", 0), rs.survey.get("fleet", 10)])
+		# At most three lines, so LAUNCH stays put: the verdict (and news), the CPU record.
+		var head := "[color=#7dffa0]Certified: the survey fleet made it %d/%d.[/color]" % [rs.survey.get("passed", 0), rs.survey.get("fleet", 10)]
+		var nxt := GameState.ROOMS.find(room_id) + 1
+		if nxt < GameState.ROOMS.size() and state.room_state(GameState.ROOMS[nxt]).dives.is_empty():
+			head += " [color=#7dffa0]%s is open.[/color]" % _room_name(GameState.ROOMS[nxt])
 		if StationLog.unread(state) > 0:
-			lines.append("[color=#ffc35a]A new entry in the station log (L).[/color]")
+			head += " [color=#ffc35a]New in the station log (L).[/color]"
+		lines.append(head)
 		var rec := GameState.record_cpu(room_id)
 		var mine := "Your cheapest certified program: [b]%d CPU[/b]." % rs.best_cpu
 		if rec > 0 and rec < rs.best_cpu:
@@ -767,6 +778,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_H:
 				_open_manual()
 				accept_event()
+			KEY_U:
+				if event.ctrl_pressed and event.shift_pressed:   # testers: open every room
+					state.unlock_all = true
+					_select_room_buttons_only()
+					accept_event()
 			KEY_F:
 				_toggle_watch()
 				accept_event()

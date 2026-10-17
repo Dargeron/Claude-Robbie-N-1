@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-17, after hourly block 17 (17:27 UTC): a static website build (tools/site.sh); a scripted browser playtest.
+Updated 2026-10-17, after hourly block 18 (18:39 UTC): rooms open one after another.
 
 ## Where we are
 
@@ -22,6 +22,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 - Sound v1: 15 synthesised sounds synced to the transmission, with a mute button.
 - The station log: dated entries unlocked by certifying rooms; the slow story (content/story/log.json).
 - Robbie's manual (H) and tooltips on every order and condition, from one source (Catalogue.HELP).
+- Rooms open one after another as each is certified (Ctrl+Shift+U opens all, for testing).
 - A first-visit coach points at LAUNCH, the timeline and the editor until Robbie 002 is sent.
 - AUTO playback: skims quiet water at 4x and slows to normal speed around every event.
 - The Wall of Robbies: every Robbie sent, its route on a small map, how it ended and its last words; the per-room
@@ -30,7 +31,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
   the room swims alongside the replay as a ghost.
 - Survey fleet (certification: 16 of 20 dives on seeds of its own, sent a few per frame with progress), headless dive runner, PNG path images, golden
   replays, exploit hunt, and a mutation solver that finds the cheapest certifying program per room.
-- 36 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
+- 37 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
   sim), golden replays, reference programs.
 - A dive takes 0.1–0.4 s to simulate natively, a little more in a browser (tools/webcheck.sh prints timings).
 

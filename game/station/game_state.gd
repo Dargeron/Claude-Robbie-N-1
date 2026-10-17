@@ -36,6 +36,18 @@ func _init() -> void:
 		rooms[id] = rs
 
 
+## Rooms open one after another: the first from the start, each next one once the room
+## before it is certified. A room that already has Robbies in it stays open (older saves).
+var unlock_all := false   # a tester's switch (Ctrl+Shift+U in the station), not saved
+
+func room_unlocked(id: String) -> bool:
+	var i := ROOMS.find(id)
+	if i <= 0 or unlock_all:
+		return true
+	var rs := room_state(id)
+	return rs.certified or not rs.dives.is_empty() or room_state(ROOMS[i - 1]).certified
+
+
 func room_state(id: String) -> RoomState:
 	return rooms[id]
 

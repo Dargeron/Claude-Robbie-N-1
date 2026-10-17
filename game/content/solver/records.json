@@ -8,5 +8,15 @@
     "certified_programs": 12,
     "cpu": 5,
     "evaluations": 125
+  },
+  "nursery": {
+    "certified_programs": 2,
+    "cpu": 6,
+    "evaluations": 100
+  },
+  "valve": {
+    "certified_programs": 7,
+    "cpu": 8,
+    "evaluations": 200
   }
 }

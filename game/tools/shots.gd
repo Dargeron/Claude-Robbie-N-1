@@ -18,6 +18,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	station = load("res://station/station.tscn").instantiate()
 	station.state.reset()
+	station.state.unlock_all = false
 	add_child(station)
 	steps = [
 		["wait", 10], ["shot", "01-start"],

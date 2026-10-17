@@ -59,3 +59,14 @@ func test_best_cpu_is_the_cheapest_certified_program() -> void:
 	eq(s.room_state("dark").best_cpu, 3, "a cheaper certification lowers it")
 	s.survey("dark", Program.parse("lamp on\nfollow_wall left"))
 	eq(s.room_state("dark").best_cpu, 3, "a dearer one doesn't raise it")
+
+
+func test_rooms_open_one_after_another() -> void:
+	var s := _state()
+	check(s.room_unlocked("dark"), "the first room is open")
+	check(not s.room_unlocked("jellyfish"), "the second is locked at first")
+	s.survey("dark", Program.parse("follow_wall left"))
+	check(s.room_unlocked("jellyfish"), "certifying The Dark opens The Jellyfish")
+	check(not s.room_unlocked("nursery"), "but not the room after")
+	s.unlock_all = true
+	check(s.room_unlocked("listeners"), "the tester's switch opens everything")
