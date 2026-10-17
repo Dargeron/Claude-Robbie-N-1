@@ -129,7 +129,7 @@ func _room_lines(s: GameState) -> Array:
 		else:
 			txt += "%d lost" % sm["lost"]
 			if sm["certified"]:
-				txt += "  [color=#7dffa0]certified[/color]"
+				txt += "  [color=#7dffa0]certified at %d CPU[/color]" % s.room_state(id).best_cpu
 			elif sm["first_exit"] > 0:
 				txt += "  [color=#7dffa0]through with Robbie %03d[/color]" % sm["first_exit"]
 		lines.append(txt)
@@ -182,7 +182,7 @@ func _plaque(it: Dictionary) -> Control:
 	var how := Label.new()
 	how.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var what := "reached the exit" if made_it else "lost: %s" % Voice.cause_label(e["cause"])
-	var extra := "  ·  conditions %d" % (int(e["seed"]) - GameState.SURVEY_FIRST_SEED + 1) if survey else ""
+	var extra := "  ·  conditions %d" % ((int(e["seed"]) - 1) % 100 + 1) if survey else ""
 	how.text = "%s  ·  %s s  ·  %d CPU%s" % [what, e["seconds"], int(e["cpu"]), extra]
 	how.add_theme_color_override("font_color", UiTheme.GREEN if made_it else UiTheme.RED.lerp(UiTheme.TEXT, 0.35))
 	how.add_theme_font_size_override("font_size", 12)

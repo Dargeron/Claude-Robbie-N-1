@@ -37,6 +37,8 @@ Then post a short plan to Albert: the goal, three to six tasks, what he will see
 | `tools/fleet.sh [glob] [n]` | Survey fleet summary for every reference program |
 | `tools/save.sh` / `tools/restore.sh` | Back up the repo to /mnt/user-data/outputs, or rebuild it from there |
 | `python3 tools/gen_audio.py` | Regenerate the synthesised sounds in game/audio/ |
+| `tools/solve_all.sh [n]` / `tools/solve.sh <room> [n]` | Solver v1 in the background (n evaluations per room); results in out/solve/ |
+| `python3 tools/solver_records.py` | Write content/solver/records.json (cheapest known CPU per room) from the solver's results |
 | `tools/hunt.sh <room>` | Resumable exploit hunt in the background; results in out/hunt/<room>.json |
 | `python3 tools/gen_fx_tables.py` | Regenerate the integer trig tables (never needed unless Fx changes) |
 

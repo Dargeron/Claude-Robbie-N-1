@@ -29,7 +29,7 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 - [x] Fast-forward that slows down by itself at markers: AUTO speed (block 8).
 - [x] Ghost of the previous Robbie's path in the replay (block 5).
 - [x] Sound v1: 15 synthesised sounds, event-synced, mute (block 2).
-- [ ] Histograms per room: CPU and Robbies spent (seeded from solver runs).
+- [~] Histograms per room: "the cheapest known" CPU after certification (block 10); a real histogram needs players.
 
 ## Simulation and design
 
@@ -46,7 +46,8 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 - [ ] Jellyfish turn smoothly instead of snapping to a new heading.
 - [x] One room that rewards the laser: The Nursery (block 7).
 - [ ] More rooms for the slice: a current, a vent, a second lurker type.
-- [ ] Solver v1 (mutation search) to seed histograms and find cheaper solutions than ours.
+- [~] Solver v1 (mutation search, block 10): running room by room; records for The Dark so far. Refresh
+      `content/solver/records.json` with `tools/solver_records.py` as results come in.
 
 ## Quality and tooling
 

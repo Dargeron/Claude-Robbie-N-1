@@ -7,7 +7,7 @@ extends RefCounted
 const ROOMS := ["dark", "jellyfish", "nursery", "valve"]
 const SAVE_PATH := "user://robbie_save.json"
 const STARTER := "move_towards beacon\n"
-const SURVEY_FIRST_SEED := 101
+const SURVEY_FIRST_SEED := Survey.FIRST_SEED
 
 var next_serial := 1
 var coach_done := false   # the first-visit guidance has been walked through
@@ -21,6 +21,7 @@ class RoomState:
 	var program_text := GameState.STARTER
 	var dives: Array = []        # Dictionaries, oldest first
 	var certified := false
+	var best_cpu := -1           # cheapest program that certified here, -1 = none yet
 	var survey := {}
 	var memory := PackedByteArray()
 
@@ -84,6 +85,8 @@ func survey(id: String, program: Program) -> Dictionary:
 	rs.survey = report
 	if report["certified"]:
 		rs.certified = true
+		if rs.best_cpu < 0 or program.cpu() < rs.best_cpu:
+			rs.best_cpu = program.cpu()
 	var text := program.to_text()
 	for d in report["dives"]:
 		if d["result"] != "exit":
@@ -144,6 +147,17 @@ func ghost_for(id: String, entry: Dictionary) -> Dictionary:
 	if path.size() < 2:
 		return {}
 	return {"serial": int(prev["serial"]), "path": path, "lost": prev["result"] != "exit"}
+
+
+## The cheapest certified program the station's simulator knows for each room
+## (content/solver/records.json, written by tools/solver_records.py from solver runs).
+static var _records: Dictionary = {}
+
+static func record_cpu(id: String) -> int:
+	if _records.is_empty() and FileAccess.file_exists("res://content/solver/records.json"):
+		var d: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://content/solver/records.json"))
+		_records = d if typeof(d) == TYPE_DICTIONARY else {"_": 0}
+	return int(_records.get(id, {}).get("cpu", -1))
 
 
 ## Has this exact program reached the exit in this room?
@@ -207,7 +221,7 @@ func save() -> void:
 	var data := {"version": 1, "next_serial": next_serial, "coach_done": coach_done, "rooms": {}}
 	for id in ROOMS:
 		var rs := room_state(id)
-		data["rooms"][id] = {"program": rs.program_text, "dives": rs.dives, "certified": rs.certified,
+		data["rooms"][id] = {"program": rs.program_text, "dives": rs.dives, "certified": rs.certified, "best_cpu": rs.best_cpu,
 			"survey": rs.survey, "memory": Marshalls.raw_to_base64(rs.memory)}
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f != null:
@@ -235,6 +249,7 @@ func load_save() -> void:
 			e["serial"] = int(e["serial"])
 			e["seed"] = int(e["seed"])
 		rs.certified = bool(s.get("certified", false))
+		rs.best_cpu = int(s.get("best_cpu", rs.survey.get("cpu", -1) if rs.certified else -1))
 		rs.survey = s.get("survey", {})
 		var mem := Marshalls.base64_to_raw(str(s.get("memory", "")))
 		if mem.size() == rs.memory.size():
@@ -249,6 +264,7 @@ func reset() -> void:
 		rs.program_text = STARTER
 		rs.dives = []
 		rs.certified = false
+		rs.best_cpu = -1
 		rs.survey = {}
 		rs.memory.fill(0)
 	save()

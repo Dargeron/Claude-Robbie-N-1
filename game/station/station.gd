@@ -337,7 +337,15 @@ func _refresh_status() -> void:
 	if program.cpu() > rs.room.cpu_budget:
 		lines.append("[color=#ff6a5a]Over the CPU budget: Robbie can't hold this program. Remove or simplify a rule.[/color]")
 	if rs.certified:
-		lines.append("[color=#7dffa0]Certified: the survey fleet made it %d/%d.[/color] Try again with less CPU, or move on." % [rs.survey.get("passed", 0), rs.survey.get("fleet", 10)])
+		lines.append("[color=#7dffa0]Certified: the survey fleet made it %d/%d.[/color]" % [rs.survey.get("passed", 0), rs.survey.get("fleet", 10)])
+		var rec := GameState.record_cpu(room_id)
+		var mine := "Your cheapest certified program: [b]%d CPU[/b]." % rs.best_cpu
+		if rec > 0 and rec < rs.best_cpu:
+			lines.append(mine + " The station's simulator has certified one with [b]%d[/b]. Try again with less CPU, or move on." % rec)
+		elif rec > 0:
+			lines.append(mine + " [color=#7dffa0]That matches the cheapest the station's simulator has found.[/color]")
+		else:
+			lines.append(mine + " Try again with less CPU, or move on.")
 	elif not rs.survey.is_empty():
 		lines.append("Last survey: [color=#ff6a5a]%d/%d made it[/color] (%d needed). The failures are in the list below." % [rs.survey["passed"], rs.survey["fleet"], rs.survey["needed"]])
 	elif state.program_made_it(room_id, program.to_text()):
@@ -410,7 +418,7 @@ func _refresh_archive() -> void:
 	var dives: Array = state.room_state(room_id).dives.duplicate()
 	dives.reverse()
 	for e in dives:
-		var who := "ROBBIE %03d" % e["serial"] if not e.get("survey", false) else "Survey, conditions %d" % (int(e["seed"]) - GameState.SURVEY_FIRST_SEED + 1)
+		var who := "ROBBIE %03d" % e["serial"] if not e.get("survey", false) else "Survey, conditions %d" % ((int(e["seed"]) - 1) % 100 + 1)
 		var what := "reached the exit" if e["result"] == "exit" else "lost: %s" % Voice.cause_label(e["cause"])
 		var idx := archive.add_item("%s  ·  %s  ·  %s s  ·  %d CPU" % [who, what, e["seconds"], e["cpu"]])
 		archive.set_item_custom_fg_color(idx, UiTheme.GREEN if e["result"] == "exit" else (UiTheme.TEXT_DIM if e.get("survey", false) else UiTheme.TEXT))

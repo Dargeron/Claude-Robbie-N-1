@@ -5,9 +5,10 @@ extends RefCounted
 
 const FLEET := 10
 const PASS_NEEDED := 8
+const FIRST_SEED := 1001  # the survey's own seeds; practice dives use 1, 101, 201... (GameState.iterate_seed)
 
 
-static func run(room: Room, program: Program, fleet: int = FLEET, first_seed: int = 1) -> Dictionary:
+static func run(room: Room, program: Program, fleet: int = FLEET, first_seed: int = FIRST_SEED) -> Dictionary:
 	var passed := 0
 	var dives: Array[Dictionary] = []
 	for s in range(first_seed, first_seed + fleet):

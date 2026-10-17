@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-17, after hourly block 9 (08:10 UTC): a first-visit coach; P0b's list is complete.
+Updated 2026-10-17, after hourly block 10 (09:16 UTC): Solver v1; "the cheapest known" after certification.
 
 ## Where we are
 
@@ -24,8 +24,8 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 - The Wall of Robbies: every Robbie sent, how it ended and its last words; the per-room score. Click to rewatch.
 - The Why? panel shows what Robbie sensed (wall ahead, nearest hostile, valve, energy); the previous Robbie in
   the room swims alongside the replay as a ghost.
-- Survey fleet (certification over 10 seeds), headless dive runner, PNG path images, golden
-  replays, exploit hunt tool.
+- Survey fleet (certification over 10 seeds of its own), headless dive runner, PNG path images, golden
+  replays, exploit hunt, and a mutation solver that finds the cheapest certifying program per room.
 - 34 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
   sim), golden replays, reference programs.
 - A dive takes about 0.1 s to simulate. The solver bot is cheaper than we feared.
@@ -34,7 +34,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 1. Verify the web page inside the claude.ai frame (needs Albert's eyes); fix or fall back.
 2. Live first viewing (pending Albert's call on the plan's open decision).
-3. Solver v1 (mutation search over longer programs) to seed CPU histograms and find cheaper solutions.
+3. Let the solver finish every room; act on anything cheaper than our intended programs.
 
 ## Known issues and open questions
 

@@ -47,3 +47,15 @@ func test_ghost_is_the_previous_robbie_in_the_room() -> void:
 	var d := s.redive("dark", a)
 	eq(path[0], Vector2(d.rec.rx[0] / Fx.ONE, d.rec.ry[0] / Fx.ONE), "the path starts where Robbie started")
 	eq(path[path.size() - 1], Vector2(d.rec.rx[d.rec.ticks - 1] / Fx.ONE, d.rec.ry[d.rec.ticks - 1] / Fx.ONE), "and ends where it was lost")
+
+
+func test_best_cpu_is_the_cheapest_certified_program() -> void:
+	var s := _state()
+	s.survey("dark", Program.parse("move_towards beacon"))
+	eq(s.room_state("dark").best_cpu, -1, "a failed survey sets no best")
+	s.survey("dark", Program.parse("lamp on\nfollow_wall left"))
+	eq(s.room_state("dark").best_cpu, 4, "certified at 4 CPU")
+	s.survey("dark", Program.parse("follow_wall left"))
+	eq(s.room_state("dark").best_cpu, 3, "a cheaper certification lowers it")
+	s.survey("dark", Program.parse("lamp on\nfollow_wall left"))
+	eq(s.room_state("dark").best_cpu, 3, "a dearer one doesn't raise it")
