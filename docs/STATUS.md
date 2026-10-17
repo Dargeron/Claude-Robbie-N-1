@@ -4,6 +4,9 @@ Updated 2026-10-17, after hourly block 18 (18:39 UTC): rooms open one after anot
 
 ## Where we are
 
+**Albert played it (2026-10-17, evening): "I had FUN... the barest core is good."** The core loop passes his gate. He has many
+changes, suggestions and problems to fix; those come first in the backlog as soon as he sends them.
+
 **Phase M1, step P0b (first playable): every item on its list is done** (block 9). The station screen runs the whole loop:
 write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Windows, macOS and the web
 (https://claude.ai/artifact/EtAUzrsTr2DVgwN4zAeCuE, and publicly at https://robbie-n1.bauldejuegos.workers.dev). Next: P0c, readable and charming. See docs/BACKLOG.md.

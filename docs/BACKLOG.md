@@ -5,6 +5,10 @@ test it, look at it, log it, back it up. Re-rank when something new is learned.
 
 Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session it landed in).
 
+## Albert's feedback (top priority)
+
+- [ ] Waiting for his list of changes, suggestions and problems (he played the prototype on 2026-10-17 and approved the core).
+
 ## Now: P0b, the first playable
 
 - [x] **Station screen**: monitor + rule editor + CPU meter + launch + archive in one screen (s02).
