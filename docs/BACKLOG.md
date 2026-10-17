@@ -26,7 +26,7 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 
 - [x] **Robbie's senses in the Why? panel**: what each condition read at that moment (block 5).
 - [ ] Live first viewing (fast-forward only until the transmission ends), then full scrubbing.
-- [ ] Fast-forward that slows down by itself at markers.
+- [x] Fast-forward that slows down by itself at markers: AUTO speed (block 8).
 - [x] Ghost of the previous Robbie's path in the replay (block 5).
 - [x] Sound v1: 15 synthesised sounds, event-synced, mute (block 2).
 - [ ] Histograms per room: CPU and Robbies spent (seeded from solver runs).

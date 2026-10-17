@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-17, after hourly block 7 (05:50 UTC): a fourth room, The Nursery.
+Updated 2026-10-17, after hourly block 8 (07:03 UTC): AUTO playback speed; the hunt covers fall-through first rules.
 
 ## Where we are
 
@@ -19,19 +19,20 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
   program that passes the survey fleet (20 of 20 dives), and naive programs that fail (see `docs/design/rooms.md`).
   Jellyfish are partly scattered afresh on every dive, so no fixed route works; lurkers are laser-proof.
 - Sound v1: 15 synthesised sounds synced to the transmission, with a mute button.
+- AUTO playback: skims quiet water at 4x and slows to normal speed around every event.
 - The Wall of Robbies: every Robbie sent, how it ended and its last words; the per-room score. Click to rewatch.
 - The Why? panel shows what Robbie sensed (wall ahead, nearest hostile, valve, energy); the previous Robbie in
   the room swims alongside the replay as a ghost.
 - Survey fleet (certification over 10 seeds), headless dive runner, PNG path images, golden
   replays, exploit hunt tool.
-- 33 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
+- 34 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
   sim), golden replays, reference programs.
 - A dive takes about 0.1 s to simulate. The solver bot is cheaper than we feared.
 
 ## Next three tasks
 
 1. Verify the web page inside the claude.ai frame (needs Albert's eyes); fix or fall back.
-2. Live first viewing (pending Albert's call on the plan's open decision); fast-forward that slows at markers.
+2. Live first viewing (pending Albert's call on the plan's open decision).
 3. Onboarding pointer at the editor on the first visit; a fourth room.
 
 ## Known issues and open questions

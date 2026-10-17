@@ -1,6 +1,7 @@
 extends SceneTree
 ## Exploit hunt: tries every one-rule program, and every two-rule program whose
-## second rule is unconditional, within the room's CPU budget. Reports anything
+## second rule is unconditional (and whose first rule can let the reading continue:
+## a condition, a setting, or an order that only sometimes applies), within the room's CPU budget. Reports anything
 ## that passes on most of the seeds tried. Slow by design; run it in the background.
 ##   godot --headless --path game --script res://tools/hunt.gd -- <room> [seeds=3] [progress_file]
 ## With a progress file the hunt is resumable: it records how far it got and what passed,
@@ -28,7 +29,15 @@ func _init() -> void:
 		candidates.append(r)
 	for r1 in singles:
 		if r1.find(" if ") < 0:
-			continue  # an unconditional first rule hides the second
+			continue  # an unconditional first rule hides the second...
+		for a2 in actions:
+			candidates.append(r1 + "\n" + a2)
+	# ...unless its order can fall through: a setting (lamp), or an order that only
+	# applies sometimes (shoot, keep_distance, move_towards light). Appended last so
+	# older progress files stay valid (block 8: these were missed before).
+	for r1 in singles:
+		if r1.find(" if ") >= 0 or not _falls_through(r1):
+			continue
 		for a2 in actions:
 			candidates.append(r1 + "\n" + a2)
 	found.append_array(done_found)
@@ -75,6 +84,10 @@ func _try(room: Room, text: String, seeds: int, found: Array[String]) -> int:
 	if passed * 3 >= seeds * 2:
 		found.append("%s  (cpu %d, %d/%d)" % [text.replace("\n", " / "), p.cpu(), passed, seeds])
 	return 1
+
+
+func _falls_through(rule: String) -> bool:
+	return rule.begins_with("lamp ") or rule == "shoot" or rule.begins_with("keep_distance ") or rule == "move_towards light"
 
 
 func _actions() -> Array[String]:

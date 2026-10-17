@@ -11,10 +11,15 @@ extends Node2D
 signal reached_end
 
 const SPEEDS := [0.5, 1.0, 2.0, 4.0, 8.0]
+const AUTO_FAST := 4.0          # AUTO plays quiet stretches this fast...
+const AUTO_SLOW := 1.0          # ...and slows to this around anything that happens
+const AUTO_RAMP := 0.06         # speed change per tick of dive time (about 1.7 s from slow to fast)
 
 var view: DiveView
 var hud: Hud
 var speed_i := 1
+var auto := true                # AUTO speed: fast through quiet water, normal speed around events
+var auto_speeds := PackedFloat32Array()
 var playing := true
 var rewinding := false
 var serial := 1
@@ -40,7 +45,10 @@ func _ready() -> void:
 	var seed_v := int(args[2]) if args.size() > 2 else 1
 	var ser := 1
 	for a in args:
-		if a.begins_with("speed="):
+		if a == "speed=auto":
+			auto = true
+		elif a.begins_with("speed="):
+			auto = false
 			speed_i = maxi(0, SPEEDS.find(float(a.substr(6))))
 		elif a.begins_with("hold="):
 			hold_frames = int(a.substr(5))
@@ -62,6 +70,7 @@ func play(dive: Dive, serial_number: int, caption_list: Array = []) -> void:
 	view = DiveView.new()
 	add_child(view)
 	view.setup(dive)
+	auto_speeds = ReplayPlayer.plan_auto_speeds(dive, captions)
 	hud = Hud.new()
 	hud.replay = self
 	add_child(hud)
@@ -86,20 +95,65 @@ func seek(t: float) -> void:
 	_ended = view.t >= float(view.last_tick())
 
 
+## The playback speed right now (in AUTO it depends on where the playhead is).
 func speed() -> float:
+	if auto and view != null and auto_speeds.size() > 0:
+		return auto_speeds[tick()]
 	return SPEEDS[speed_i]
 
 
+## Speed button: AUTO, x1, x2, x4, x8, AUTO...
 func cycle_speed() -> void:
-	speed_i = (speed_i + 1) % SPEEDS.size()
-	if speed_i == 0:
+	if auto:
+		auto = false
 		speed_i = 1
+	elif speed_i >= SPEEDS.size() - 1:
+		auto = true
+	else:
+		speed_i += 1
+
+
+func speed_label() -> String:
+	return "AUTO" if auto else "×%s" % str(SPEEDS[speed_i]).trim_suffix(".0")
+
+
+## AUTO speed for every tick: fast through quiet water, slowing to normal speed a
+## moment before anything happens (a hit, the lurker waking, a shot, the valve
+## closing, the exit), while Robbie talks, and for the last seconds.
+static func plan_auto_speeds(dive: Dive, caption_list: Array) -> PackedFloat32Array:
+	var n := dive.rec.ticks
+	var s := PackedFloat32Array()
+	s.resize(n)
+	s.fill(AUTO_FAST)
+	var spans: Array = []   # [from tick, to tick, speed]; packed arrays can't be changed inside a lambda
+	for e in dive.world.events:
+		match e["type"]:
+			"damage", "lurker_wakes", "lurker_strikes", "valve_sting", "exit":
+				spans.append([int(e["t"]) - 30, int(e["t"]) + 30, AUTO_SLOW])
+			"laser":
+				spans.append([int(e["t"]) - 15, int(e["t"]) + 15, 2.0])   # shots are frequent: ease off, don't stop
+			"valve":
+				if e["state"] == "closing":
+					spans.append([int(e["t"]) - 20, int(e["t"]) + 20, AUTO_SLOW])
+	for c in caption_list:
+		spans.append([int(c[0]), int(c[0]) + 60, 1.5])
+	spans.append([n - 75, n, AUTO_SLOW])
+	spans.append([0, 45, AUTO_SLOW])
+	for sp in spans:
+		for k in range(maxi(int(sp[0]), 0), mini(int(sp[1]), n)):
+			s[k] = minf(s[k], float(sp[2]))
+	# Ease in and out: never change faster than AUTO_RAMP per tick, so it slows down before a moment.
+	for k in range(n - 2, -1, -1):
+		s[k] = minf(s[k], s[k + 1] + AUTO_RAMP)
+	for k in range(1, n):
+		s[k] = minf(s[k], s[k - 1] + AUTO_RAMP)
+	return s
 
 
 func _process(delta: float) -> void:
 	if view == null:
 		return
-	var ticks_per_second: float = float(World.TICKS_PER_SECOND) * float(SPEEDS[speed_i])
+	var ticks_per_second: float = float(World.TICKS_PER_SECOND) * speed()
 	if playing:
 		var dir := -1.0 if rewinding else 1.0
 		view.t = clampf(view.t + dir * ticks_per_second * delta, 0.0, float(view.last_tick()))
@@ -187,8 +241,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_LEFT:
 			seek(view.t - World.TICKS_PER_SECOND)
 		KEY_UP:
+			auto = false
 			speed_i = mini(speed_i + 1, SPEEDS.size() - 1)
 		KEY_DOWN:
+			auto = false
 			speed_i = maxi(speed_i - 1, 0)
 		KEY_R:
 			rewinding = not rewinding
@@ -222,7 +278,8 @@ class Hud:
 		var font := ThemeDB.fallback_font
 		var amber := Color(1.0, 0.78, 0.35)
 		var dim := Color(0.75, 0.75, 0.7, 0.85)
-		var vhs: bool = replay.rewinding or replay.speed_i != 1 or not replay.playing
+		var spd: float = replay.speed()
+		var vhs: bool = replay.rewinding or absf(spd - 1.0) > 0.05 or not replay.playing
 		if vhs:
 			for y in range(0, 360, 3):
 				draw_line(Vector2(0, y), Vector2(640, y), Color(1, 1, 1, 0.035), 1.0)
@@ -250,8 +307,10 @@ class Hud:
 		var r := rec.rrule[k]
 		var label := "no rule applies: drifting" if r < 0 else "RULE %d  >  %s" % [r + 1, d.program.rule_label(d.program.rules[r])]
 		draw_string(font, Vector2(6, 355), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.6, 1.0, 0.7) if r >= 0 else dim)
-		var spd: float = replay.SPEEDS[replay.speed_i]
-		var mode := "PAUSED" if not replay.playing else ("REWIND x%s" % spd if replay.rewinding else ("PLAY x%s" % spd if spd != 1.0 else "PLAY"))
+		var shown := "%.1f" % spd if replay.auto else str(spd).trim_suffix(".0")
+		var mode := "PAUSED" if not replay.playing else ("REWIND x%s" % shown if replay.rewinding else ("PLAY x%s" % shown if absf(spd - 1.0) > 0.05 else "PLAY"))
+		if replay.auto and replay.playing and not replay.rewinding:
+			mode = "AUTO x%s" % shown
 		draw_string(font, Vector2(560, 355), mode, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, dim)
 		if k >= v.last_tick():
 			var ok := d.world.result == World.Result.EXIT

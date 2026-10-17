@@ -129,8 +129,9 @@ func _build() -> void:
 		replay.playing = not replay.playing
 		replay.rewinding = false)
 	transport.add_child(play_btn)
-	speed_btn = _button("×1", "Playback speed", func() -> void: replay.cycle_speed())
-	speed_btn.custom_minimum_size = Vector2(44, 0)
+	speed_btn = _button("AUTO", "Playback speed. AUTO skims quiet water and slows down when something happens.", func() -> void: replay.cycle_speed())
+	speed_btn.custom_minimum_size = Vector2(50, 0)
+	speed_btn.add_theme_font_size_override("font_size", 12)
 	transport.add_child(speed_btn)
 	transport.add_child(IconButton.make("expand", "Watch large (F)", _toggle_watch))
 	mute_btn = IconButton.make("sound", "Sound on/off (M)", _toggle_mute)
@@ -438,7 +439,7 @@ func _process(_delta: float) -> void:
 		return
 	play_btn.set_icon("pause" if replay.playing and not replay.rewinding else "play")
 	rewind_btn.modulate = UiTheme.AMBER if replay.rewinding else Color.WHITE
-	speed_btn.text = "×%s" % str(replay.speed()).trim_suffix(".0")
+	speed_btn.text = replay.speed_label()
 	var k := replay.tick()
 	timeline.set_playhead(replay.view.t)
 	# Light up the rule Robbie is following, but only when the editor holds that Robbie's program.

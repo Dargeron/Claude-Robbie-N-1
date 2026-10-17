@@ -65,6 +65,9 @@ Rendering works here too: `xvfb-run -a tools/godot.sh --path game --rendering-dr
 - Class names resolve only after an import: `tools/bootstrap.sh` runs `--import`. If a new
   `class_name` is "not declared", run bootstrap again.
 - `tools/test.sh | tail` hides a failure behind tail's exit code: run commands with `set -o pipefail`.
+- Background hunts compete for the two cores: `pkill -STOP -f "[h]unt.gd"` before tests or renders,
+  `pkill -CONT -f "[h]unt.gd"` after.
+- GDScript lambdas capture packed arrays by value: changes inside the lambda are lost. Use a loop.
 - Integer division warnings are disabled in `project.godot`; integer division is intended everywhere.
 
 ## Definition of done
