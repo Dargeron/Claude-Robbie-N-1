@@ -6,7 +6,7 @@ Updated 2026-10-17, after hourly block 18 (18:39 UTC): rooms open one after anot
 
 **Phase M1, step P0b (first playable): every item on its list is done** (block 9). The station screen runs the whole loop:
 write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Windows, macOS and the web
-(https://claude.ai/artifact/EtAUzrsTr2DVgwN4zAeCuE). Next: P0c, readable and charming. See docs/BACKLOG.md.
+(https://claude.ai/artifact/EtAUzrsTr2DVgwN4zAeCuE, and publicly at https://robbie-n1.bauldejuegos.workers.dev). Next: P0c, readable and charming. See docs/BACKLOG.md.
 
 ## What works
 

@@ -1,0 +1,7 @@
+# Robbie N+1 as a static-assets Worker on Albert's Cloudflare (tools/deploy_cf.sh).
+# No secrets here: the API token and account ID come from the environment.
+name = "robbie-n1"
+compatibility_date = "2026-10-01"
+
+[assets]
+directory = "../../out/site"
