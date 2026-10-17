@@ -53,12 +53,14 @@ func launch(id: String, program: Program) -> Dictionary:
 	var history := history_for(id)
 	var seed_v := iterate_seed(id)
 	var dive := Dive.new(rs.room, program, seed_v)
+	dive.vm.record_senses = true
 	var o := dive.run()
 	var entry := {
 		"serial": serial, "seed": seed_v, "text": program.to_text(), "result": o["result"],
 		"cause": o["cause"], "seconds": o["seconds"], "cpu": program.cpu(), "survey": false,
 		"last_words": Voice.last_words(dive, serial, history),
 		"seen": Marshalls.raw_to_base64(dive.world.seen),
+		"path": GameState.encode_path(dive),
 	}
 	rs.program_text = program.to_text()
 	rs.dives.append(entry)
@@ -93,8 +95,54 @@ func survey(id: String, program: Program) -> Dictionary:
 
 func redive(id: String, entry: Dictionary) -> Dive:
 	var d := Dive.new(room_state(id).room, Program.parse(entry["text"]), int(entry["seed"]))
+	d.vm.record_senses = true
 	d.run()
 	return d
+
+
+## A Robbie's route, kept small for the save file: whole-pixel positions every
+## PATH_STEP ticks (and the final one), as signed 16-bit pairs in base64.
+const PATH_STEP := 6
+
+static func encode_path(dive: Dive) -> String:
+	var rec := dive.rec
+	var ticks: Array[int] = []
+	for k in range(0, rec.ticks, PATH_STEP):
+		ticks.append(k)
+	if rec.ticks > 0 and ticks.back() != rec.ticks - 1:
+		ticks.append(rec.ticks - 1)
+	var b := PackedByteArray()
+	b.resize(ticks.size() * 4)
+	for i in ticks.size():
+		b.encode_s16(i * 4, rec.rx[ticks[i]] / Fx.ONE)
+		b.encode_s16(i * 4 + 2, rec.ry[ticks[i]] / Fx.ONE)
+	return Marshalls.raw_to_base64(b)
+
+
+static func decode_path(text: String) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	if text == "":
+		return out
+	var b := Marshalls.base64_to_raw(text)
+	for i in range(0, b.size() - 3, 4):
+		out.append(Vector2(b.decode_s16(i), b.decode_s16(i + 2)))
+	return out
+
+
+## The ghost for a replay: the route of the Robbie sent to this room just before
+## this one. Survey Robbies and first Robbies have none.
+func ghost_for(id: String, entry: Dictionary) -> Dictionary:
+	if entry.get("survey", false):
+		return {}
+	var own := own_dives(id)
+	var at := own.find(entry)
+	if at <= 0:
+		return {}
+	var prev: Dictionary = own[at - 1]
+	var path := GameState.decode_path(str(prev.get("path", "")))
+	if path.size() < 2:
+		return {}
+	return {"serial": int(prev["serial"]), "path": path, "lost": prev["result"] != "exit"}
 
 
 ## Has this exact program reached the exit in this room?

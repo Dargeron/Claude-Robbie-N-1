@@ -24,12 +24,10 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 
 ## Next: P0c, readable and charming
 
-- [ ] **Robbie's senses in the Why? panel**: what each condition read at that moment (wall ahead, nearest
-      hostile, valve, energy), so players discover conditions in context. The panel is sparse when only one
-      rule exists.
+- [x] **Robbie's senses in the Why? panel**: what each condition read at that moment (block 5).
 - [ ] Live first viewing (fast-forward only until the transmission ends), then full scrubbing.
 - [ ] Fast-forward that slows down by itself at markers.
-- [ ] Ghost of the previous Robbie's path in the replay.
+- [x] Ghost of the previous Robbie's path in the replay (block 5).
 - [x] Sound v1: 15 synthesised sounds, event-synced, mute (block 2).
 - [ ] Histograms per room: CPU and Robbies spent (seeded from solver runs).
 - [ ] Onboarding: Room 1 opens with a pre-written broken program and one hint.

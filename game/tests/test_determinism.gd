@@ -32,3 +32,17 @@ func test_recording_covers_every_tick() -> void:
 	var d := _dive("dark", "follow_wall left", 1)
 	eq(d.rec.ticks, d.world.tick, "one snapshot per tick")
 	eq(d.rec.rx.size(), d.world.tick, "robbie channel length")
+
+
+func test_recording_senses_changes_nothing() -> void:
+	var room := RoomLibrary.load_room("valve")
+	var prog := Program.parse("keep_distance 4\nstop if valve_shut\nmove_towards beacon")
+	var plain := Dive.new(room, prog, 3)
+	var a := plain.run()
+	var watched := Dive.new(room, prog, 3)
+	watched.vm.record_senses = true
+	var b := watched.run()
+	eq(b["final_hash"], a["final_hash"], "reading the senses for the Why? panel never changes a dive")
+	check(watched.vm.trace[0].has("senses") and not plain.vm.trace[0].has("senses"), "senses only when asked")
+	var lines := DiveText.senses(room, watched.vm.trace[watched.vm.trace.size() - 1])
+	check(lines.size() == 4, "valve room: wall, hostile, valve, energy (got %d)" % lines.size())

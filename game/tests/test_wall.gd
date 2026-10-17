@@ -32,3 +32,18 @@ func test_room_summary_counts_losses() -> void:
 	eq(sm["lost"], 1, "one lost")
 	eq(sm["first_exit"], 2, "Robbie 002 got through first")
 	eq(RobbieWall.room_summary(s, "valve")["sent"], 0, "nothing sent to The Valve")
+
+
+func test_ghost_is_the_previous_robbie_in_the_room() -> void:
+	var s := _state()
+	var a: Dictionary = s.launch("dark", Program.parse("move_towards beacon"))["entry"]
+	s.launch("valve", Program.parse("move_towards beacon"))
+	var b: Dictionary = s.launch("dark", Program.parse("follow_wall left"))["entry"]
+	eq(s.ghost_for("dark", a), {}, "the first Robbie has no ghost")
+	var g := s.ghost_for("dark", b)
+	eq(g.get("serial", -1), 1, "Robbie 003's ghost is Robbie 001, not the Valve's 002")
+	check(g.get("lost", false), "Robbie 001 was lost")
+	var path: PackedVector2Array = g["path"]
+	var d := s.redive("dark", a)
+	eq(path[0], Vector2(d.rec.rx[0] / Fx.ONE, d.rec.ry[0] / Fx.ONE), "the path starts where Robbie started")
+	eq(path[path.size() - 1], Vector2(d.rec.rx[d.rec.ticks - 1] / Fx.ONE, d.rec.ry[d.rec.ticks - 1] / Fx.ONE), "and ends where it was lost")

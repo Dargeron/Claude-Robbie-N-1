@@ -361,6 +361,7 @@ func _show(dive: Dive, entry: Dictionary, history: Dictionary) -> void:
 	var serial: int = entry["serial"]
 	replay.play(dive, maxi(serial, 0), Voice.captions(dive, maxi(serial, 1), history) if serial > 0 else [])
 	replay.view.station_memory = state.memory_before(room_id, entry)
+	replay.view.ghost = state.ghost_for(room_id, entry)
 	timeline.set_dive(dive)
 	_last_why_tick = -1
 
@@ -466,6 +467,13 @@ func _why_text(k: int) -> String:
 				out += "[color=#7fd8ff]+ %s[/color]\n" % l
 			else:
 				out += "[color=#8b8f94]· %s[/color]\n" % l
+	if found >= 0:
+		var parts := PackedStringArray()
+		for sn in DiveText.senses(current_dive.room, trace[found]):
+			var col := "#7fd8ff" if sn[2] else "#ddd6c6"
+			parts.append("%s: [color=%s]%s[/color]" % [sn[0], col, sn[1]])
+		if not parts.is_empty():
+			out += "\n[color=#8b8f94]Robbie sensed:[/color] " + "  ·  ".join(parts) + "\n"
 	var recent := PackedStringArray()
 	var counts := {}
 	for e in current_dive.world.events:

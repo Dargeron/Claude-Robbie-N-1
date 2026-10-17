@@ -29,7 +29,7 @@ func _ready() -> void:
 		["room", "valve"], ["program", "keep_distance 4\nstop if valve_shut\nmove_towards beacon"], ["launch"],
 		["seek_tick", 362], ["wait", 5], ["shot", "07-valve-lurker"],
 		["room", "jellyfish"], ["program", "move_towards beacon"], ["launch"], ["seek", 0.85], ["wait", 5], ["shot", "08-jellyfish-naive"],
-		["program", "lamp off\nkeep_distance 2\nmove_towards beacon"], ["launch"],
+		["program", "lamp off\nkeep_distance 2\nmove_towards beacon"], ["launch"], ["seek", 0.12], ["wait", 5], ["shot", "08b-jellyfish-ghost"],
 		["room", "valve"], ["program", "move_towards beacon"], ["launch"],
 		["wall"], ["wait", 5], ["shot", "09-wall"],
 		["wall_pick", 3], ["wait", 5], ["shot", "10-from-wall"],

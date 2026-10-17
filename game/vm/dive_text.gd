@@ -69,6 +69,28 @@ static func _why_action(rule: Dictionary, value: int) -> String:
 	return "could not be carried out"
 
 
+## What Robbie's sensors read at one think, in the words the conditions use.
+## Returns [label, value, notable] triples; notable = the reading would make its condition true.
+static func senses(room: Room, entry: Dictionary) -> Array:
+	var out: Array = []
+	var s: PackedInt32Array = entry.get("senses", PackedInt32Array())
+	if s.size() < 5:
+		return out
+	out.append(["wall ahead", "yes" if s[0] == 1 else "no", s[0] == 1])
+	if not room.jelly_spawns.is_empty() or not room.lurker_spawns.is_empty() or room.variation("jelly_scatter", 0) > 0:
+		if s[1] < 0:
+			out.append(["nearest hostile", "none sensed", false])
+		else:
+			var kind := "jellyfish" if s[2] == Body.Kind.JELLYFISH else ("lurker" if s[2] == Body.Kind.LURKER else "hostile")
+			var where := "touching Robbie" if s[1] <= 0 else "at " + tenths(s[1])
+			out.append(["nearest hostile", "%s %s" % [kind, where], s[1] <= 6 * Fx.TILE])
+	if not room.gate_tiles.is_empty():
+		var v: String = ["not sensed", "open", "shut"][clampi(s[3], 0, 2)]
+		out.append(["valve ahead", v, s[3] != 0])
+	out.append(["energy", "%d%%" % s[4], s[4] < 25])
+	return out
+
+
 ## Compact trace: one line per think where the chosen rule changed.
 static func trace_text(dive: Dive) -> String:
 	var lines := PackedStringArray()

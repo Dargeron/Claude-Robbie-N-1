@@ -23,6 +23,7 @@ var dive: Dive
 var t := 0.0                         # playback position in ticks (fractional)
 var first_seen := PackedInt32Array() # tick at which each tile entered this dive's memory
 var station_memory := PackedByteArray()  # tiles any Robbie in this room has ever seen
+var ghost: Dictionary = {}           # the previous Robbie's route: {serial, path (px every PATH_STEP ticks), lost}
 
 
 func setup(d: Dive) -> void:
@@ -91,6 +92,7 @@ func _draw() -> void:
 	var now := Time.get_ticks_msec() / 1000.0
 	draw_rect(Rect2(0, 0, 640, 360), Color(0.0, 0.01, 0.025))
 	_draw_memory(k)
+	_draw_ghost()
 	var rpos := _lerp_pos(rec.rx, rec.ry, k, k2, f)
 	var lamp_on := (rec.rflags[k] & 1) == 1
 	if lamp_on:
@@ -132,6 +134,35 @@ func _draw_memory(k: int) -> void:
 				draw_rect(Rect2(tx * 16, ty * 16, 16, 16), C_ROCK_MEMORY)
 			elif room.is_exit(tx, ty):
 				draw_rect(Rect2(tx * 16, ty * 16, 16, 16), Color(0.03, 0.1, 0.05))
+
+
+## The previous Robbie, swimming its own route alongside this one: its trail so
+## far, a faint outline where it is now, and a cross where it was lost.
+func _draw_ghost() -> void:
+	if ghost.is_empty():
+		return
+	var path: PackedVector2Array = ghost["path"]
+	var step := float(GameState.PATH_STEP)
+	var col := Color(0.62, 0.78, 1.0)
+	var f := t / step
+	var n := mini(int(f) + 1, path.size())
+	if n >= 2:
+		var trail := path.slice(0, n)
+		if n < path.size():
+			trail.append(path[n - 1].lerp(path[n], f - float(n - 1)))
+		draw_polyline(trail, Color(col, 0.3), 1.0)
+	var font := ThemeDB.fallback_font
+	var label := "%03d" % int(ghost["serial"])
+	if n < path.size():
+		var pos := path[n - 1].lerp(path[n], f - float(n - 1))
+		draw_arc(pos, 4.5, 0, TAU, 16, Color(col, 0.35), 1.0)
+		draw_string(font, pos + Vector2(6, -5), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(col, 0.45))
+	else:
+		var end := path[path.size() - 1]
+		if ghost.get("lost", true):
+			draw_line(end + Vector2(-3, -3), end + Vector2(3, 3), Color(col, 0.4), 1.0)
+			draw_line(end + Vector2(-3, 3), end + Vector2(3, -3), Color(col, 0.4), 1.0)
+		draw_string(font, end + Vector2(6, -5), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(col, 0.35))
 
 
 func _draw_lamp(k: int, rpos: Vector2) -> void:

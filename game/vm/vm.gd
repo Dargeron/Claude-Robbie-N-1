@@ -5,7 +5,7 @@ extends RefCounted
 ## "instant" orders (lamp) are applied and the reading continues.
 ##
 ## Every think leaves a trace entry, which the replay's Why? panel explains:
-##   {"t": tick, "rule": chosen index or -1, "checks": [[index, code, value], ...]}
+##   {"t": tick, "rule": chosen index or -1, "checks": [[index, code, value], ...], "senses": see senses()}
 ## codes: "cond_false", "not_applicable", "instant", "chosen"
 
 const HYST := 12 * 256   # "near" switches off 12 px further out than it switches on
@@ -14,6 +14,7 @@ var program: Program
 var last_rule := -1
 var near_mem: Dictionary = {}
 var trace: Array[Dictionary] = []
+var record_senses := false   # the station turns this on for dives it shows; fleets and hunts skip the cost
 
 
 func _init(p: Program) -> void:
@@ -41,8 +42,23 @@ func think(w: World) -> Dictionary:
 		checks.append([i, "chosen", a["value"]])
 		break
 	last_rule = decision["rule"]
-	trace.append({"t": w.tick, "rule": decision["rule"], "checks": checks})
+	var entry := {"t": w.tick, "rule": decision["rule"], "checks": checks}
+	if record_senses:
+		entry["senses"] = senses(w)
+	trace.append(entry)
 	return decision
+
+
+## What Robbie's sensors read at this think, for the Why? panel (pure reads, no side effects):
+## [wall ahead 0/1, nearest sensed hostile distance or -1, its Body.Kind or -1,
+##  valve ahead 0 = not sensed / 1 = open / 2 = shut or closing, energy %]
+static func senses(w: World) -> PackedInt32Array:
+	var nh := w.nearest_hostile()
+	var valve := 0
+	if not w.room.gate_tiles.is_empty() and w.valve_sensed():
+		valve = 1 if w.gate_state == World.GateState.OPEN else 2
+	var kind: int = w.bodies[nh[0]].kind if nh[0] >= 0 else -1
+	return PackedInt32Array([1 if w.wall_ahead() else 0, nh[1], kind, valve, w.energy_percent()])
 
 
 ## Returns [holds: bool, value: int]. The value is what the sensor read
