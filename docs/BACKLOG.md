@@ -7,7 +7,18 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 
 ## Albert's feedback (top priority)
 
-- [ ] Waiting for his list of changes, suggestions and problems (he played the prototype on 2026-10-17 and approved the core).
+Full notes and triage: docs/design/feedback-2026-10-17.md. Order to confirm with Albert.
+
+- [ ] #14 The Valve's lurker can't be read: shape visible in the lamp, clearer wake, earlier hint (not a crash; ours passes 20/20).
+- [ ] #8 Raise CPU budgets now (later: CPU as an upgrade).
+- [ ] #5 Beacon opens the next room; optional objectives per room pay currency (survey becomes one of them?).
+- [ ] #2 Full-screen Game on launch; Space/arrows speed incl. x0.5; toggle "fast until just before the last death".
+- [ ] #3/#4 Tutorial (and a big, obvious survey/objectives control).
+- [ ] #11 Everything hidden until discovered, exit included (the beacon order still works).
+- [ ] #10 Hundreds of last words, by cause and circumstance.
+- [ ] #1/#6 Design with Albert: two currencies, the Lab (Robbie sprite, slots), shop for equipment and instructions.
+- [ ] #6 Three screens: Game, Mission Control, Lab.
+- [ ] #7/#9/#13 Art pass: cute, drawn, steampunk-ish, organic and moving walls (needs Vertex AI credentials).
 
 ## Now: P0b, the first playable
 
