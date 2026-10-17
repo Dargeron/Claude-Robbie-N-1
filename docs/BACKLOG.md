@@ -31,6 +31,11 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 - [x] Sound v1: 15 synthesised sounds, event-synced, mute (block 2).
 - [~] Histograms per room: "the cheapest known" CPU after certification (block 10); a real histogram needs players.
 
+## Story
+
+- [x] Station log: six entries, one per certified room, understated (block 14). Albert to rewrite as he likes.
+- [ ] Make one of the log's oddities mechanical in a later room (the swarm drifting to where Robbies fell; the ping).
+
 ## Simulation and design
 
 - [~] Exploit hunts (resumable, tools/hunt.sh): jellyfish wall-hug fixed (block 1); valve far-wall

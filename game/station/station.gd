@@ -20,6 +20,8 @@ var monitor_hint: Label
 var room_buttons := {}
 var serial_label: Button
 var wall: RobbieWall
+var log_btn: Button
+var station_log: StationLog
 var coach: Coach
 var _coach_scrubbed := false      # the player has dragged along a transmission's timeline
 var _coach_edited := false        # ...and changed the program since the first loss
@@ -83,10 +85,14 @@ func _build() -> void:
 		tabs.add_child(b)
 		room_buttons[id] = b
 	serial_label = _button("", "The Wall of Robbies: every Robbie sent, and its last words (W)", _open_wall)
-	serial_label.position = Vector2(1000, 8)
-	serial_label.custom_minimum_size = Vector2(266, 0)
+	serial_label.position = Vector2(992, 8)
+	serial_label.custom_minimum_size = Vector2(192, 0)
 	serial_label.add_theme_color_override("font_color", UiTheme.TEXT_DIM)
 	add_child(serial_label)
+	log_btn = _button("Log", "The station log (L)", _open_log)
+	log_btn.position = Vector2(1190, 8)
+	log_btn.custom_minimum_size = Vector2(78, 0)
+	add_child(log_btn)
 
 	# Monitor: the dive is drawn at 640x360 and shown 1:1.
 	var frame := Panel.new()
@@ -234,6 +240,13 @@ func _build() -> void:
 	wall.entry_chosen.connect(_open_from_wall)
 	add_child(wall)
 
+	station_log = StationLog.new()
+	station_log.visible = false
+	station_log.closed.connect(func() -> void:
+		station_log.visible = false
+		_refresh())
+	add_child(station_log)
+
 
 ## Room tabs: number and name; certified rooms turn green.
 func _label_room_tab(b: Button, rid: String) -> void:
@@ -329,6 +342,9 @@ func _refresh() -> void:
 	launch_btn.disabled = over or program.rules.is_empty()
 	launch_btn.text = "LAUNCH ROBBIE %03d" % state.next_serial
 	serial_label.text = "Robbies sent: %d  ·  Wall" % (state.next_serial - 1)
+	var unread := StationLog.unread(state)
+	log_btn.text = "Log  +%d" % unread if unread > 0 else "Log"
+	log_btn.add_theme_color_override("font_color", UiTheme.AMBER if unread > 0 else UiTheme.TEXT_DIM)
 	survey_btn.disabled = not state.program_made_it(room_id, program.to_text()) or over or survey_run != null
 	survey_btn.visible = not rs.certified or not rs.survey.is_empty()
 	_refresh_status()
@@ -346,6 +362,8 @@ func _refresh_status() -> void:
 		lines.append("[color=#ff6a5a]Over the CPU budget: Robbie can't hold this program. Remove or simplify a rule.[/color]")
 	if rs.certified:
 		lines.append("[color=#7dffa0]Certified: the survey fleet made it %d/%d.[/color]" % [rs.survey.get("passed", 0), rs.survey.get("fleet", 10)])
+		if StationLog.unread(state) > 0:
+			lines.append("[color=#ffc35a]A new entry in the station log (L).[/color]")
 		var rec := GameState.record_cpu(room_id)
 		var mine := "Your cheapest certified program: [b]%d CPU[/b]." % rs.best_cpu
 		if rec > 0 and rec < rs.best_cpu:
@@ -487,7 +505,7 @@ func _restore_program() -> void:
 
 ## First visit: point at the one thing to do next, until Robbie 002 has been sent.
 func _update_coach() -> void:
-	if state.coach_done or wall.visible or watch_large:
+	if state.coach_done or wall.visible or station_log.visible or watch_large:
 		coach.point_at(null, "")
 		return
 	if state.next_serial >= 3 or (state.next_serial == 2 and _any_exit()):
@@ -631,6 +649,16 @@ func _open_wall() -> void:
 	wall.visible = true
 
 
+func _open_log() -> void:
+	if watch_large:
+		_toggle_watch()
+	wall.visible = false
+	replay.playing = false
+	station_log.refresh(state)
+	move_child(station_log, get_child_count() - 1)
+	station_log.visible = true
+
+
 func _close_wall() -> void:
 	wall.visible = false
 
@@ -679,12 +707,15 @@ func _toggle_watch() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if wall.visible:
+	if wall.visible or station_log.visible:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
 			KEY_W:
 				_open_wall()
+				accept_event()
+			KEY_L:
+				_open_log()
 				accept_event()
 			KEY_F:
 				_toggle_watch()

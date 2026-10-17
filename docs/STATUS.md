@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-17, after hourly block 13 (12:46 UTC): the survey fleet is 20 Robbies (16 must make it), sent with progress.
+Updated 2026-10-17, after hourly block 14 (13:57 UTC): the station log, where the story starts.
 
 ## Where we are
 
@@ -20,6 +20,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
   Three creatures: jellyfish (light attracts them), lurkers (laser-proof; back away), eels (blind, hunt by sound;
   hold still). Jellyfish are partly scattered afresh on every dive, so no fixed route works.
 - Sound v1: 15 synthesised sounds synced to the transmission, with a mute button.
+- The station log: dated entries unlocked by certifying rooms; the slow story (content/story/log.json).
 - A first-visit coach points at LAUNCH, the timeline and the editor until Robbie 002 is sent.
 - AUTO playback: skims quiet water at 4x and slows to normal speed around every event.
 - The Wall of Robbies: every Robbie sent, its route on a small map, how it ended and its last words; the per-room

@@ -10,6 +10,7 @@ const STARTER := "move_towards beacon\n"
 const SURVEY_FIRST_SEED := Survey.FIRST_SEED
 
 var next_serial := 1
+var log_read: Array = []      # station log entries the player has opened
 var coach_done := false   # the first-visit guidance has been walked through
 var persist := true   # tests turn this off so they never touch the player's save
 var rooms := {}   # id -> RoomState
@@ -222,7 +223,7 @@ func _remember(rs: RoomState, dive: Dive) -> void:
 func save() -> void:
 	if not persist:
 		return
-	var data := {"version": 1, "next_serial": next_serial, "coach_done": coach_done, "rooms": {}}
+	var data := {"version": 1, "next_serial": next_serial, "coach_done": coach_done, "log_read": log_read, "rooms": {}}
 	for id in ROOMS:
 		var rs := room_state(id)
 		data["rooms"][id] = {"program": rs.program_text, "dives": rs.dives, "certified": rs.certified, "best_cpu": rs.best_cpu,
@@ -241,6 +242,7 @@ func load_save() -> void:
 	next_serial = int(parsed.get("next_serial", 1))
 	# Saves from before the coach existed: anyone who already sent Robbies doesn't need it.
 	coach_done = bool(parsed.get("coach_done", next_serial > 1))
+	log_read = parsed.get("log_read", [])
 	var saved: Dictionary = parsed.get("rooms", {})
 	for id in ROOMS:
 		if not saved.has(id):
@@ -263,6 +265,7 @@ func load_save() -> void:
 func reset() -> void:
 	next_serial = 1
 	coach_done = false
+	log_read = []
 	for id in ROOMS:
 		var rs := room_state(id)
 		rs.program_text = STARTER

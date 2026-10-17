@@ -13,7 +13,9 @@ for room in ["dark", "jellyfish", "nursery", "valve", "listeners"]:
     if not os.path.exists(p):
         continue
     d = json.load(open(p))
-    found = d.get("found", {})
+    # Only finds certified by the current survey (16 of 20; older runs kept 8-of-10 passes,
+    # which the solver re-checks when it next runs that room).
+    found = {k: v for k, v in d.get("found", {}).items() if int(v.get("passed", 0)) >= 16}
     if not found:
         continue
     cpus = [int(v["cpu"]) for v in found.values()]

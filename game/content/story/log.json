@@ -1,0 +1,41 @@
+{
+  "_about": "The station log: short entries that unlock as rooms are certified. The story develops slowly: something down there is watching the Robbies and learning too. Keep it understated. 'after' is the room id that unlocks the entry ('' = from the start). Edit freely.",
+  "entries": [
+    {
+      "id": "start",
+      "after": "",
+      "title": "Day 1",
+      "text": "The Robbie programme is go. Robbies are cheap, the ocean is big, and nobody has seen the bottom. Send one, watch what comes back, fix the rules, send the next. Keep every transmission: each one is a piece of the map."
+    },
+    {
+      "id": "dark",
+      "after": "dark",
+      "title": "Day 3",
+      "text": "The Dark is charted. The survey fleet came back with clean maps and one oddity from the sonar desk: a return ping we didn't send. Probably an echo off the shelf. Probably."
+    },
+    {
+      "id": "jellyfish",
+      "after": "jellyfish",
+      "title": "Day 6",
+      "text": "The jellyfish swarm is never where we left it. Biology says they drift on the currents. Biology doesn't say why they drift towards the places our Robbies went down. Logged, not explained."
+    },
+    {
+      "id": "nursery",
+      "after": "nursery",
+      "title": "Day 9",
+      "text": "The Nursery is clear. We shot our way through. Afterwards the sonar desk heard a long, low tone from below, three times, then nothing. Nobody here wants to call it a reply."
+    },
+    {
+      "id": "valve",
+      "after": "valve",
+      "title": "Day 13",
+      "text": "The valve keeps its rhythm. Someone pointed out that the rhythm shifted a little after our tenth dive. Someone else pointed out that we are all very tired. Both are in the log."
+    },
+    {
+      "id": "listeners",
+      "after": "listeners",
+      "title": "Day 17",
+      "text": "The eels hunt by sound. So, it seems, does something else. Since we started, the ping that isn't ours has come back a little closer after every Robbie we lose."
+    }
+  ]
+}
