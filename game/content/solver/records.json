@@ -1,4 +1,9 @@
 {
+  "jellyfish": {
+    "certified_programs": 18,
+    "cpu": 3,
+    "evaluations": 125
+  },
   "listeners": {
     "certified_programs": 12,
     "cpu": 5,
