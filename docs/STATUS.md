@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-17, after hourly block 6 (04:40 UTC): lurkers are laser-proof; The Jellyfish's simplest solution is lamp off.
+Updated 2026-10-17, after hourly block 7 (05:50 UTC): a fourth room, The Nursery.
 
 ## Where we are
 
@@ -15,9 +15,9 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
   same dive, checked by hash every second of dive time.
 - Robbie's rule interpreter, with 9 orders and 7 conditions, CPU costs and a trace of every think.
   The trace explains in words why each rule ran or was skipped (the seed of the Why? panel).
-- Three prototype rooms (The Dark, The Jellyfish, The Valve). Each has an intended program that
-  passes the survey fleet (18–20 of 20 dives), and naive programs that fail (see `docs/design/rooms.md`).
-  The Jellyfish scatters 16 of its 24 jellyfish afresh on every dive, so no fixed route works.
+- Four prototype rooms (The Dark, The Jellyfish, The Nursery, The Valve), one idea each. Each has an intended
+  program that passes the survey fleet (20 of 20 dives), and naive programs that fail (see `docs/design/rooms.md`).
+  Jellyfish are partly scattered afresh on every dive, so no fixed route works; lurkers are laser-proof.
 - Sound v1: 15 synthesised sounds synced to the transmission, with a mute button.
 - The Wall of Robbies: every Robbie sent, how it ended and its last words; the per-room score. Click to rewatch.
 - The Why? panel shows what Robbie sensed (wall ahead, nearest hostile, valve, energy); the previous Robbie in

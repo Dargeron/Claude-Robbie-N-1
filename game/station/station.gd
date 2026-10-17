@@ -2,7 +2,6 @@ extends Control
 ## The orbital station: write Robbie's program, launch it, watch its transmission,
 ## understand what happened, try again. P0b, first playable.
 
-const ROOM_NAMES := {"dark": "The Dark", "jellyfish": "The Jellyfish", "valve": "The Valve"}
 
 var state := GameState.new()
 var room_id := "dark"
@@ -64,7 +63,8 @@ func _build() -> void:
 	title.add_theme_color_override("font_color", UiTheme.AMBER)
 	add_child(title)
 	var tabs := HBoxContainer.new()
-	tabs.position = Vector2(470, 8)
+	tabs.position = Vector2(372, 8)
+	tabs.add_theme_constant_override("separation", 4)
 	add_child(tabs)
 	var group := ButtonGroup.new()
 	for i in GameState.ROOMS.size():
@@ -73,6 +73,7 @@ func _build() -> void:
 		b.toggle_mode = true
 		b.button_group = group
 		b.custom_minimum_size = Vector2(150, 0)
+		b.add_theme_font_size_override("font_size", 13)
 		b.pressed.connect(func() -> void: _select_room(id))
 		tabs.add_child(b)
 		room_buttons[id] = b
@@ -222,6 +223,18 @@ func _build() -> void:
 	add_child(wall)
 
 
+## Room tabs: number and name; certified rooms turn green.
+func _label_room_tab(b: Button, rid: String) -> void:
+	var done := state.room_state(rid).certified
+	b.text = "%d · %s" % [GameState.ROOMS.find(rid) + 1, _room_name(rid)]
+	b.add_theme_color_override("font_color", UiTheme.GREEN if done else UiTheme.TEXT)
+	b.tooltip_text = "Certified by the survey fleet" if done else "Not certified yet"
+
+
+func _room_name(id: String) -> String:
+	return state.room_state(id).room.title
+
+
 func _button(text: String, tip: String, on_press: Callable) -> Button:
 	var b := Button.new()
 	b.text = text
@@ -247,8 +260,7 @@ func _select_room(id: String) -> void:
 	editor.set_program(program)
 	for rid in room_buttons:
 		var b: Button = room_buttons[rid]
-		var done := state.room_state(rid).certified
-		b.text = "%d · %s%s" % [GameState.ROOMS.find(rid) + 1, ROOM_NAMES[rid], "  (done)" if done else ""]
+		_label_room_tab(b, rid)
 		b.button_pressed = rid == id
 	current_dive = null
 	current_entry = {}
@@ -267,7 +279,7 @@ func _clear_monitor() -> void:
 		replay.hud.queue_free()
 		replay.view = null
 	timeline.set_dive(null)
-	monitor_hint.text = "NO TRANSMISSIONS FROM %s YET\nWrite a program and launch a Robbie." % ROOM_NAMES[room_id].to_upper()
+	monitor_hint.text = "NO TRANSMISSIONS FROM %s YET\nWrite a program and launch a Robbie." % _room_name(room_id).to_upper()
 	monitor_hint.visible = true
 	why.text = _intro_text()
 
@@ -278,7 +290,7 @@ func _intro_text() -> String:
 		"Robbie reads its rules from the top, several times a second, and follows the first one that applies.\n" +
 		"CPU budget here: [b]%d[/b]. Energy: [b]%d[/b].\n\n" +
 		"When a Robbie is lost, its transmission arrives here. Scrub through it, see which rule was running, and fix the program.") % [
-		ROOM_NAMES[room_id], rs.room.cpu_budget, rs.room.energy]
+		_room_name(room_id), rs.room.cpu_budget, rs.room.energy]
 
 
 func _on_program_changed() -> void:
@@ -290,7 +302,7 @@ func _refresh() -> void:
 	var rs := state.room_state(room_id)
 	var budget := rs.room.cpu_budget
 	var used := program.cpu()
-	title_label.text = "PROGRAM  ·  %s" % ROOM_NAMES[room_id].to_upper()
+	title_label.text = "PROGRAM  ·  %s" % _room_name(room_id).to_upper()
 	cpu_label.text = "CPU %d / %d" % [used, budget]
 	cpu_label.add_theme_color_override("font_color", UiTheme.RED if used > budget else UiTheme.CYAN)
 	cpu_bar.max_value = budget
@@ -351,7 +363,7 @@ func _survey() -> void:
 func _select_room_buttons_only() -> void:
 	for rid in room_buttons:
 		var b: Button = room_buttons[rid]
-		b.text = "%d · %s%s" % [GameState.ROOMS.find(rid) + 1, ROOM_NAMES[rid], "  (done)" if state.room_state(rid).certified else ""]
+		_label_room_tab(b, rid)
 
 
 func _show(dive: Dive, entry: Dictionary, history: Dictionary) -> void:

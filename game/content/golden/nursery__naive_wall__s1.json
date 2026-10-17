@@ -1,0 +1,16 @@
+{
+  "cause": "jellyfish",
+  "final_hash": 580816671,
+  "hashes": [
+    442912591,
+    2262756483,
+    3815081462,
+    3545707155,
+    465942784
+  ],
+  "program": "nursery/naive_wall.rbt",
+  "result": "destroyed",
+  "room": "nursery",
+  "seed": 1,
+  "ticks": 162
+}

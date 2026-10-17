@@ -1,0 +1,6 @@
+# expect: exit
+# certify: yes
+# The tunnel is too narrow to slip past them, dark or not: clear the way.
+# Room 1's wall-following does the steering.
+shoot
+follow_wall left

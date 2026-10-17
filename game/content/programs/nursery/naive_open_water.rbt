@@ -1,0 +1,4 @@
+# certify: no
+# Shooting is right; open water isn't a way through a winding tunnel.
+shoot
+move_towards open_water

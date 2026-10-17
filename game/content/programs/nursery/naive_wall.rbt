@@ -1,0 +1,4 @@
+# expect: fail
+# certify: no
+# The Dark's solution: the jellyfish are resting right in the tunnel.
+follow_wall left

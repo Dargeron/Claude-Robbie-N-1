@@ -1,0 +1,6 @@
+# expect: fail
+# certify: no
+# The Jellyfish's solution: darkness hides Robbie, but in a tunnel this narrow
+# it still swims straight into them.
+lamp off
+follow_wall left

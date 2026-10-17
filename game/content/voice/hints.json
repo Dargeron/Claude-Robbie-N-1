@@ -4,27 +4,76 @@
   "first_loss": "Mission control: Drag along the timeline under the monitor. The panel below it says which rule Robbie was following, and why. Change a rule, then launch the next Robbie.",
   "rooms": {
     "dark/wall": [
-      {"after": 2, "text": "The beacon tells Robbie where the exit is, not how to get there. In a cave, something that keeps in touch with the rock might go further."}
+      {
+        "after": 2,
+        "text": "The beacon tells Robbie where the exit is, not how to get there. In a cave, something that keeps in touch with the rock might go further."
+      }
     ],
     "dark/energy": [
-      {"after": 1, "text": "That Robbie took the long way round. In this cave, left and right are not the same."}
+      {
+        "after": 1,
+        "text": "That Robbie took the long way round. In this cave, left and right are not the same."
+      }
     ],
     "jellyfish/jellyfish": [
-      {"after": 2, "text": "Watch what the jellyfish do when Robbie's lamp touches them. What if Robbie stopped shining at them?"},
-      {"after": 4, "text": "In the dark, Robbie can still see a jellyfish's own glow. Keeping a little distance might be enough."}
+      {
+        "after": 2,
+        "text": "Watch what the jellyfish do when Robbie's lamp touches them. What if Robbie stopped shining at them?"
+      },
+      {
+        "after": 4,
+        "text": "In the dark, Robbie can still see a jellyfish's own glow. Keeping a little distance might be enough."
+      }
     ],
     "jellyfish/wall": [
-      {"after": 2, "text": "Backing away from one thing can mean backing into another."}
+      {
+        "after": 2,
+        "text": "Backing away from one thing can mean backing into another."
+      }
+    ],
+    "nursery/jellyfish": [
+      {
+        "after": 2,
+        "text": "In a tunnel this narrow, the dark won't keep them out of Robbie's way. Something has to clear the path."
+      },
+      {
+        "after": 4,
+        "text": "Robbie carries a laser. It fires at whatever Robbie senses close by, and every shot costs energy."
+      }
+    ],
+    "nursery/wall": [
+      {
+        "after": 2,
+        "text": "The beacon is on the far side of a winding tunnel. The trick from the first room still works here."
+      }
+    ],
+    "nursery/energy": [
+      {
+        "after": 1,
+        "text": "Shots and detours both cost energy. That Robbie spent it before the end of the tunnel."
+      }
     ],
     "valve/valve": [
-      {"after": 2, "text": "The valve has a rhythm. Robbie can tell whether it is shut, as long as the valve is ahead of it."}
+      {
+        "after": 2,
+        "text": "The valve has a rhythm. Robbie can tell whether it is shut, as long as the valve is ahead of it."
+      }
     ],
     "valve/lurker": [
-      {"after": 2, "text": "The rock's eyes glow just before it strikes. A Robbie that keeps its distance from what it sees might live."}
+      {
+        "after": 2,
+        "text": "The rock's eyes glow just before it strikes. A Robbie that keeps its distance from what it sees might live."
+      }
     ],
     "valve/energy": [
-      {"after": 1, "text": "Waiting costs energy too. A Robbie that never moves on runs dry."}
+      {
+        "after": 1,
+        "text": "Waiting costs energy too. A Robbie that never moves on runs dry."
+      }
     ]
   },
-  "stuck": {"after": 5, "text": "Every rule costs CPU, but a second rule can catch what the first one misses. Rules are read from the top: the first one that applies wins."}
+  "stuck": {
+    "after": 5,
+    "text": "Every rule costs CPU, but a second rule can catch what the first one misses. Rules are read from the top: the first one that applies wins."
+  }
 }

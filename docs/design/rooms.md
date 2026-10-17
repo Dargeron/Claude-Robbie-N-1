@@ -1,6 +1,6 @@
 # The Jellyfish Rooms: prototype room designs
 
-Three one-screen rooms (40 x 22 tiles, 1 tile = 1 m = 16 px) that share one set of orders.
+Four one-screen rooms (40 x 22 tiles, 1 tile = 1 m = 16 px) that share one set of orders.
 Each has an intended solution, naive programs that must fail, and the idea it teaches.
 Programs live in `game/content/programs/<room>/`; `tests/test_reference_programs.gd` checks every claim below.
 
@@ -99,7 +99,55 @@ swimming past it, so it was dropped.
 
 ![Three dives of the intended program, and the fixed route](../devlog/img/s05/jellyfish-swarms.png)
 
-## 3. The Valve
+## 3. The Nursery
+
+CPU budget 8 · energy 7500 · 8 jellyfish resting in the tunnel plus 6 scattered fresh on every dive
+
+```text
+########################################
+#....###################################
+#.....................J.........########
+#.S.........J...................########
+#...............................########
+#############################...########
+#############################.J.########
+##################...########...########
+##################.p.########...########
+#######.........................########
+#######.................J.......########
+#######.......J.................########
+#######...##############################
+#######...##############################
+#######.J.############...###############
+#######...############.p.###############
+#######...############...###############
+#######.............................EEE#
+#######.........J...................EEE#
+#######.....................J.......EEE#
+########################################
+########################################
+```
+
+A winding tunnel three tiles wide, with two dead-end pockets. Added in block 7.
+
+**Teaches:** the laser. When there is no way round, clear the way. It reuses the first room's trick
+(`follow_wall`), and it shows that the Jellyfish room's trick (`lamp off`) is not a universal answer: in a tunnel this
+narrow, darkness doesn't stop Robbie swimming into a jellyfish that is resting in its way.
+
+| Program | CPU | Survey fleet (20 seeds) | What happens |
+| --- | --- | --- | --- |
+| `shoot` / `follow_wall left` (intended) | 6 | 20/20 | Clears the tunnel shot by shot, about 55 s, roughly a fifth of the energy left |
+| `shoot` / `follow_wall right` (intended) | 6 | 20/20 | Either hand works |
+| `lamp off` / `shoot` / `follow_wall left` | 7 | 19/20 | Works, but the lamp makes no difference here (one energy failure) |
+| `lamp off` / `follow_wall left` | 4 | 0/20 | The Jellyfish's answer: stung by the jellyfish resting in the tunnel |
+| `follow_wall left` | 3 | 0/20 | The Dark's answer: same |
+| `move_towards beacon` | 2 | 0/20 | Lit jellyfish, then the rock |
+| `shoot` / `move_towards open_water` | 6 | 0/20 | Open water is not a way through a winding tunnel: walls and wasted energy |
+| `shoot` / `move_towards beacon` | 5 | 0/20 | The beacon points through rock |
+
+![The Nursery, intended](../devlog/img/s09/nursery-intended.png)
+
+## 4. The Valve
 
 CPU budget 10 · energy 6000 · valve cycle 60/45/150 ticks (open/closing/shut)
 

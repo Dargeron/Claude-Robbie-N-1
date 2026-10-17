@@ -45,7 +45,8 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 - [ ] `keep_distance` reverses blind and can back Robbie into rock (2 of 20 jellyfish dives). Candidate
       lesson: a `wall_behind` condition, or a room that teaches it.
 - [ ] Jellyfish turn smoothly instead of snapping to a new heading.
-- [ ] More rooms for the slice: a current, a vent, a second lurker type; one room that rewards the laser.
+- [x] One room that rewards the laser: The Nursery (block 7).
+- [ ] More rooms for the slice: a current, a vent, a second lurker type.
 - [ ] Solver v1 (mutation search) to seed histograms and find cheaper solutions than ours.
 
 ## Quality and tooling

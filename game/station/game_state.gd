@@ -4,7 +4,7 @@ extends RefCounted
 ## survey results, and the map assembled from every transmission.
 ## Dives are stored as inputs (program text + seed) and re-simulated on demand.
 
-const ROOMS := ["dark", "jellyfish", "valve"]
+const ROOMS := ["dark", "jellyfish", "nursery", "valve"]
 const SAVE_PATH := "user://robbie_save.json"
 const STARTER := "move_towards beacon\n"
 const SURVEY_FIRST_SEED := 101

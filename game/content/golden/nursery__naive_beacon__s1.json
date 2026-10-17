@@ -1,0 +1,18 @@
+{
+  "cause": "jellyfish",
+  "final_hash": 876578273,
+  "hashes": [
+    478367290,
+    2471938769,
+    3002775785,
+    2893551002,
+    880178238,
+    4231385981,
+    876578273
+  ],
+  "program": "nursery/naive_beacon.rbt",
+  "result": "destroyed",
+  "room": "nursery",
+  "seed": 1,
+  "ticks": 210
+}

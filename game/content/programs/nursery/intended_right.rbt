@@ -1,0 +1,5 @@
+# expect: exit
+# certify: yes
+# Either hand works in this tunnel.
+shoot
+follow_wall right
