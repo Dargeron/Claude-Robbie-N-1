@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-16, after hourly block 2 (23:50 UTC).
+Updated 2026-10-17, after hourly block 3 (01:00 UTC): The Jellyfish now has a fresh swarm on every dive.
 
 ## Where we are
 
@@ -16,10 +16,12 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 - Robbie's rule interpreter, with 9 orders and 7 conditions, CPU costs and a trace of every think.
   The trace explains in words why each rule ran or was skipped (the seed of the Why? panel).
 - Three prototype rooms (The Dark, The Jellyfish, The Valve). Each has an intended program that
-  passes 20/20 survey dives, and naive programs that fail (see `docs/design/rooms.md`).
+  passes the survey fleet (18–20 of 20 dives), and naive programs that fail (see `docs/design/rooms.md`).
+  The Jellyfish scatters 16 of its 24 jellyfish afresh on every dive, so no fixed route works.
+- Sound v1: 15 synthesised sounds synced to the transmission, with a mute button.
 - Survey fleet (certification over 10 seeds), headless dive runner, PNG path images, golden
   replays, exploit hunt tool.
-- 25 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
+- 29 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
   sim), golden replays, reference programs.
 - A dive takes about 0.1 s to simulate. The solver bot is cheaper than we feared.
 

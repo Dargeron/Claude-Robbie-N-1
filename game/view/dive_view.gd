@@ -147,6 +147,10 @@ func _draw_lamp(k: int, rpos: Vector2) -> void:
 		cols.append(Color(C_LAMP, lerpf(0.30, 0.03, reach)))
 		lit_tiles[Vector2i(ends[i] / Fx.TILE, ends[i + 1] / Fx.TILE)] = reach
 	draw_polygon(pts, cols)
+	# The glow all around Robbie (World.LAMP_HALO, 48 px): jellyfish inside it see the lamp too.
+	for i in 12:
+		draw_circle(rpos, 48.0 * (1.0 - i * 0.075), Color(C_LAMP, 0.010 + i * 0.002))
+	draw_arc(rpos, 48.0, 0, TAU, 48, Color(C_LAMP, 0.07), 1.0)
 	# Rock struck by the light.
 	for tile: Vector2i in lit_tiles:
 		if dive.room.tile_at(tile.x, tile.y) == Room.Tile.ROCK:

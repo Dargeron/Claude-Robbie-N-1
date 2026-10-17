@@ -1,0 +1,16 @@
+{
+  "cause": "jellyfish",
+  "final_hash": 2107891709,
+  "hashes": [
+    92013085,
+    261403981,
+    3165473983,
+    3338431835,
+    2782404900
+  ],
+  "program": "jellyfish/naive_clock.rbt",
+  "result": "destroyed",
+  "room": "jellyfish",
+  "seed": 1,
+  "ticks": 156
+}

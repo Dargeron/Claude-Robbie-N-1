@@ -1,17 +1,17 @@
 {
   "cause": "jellyfish",
-  "final_hash": 2279033770,
+  "final_hash": 3674679731,
   "hashes": [
-    4024030286,
-    3025483045,
-    2552942786,
-    1044885194,
-    1798903387,
-    978505254
+    1167259245,
+    1908047684,
+    565650306,
+    62616575,
+    3514906913,
+    219394338
   ],
   "program": "jellyfish/naive_beacon.rbt",
   "result": "destroyed",
   "room": "jellyfish",
   "seed": 2,
-  "ticks": 194
+  "ticks": 189
 }

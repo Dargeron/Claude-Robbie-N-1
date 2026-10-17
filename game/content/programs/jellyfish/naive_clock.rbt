@@ -1,0 +1,6 @@
+# certify: no
+# Found by the exploit hunt (block 3): a fixed route that never looks at the water.
+# It passed 20/20 while the swarm sat in the same places every dive; now the swarm
+# is scattered fresh on every dive and a lit lamp draws jellyfish from all around.
+move 45 if energy_below 75
+move 135

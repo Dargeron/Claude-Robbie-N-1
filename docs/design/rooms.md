@@ -48,44 +48,50 @@ CPU budget 6 · energy 4200
 
 ## 2. The Jellyfish
 
-CPU budget 8 · energy 6000
+CPU budget 8 · energy 6000 · swarm: 8 jellyfish resting by the rock plus 16 scattered fresh on every dive
 
 ```text
 ########################################
-#......................................#
-#...........###........................#
-#...........###...##...........###.....#
-#....p......###...##...........###.....#
-#..............................###.....#
-#....................J.................#
-#...........................J..........#
-#...............J......................#
-#.........................J..........EE#
-#.S.......J..........J...........J...EE#
-#............................J.......EE#
-#............J.........J.............EE#
 #................J.....................#
-#..............................J.......#
-#......###.............................#
-#......###.............................#
-#......###..............####...........#
-#.......................####.......p...#
-#.......................####...........#
+#.....J.....###............J...........#
+#...........###...##...........###.....#
+#....p......###...##...........###.J...#
+#..............................###.....#
 #......................................#
+#......................................#
+#......................................#
+#....................................EE#
+#.S..................................EE#
+#....................................EE#
+#....................................EE#
+#......................................#
+#......................................#
+#......###..........................J..#
+#......###.............................#
+#...J..###..............####...........#
+#.......................####.......p...#
+#..............J........####...........#
+#...........................J..........#
 ########################################
 ```
+
+The `J` marks are the jellyfish that rest along the rock. Sixteen more are scattered over open water on
+every dive (`jelly_scatter`: at least 6 tiles from the start, 3 from the exit, 2 from each other), so no
+fixed route works twice. A lit lamp draws jellyfish from its beam and from a 3-tile glow all around Robbie
+(`LAMP_HALO`), so sneaking past with the lamp on and the swarm behind you doesn't work either.
 
 **Teaches:** light attracts. Darkness hides Robbie, and the jellyfish's own glow still warns it. Or: the loud way, with the laser.
 
 | Program | CPU | Survey fleet (20 seeds) | What happens |
 | --- | --- | --- | --- |
-| `lamp off` / `keep_distance 2` / `move_towards beacon` (intended) | 6 | 20/20 | Slips through the swarm in the dark, about 35–40 s |
+| `lamp off` / `keep_distance 2` / `move_towards beacon` (intended) | 6 | 18/20 | Slips through the swarm in the dark. Backing away is blind: twice in 20 a drifting jellyfish herds Robbie into rock |
 | `shoot if hostile_near 4` / `move_towards beacon` (intended, loud) | 8 | 20/20 | Faster (about 20 s) but spends energy on every shot |
-| `move_towards beacon` | 2 | 1/20 | Lit jellyfish dart at the lamp faster than Robbie swims |
+| `move_towards beacon` | 2 | 0/20 | Lit jellyfish dart at the lamp faster than Robbie swims |
 | `keep_distance 2` / `move_towards beacon` | 5 | 0/20 | Backing away with the lamp on: the swarm follows |
-| `follow_wall left` | 3 | 9/20 | Found by the exploit hunt: skirting the swarm along the rock. Jellyfish now rest along the walls too, so it fails the survey fleet |
+| `follow_wall left` | 3 | 0/20 | Found by the exploit hunt (block 1): skirting the swarm along the rock. Jellyfish rest along the walls |
+| `move 45 if energy_below 75` / `move 135` | 4 | 0/20 | Found by the exploit hunt (block 3): a fixed route that never looks. It passed 20/20 while the swarm sat still; now the swarm moves every dive |
 
-![The Jellyfish intended](../devlog/img/s01/jellyfish-intended_dark.png)
+![Three dives of the intended program, and the fixed route](../devlog/img/s05/jellyfish-swarms.png)
 
 ## 3. The Valve
 

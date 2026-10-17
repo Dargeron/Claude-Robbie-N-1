@@ -45,6 +45,7 @@ const J_GLOW := 48 * 256
 const J_DRIFT := 64             # 0.25 px per tick
 const J_CHASE := 282            # 1.1 px per tick: lit jellyfish dart at the lamp
 const J_STING_COOLDOWN := 30
+const LAMP_HALO := 48 * 256     # a lit lamp glows all around Robbie, not just ahead
 
 # Lurker
 const L_RADIUS := 6 * 256
@@ -109,8 +110,10 @@ func _init(r: Room, seed_v: int, calm_v: bool = false) -> void:
 	gate_phase = 0 if (calm or phase_range <= 0) else vr.below(phase_range)
 
 	var jitter := room.variation("jelly_jitter_px", 0) * Fx.ONE
-	for i in room.jelly_spawns.size():
-		var sp: Vector2i = room.jelly_spawns[i]
+	var jelly_tiles: Array[Vector2i] = room.jelly_spawns.duplicate()
+	jelly_tiles.append_array(_scatter_tiles(vr, room.variation("jelly_scatter", 0)))
+	for i in jelly_tiles.size():
+		var sp: Vector2i = jelly_tiles[i]
 		var b := Body.new()
 		b.kind = Body.Kind.JELLYFISH
 		b.index = bodies.size()
@@ -143,6 +146,38 @@ func _init(r: Room, seed_v: int, calm_v: bool = false) -> void:
 	seen.resize(room.w * room.h)
 	_update_gate(true)
 	_update_seen()
+
+
+## A fresh swarm for every dive: n open-water tiles chosen by the seed, away from
+## Robbie's start and the exit, spread at least two tiles apart.
+func _scatter_tiles(vr: Rng, n: int) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	if n <= 0:
+		return out
+	var ex := room.exit_cx / Fx.TILE
+	var ey := room.exit_cy / Fx.TILE
+	var tries := 0
+	while out.size() < n and tries < n * 60:
+		tries += 1
+		var t := Vector2i(vr.between(1, room.w - 2), vr.between(1, room.h - 2))
+		if room.tile_at(t.x, t.y) != Room.Tile.WATER or room.is_exit(t.x, t.y):
+			continue
+		if maxi(absi(t.x - room.start_tx), absi(t.y - room.start_ty)) < 6:
+			continue
+		if maxi(absi(t.x - ex), absi(t.y - ey)) < 3:
+			continue
+		var crowded := false
+		for o in out:
+			if maxi(absi(o.x - t.x), absi(o.y - t.y)) < 2:
+				crowded = true
+				break
+		for o in room.jelly_spawns:
+			if maxi(absi(o.x - t.x), absi(o.y - t.y)) < 2:
+				crowded = true
+				break
+		if not crowded:
+			out.append(t)
+	return out
 
 
 # ---------------------------------------------------------------- tiles
@@ -597,7 +632,8 @@ func _update_creatures() -> void:
 
 func _step_jellyfish(b: Body) -> void:
 	var spd := J_DRIFT
-	if lit(b.x, b.y):
+	var in_halo := lamp_on and dist_to(b) <= LAMP_HALO and los(robbie.x, robbie.y, b.x, b.y)
+	if in_halo or lit(b.x, b.y):
 		b.state = 1
 		b.angle = Fx.angle_of(robbie.x - b.x, robbie.y - b.y)
 		spd = J_CHASE
