@@ -9,7 +9,8 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 
 - [x] **Station screen**: monitor + rule editor + CPU meter + launch + archive in one screen (s02).
 - [x] **Builds Albert can run**: Linux/Windows/macOS zips; web build on a claude.ai page (s02).
-- [ ] **Verify the web page inside the claude.ai frame** (WebAssembly may be blocked there).
+- [~] **Verify the web page inside the claude.ai frame** (WebAssembly may be blocked there). Runs in headless
+      Chromium end to end (tools/webcheck.sh, block 15); the claude.ai frame still needs Albert's eyes.
 - [x] **Replay controls on screen**: transport, timeline with markers, click-to-seek (s02).
 - [x] **Why? panel**: the rule-by-rule explanation for the moment under the playhead (s02).
 - [x] **Robbie's voice v1**: subtitles and last words, 40 lines (s02).
@@ -58,7 +59,7 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 
 - [x] Smoke test: tools/smoke.sh renders the station tour and checks every shot (block 12).
 - [ ] Tests for DiveText explanations.
-- [ ] Profile the sim; keep a dive under 0.1 s as rooms grow.
+- [x] Profile the sim (block 15): sensing checks distance before line of sight, nearest hostile cached per think.
 - [ ] Custom size-optimised web export template (only if the web build is too big to share).
 
 ## Waiting on Albert

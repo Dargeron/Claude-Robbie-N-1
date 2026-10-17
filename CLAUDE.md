@@ -38,6 +38,7 @@ Then post a short plan to Albert: the goal, three to six tasks, what he will see
 | `tools/save.sh` / `tools/restore.sh` | Back up the repo to /mnt/user-data/outputs, or rebuild it from there |
 | `python3 tools/gen_audio.py` | Regenerate the synthesised sounds in game/audio/ |
 | `tools/solve_all.sh [n]` / `tools/solve.sh <room> [n]` | Solver v1 in the background (n evaluations per room); results in out/solve/ |
+| `tools/webcheck.sh` | After `tools/web_artifact.sh`: the packed page in headless Chromium with the station's `perf` benchmark; fails on script errors |
 | `tools/smoke.sh` | Render smoke test: the station tour under Xvfb; fails on script errors, missing or blank shots |
 | `python3 tools/solver_records.py` | Write content/solver/records.json (cheapest known CPU per room) from the solver's results |
 | `tools/hunt.sh <room>` | Resumable exploit hunt in the background; results in out/hunt/<room>.json |
@@ -73,6 +74,9 @@ Rendering works here too: `xvfb-run -a tools/godot.sh --path game --rendering-dr
 - GDScript lambdas capture packed arrays by value: changes inside the lambda are lost. Use a loop.
 - Tool scripts run with `--path game`: pass absolute file paths (`$PWD/out/...`). A relative path fails
   silently and nothing is saved.
+- Exported builds leave out `tools/` and `tests/` (export filter). Game code must never use their classes
+  (`test_lint` checks), and exports infer types more strictly: annotate loop variables over untyped arrays.
+  `tools/webcheck.sh` is the only check that runs the exported game: run it before publishing.
 - `tools/smoke.sh` runs the station tour and checks every screenshot is there and not blank: run it before
   publishing anything visual.
 - Integer division warnings are disabled in `project.godot`; integer division is intended everywhere.

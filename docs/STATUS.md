@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-17, after hourly block 14 (13:57 UTC): the station log, where the story starts.
+Updated 2026-10-17, after hourly block 15 (15:03 UTC): the web build checked end to end in Chromium; the sim is up to 4x faster.
 
 ## Where we are
 
@@ -29,13 +29,13 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
   the room swims alongside the replay as a ghost.
 - Survey fleet (certification: 16 of 20 dives on seeds of its own, sent a few per frame with progress), headless dive runner, PNG path images, golden
   replays, exploit hunt, and a mutation solver that finds the cheapest certifying program per room.
-- 35 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
+- 36 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
   sim), golden replays, reference programs.
-- A dive takes about 0.1 s to simulate. The solver bot is cheaper than we feared.
+- A dive takes 0.1–0.4 s to simulate natively, a little more in a browser (tools/webcheck.sh prints timings).
 
 ## Next three tasks
 
-1. Verify the web page inside the claude.ai frame (needs Albert's eyes); fix or fall back.
+1. Verify the web page inside the claude.ai frame (needs Albert's eyes). It runs in headless Chromium (webcheck, block 15).
 2. Live first viewing (pending Albert's call on the plan's open decision).
 3. Let the solver finish every room; act on anything cheaper than our intended programs.
 

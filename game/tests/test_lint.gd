@@ -44,3 +44,30 @@ func _strip_strings(code: String) -> String:
 		if not in_str:
 			out += ch
 	return out
+
+
+## tools/ and tests/ are left out of exported builds, so game code must never use a
+## class declared there (block 15: the station once called Golden and the web build
+## failed to parse).
+func test_game_code_does_not_use_tool_classes() -> void:
+	var tool_classes: Array[String] = []
+	var re_class := RegEx.new()
+	re_class.compile("^class_name\\s+(\\w+)")
+	for dir in ["res://tools", "res://tests"]:
+		for file in DirAccess.get_files_at(dir):
+			if file.ends_with(".gd"):
+				for line in FileAccess.get_file_as_string(dir + "/" + file).split("\n"):
+					var m := re_class.search(line)
+					if m != null:
+						tool_classes.append(m.get_string(1))
+	check(tool_classes.has("Golden") and tool_classes.has("TestCase"), "found the tool classes (%s)" % str(tool_classes))
+	for dir in ["res://sim", "res://vm", "res://station", "res://view"]:
+		for file in DirAccess.get_files_at(dir):
+			if not file.ends_with(".gd"):
+				continue
+			var text := FileAccess.get_file_as_string(dir + "/" + file)
+			for cls in tool_classes:
+				var re := RegEx.new()
+				re.compile("\\b%s\\b" % cls)
+				if re.search(text) != null:
+					failures.append("%s/%s uses %s, which exported builds leave out" % [dir, file, cls])

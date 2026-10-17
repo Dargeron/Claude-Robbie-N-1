@@ -54,6 +54,36 @@ func _ready() -> void:
 		if not state.room_state(id).certified:
 			_select_room(id)
 			break
+	if OS.get_cmdline_user_args().has("perf"):
+		_benchmark.call_deferred()
+
+
+## Timing of the heavy parts, printed to the console (run with the user argument "perf";
+## the web test page passes it so we can measure the browser build).
+func _benchmark() -> void:
+	for id: String in GameState.ROOMS:
+		var rs := state.room_state(id)
+		var dir: String = "res://content/programs/" + id
+		var files := Array(DirAccess.get_files_at(dir)).filter(func(f: String) -> bool: return f.begins_with("intended") and f.ends_with(".rbt"))
+		files.sort()
+		var prog := ProgramFiles.load_program(dir + "/" + str(files[0]))
+		var t0 := Time.get_ticks_usec()
+		var d := Dive.new(rs.room, prog, 1)
+		d.vm.record_senses = true
+		d.run()
+		var t1 := Time.get_ticks_usec()
+		var v := DiveView.new()
+		v.setup(d)
+		var caps := Voice.captions(d, 5, {})
+		var t2 := Time.get_ticks_usec()
+		v.free()
+		print("[perf] %-10s dive %5.1f s of water: sim %4d ms, replay setup %4d ms, %d captions" % [
+			id, d.rec.ticks / 30.0, (t1 - t0) / 1000, (t2 - t1) / 1000, caps.size()])
+	var t3 := Time.get_ticks_usec()
+	var nursery := state.room_state("nursery")
+	Survey.run(nursery.room, Program.parse("shoot\nfollow_wall left"))
+	print("[perf] nursery survey of %d: %d ms" % [Survey.FLEET, (Time.get_ticks_usec() - t3) / 1000])
+	print("[perf] done")
 
 
 # ---------------------------------------------------------------- layout

@@ -365,19 +365,36 @@ func sensed(b: Body) -> bool:
 	var d := dist_to(b)
 	if d <= PROX:
 		return true
+	# Cheap tests first: only bodies close enough to glow at Robbie, or inside the lamp's
+	# reach, need the (expensive) line-of-sight check. Same answer as before, much faster.
+	var by_glow := b.glow > 0 and d <= b.glow
+	var by_lamp := lamp_on and d <= LAMP_RANGE and not (b.kind == Body.Kind.LURKER and b.state != 1)
+	if not by_glow and not by_lamp:
+		return false
 	if not los(robbie.x, robbie.y, b.x, b.y):
 		return false
-	if b.glow > 0 and d <= b.glow:
+	if by_glow:
 		return true
-	if b.kind == Body.Kind.LURKER and b.state != 1:
-		return false  # camouflaged, except while it winds up to strike
-	if lamp_on and d <= LAMP_RANGE and in_cone(b.x, b.y):
-		return true
-	return false
+	return in_cone(b.x, b.y)
 
 
-## Nearest sensed hostile as [body_index, distance], or [-1, -1].
+## Nearest sensed hostile as [body_index, distance], or [-1, -1]. Several rules can ask
+## in one think; nothing moves during a think, so the answer is kept until something
+## that matters changes (the tick, the lamp, or Robbie's position or heading).
 func nearest_hostile() -> Array[int]:
+	var key: Array[int] = [tick, 1 if lamp_on else 0, robbie.x, robbie.y, robbie.angle]
+	if key == _nh_key:
+		return _nh_value
+	_nh_key = key
+	_nh_value = _nearest_hostile_now()
+	return _nh_value
+
+
+var _nh_key: Array[int] = []
+var _nh_value: Array[int] = []
+
+
+func _nearest_hostile_now() -> Array[int]:
 	var best := -1
 	var best_d := -1
 	for b in bodies:
