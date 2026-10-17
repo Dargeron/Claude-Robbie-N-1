@@ -1,10 +1,10 @@
 # Status
 
-Updated 2026-10-17, after hourly block 8 (07:03 UTC): AUTO playback speed; the hunt covers fall-through first rules.
+Updated 2026-10-17, after hourly block 9 (08:10 UTC): a first-visit coach; P0b's list is complete.
 
 ## Where we are
 
-**Phase M1, step P0b (first playable): done in a first version.** The station screen runs the whole loop:
+**Phase M1, step P0b (first playable): every item on its list is done** (block 9). The station screen runs the whole loop:
 write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Windows, macOS and the web
 (https://claude.ai/artifact/EtAUzrsTr2DVgwN4zAeCuE). Next: P0c, readable and charming. See docs/BACKLOG.md.
 
@@ -19,6 +19,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
   program that passes the survey fleet (20 of 20 dives), and naive programs that fail (see `docs/design/rooms.md`).
   Jellyfish are partly scattered afresh on every dive, so no fixed route works; lurkers are laser-proof.
 - Sound v1: 15 synthesised sounds synced to the transmission, with a mute button.
+- A first-visit coach points at LAUNCH, the timeline and the editor until Robbie 002 is sent.
 - AUTO playback: skims quiet water at 4x and slows to normal speed around every event.
 - The Wall of Robbies: every Robbie sent, how it ended and its last words; the per-room score. Click to rewatch.
 - The Why? panel shows what Robbie sensed (wall ahead, nearest hostile, valve, energy); the previous Robbie in
@@ -33,7 +34,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 1. Verify the web page inside the claude.ai frame (needs Albert's eyes); fix or fall back.
 2. Live first viewing (pending Albert's call on the plan's open decision).
-3. Onboarding pointer at the editor on the first visit; a fourth room.
+3. Solver v1 (mutation search over longer programs) to seed CPU histograms and find cheaper solutions.
 
 ## Known issues and open questions
 

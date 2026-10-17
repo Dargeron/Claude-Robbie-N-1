@@ -20,6 +20,9 @@ var monitor_hint: Label
 var room_buttons := {}
 var serial_label: Button
 var wall: RobbieWall
+var coach: Coach
+var _coach_scrubbed := false      # the player has dragged along a transmission's timeline
+var _coach_edited := false        # ...and changed the program since the first loss
 var timeline: Timeline
 var play_btn: IconButton
 var speed_btn: Button
@@ -141,6 +144,7 @@ func _build() -> void:
 	timeline.size = Vector2(412, 30)
 	timeline.tooltip_text = "Click or drag to jump. Red: hits. Pink: the lurker wakes. Colours: which rule was driving."
 	timeline.seek_requested.connect(func(t: float) -> void:
+		_coach_scrubbed = true
 		replay.seek(t)
 		replay.playing = false)
 	add_child(timeline)
@@ -216,6 +220,9 @@ func _build() -> void:
 	restore_btn = _button("Use this Robbie's program", "Copy the selected Robbie's program into the editor", _restore_program)
 	restore_btn.disabled = true
 	col.add_child(restore_btn)
+
+	coach = Coach.new()
+	add_child(coach)
 
 	wall = RobbieWall.new()
 	wall.visible = false
@@ -295,6 +302,8 @@ func _intro_text() -> String:
 
 
 func _on_program_changed() -> void:
+	if state.next_serial > 1:
+		_coach_edited = true
 	state.room_state(room_id).program_text = program.to_text()
 	_refresh()
 
@@ -433,7 +442,34 @@ func _restore_program() -> void:
 
 # ---------------------------------------------------------------- per frame
 
+## First visit: point at the one thing to do next, until Robbie 002 has been sent.
+func _update_coach() -> void:
+	if state.coach_done or wall.visible or watch_large:
+		coach.point_at(null, "")
+		return
+	if state.next_serial >= 3 or (state.next_serial == 2 and _any_exit()):
+		state.coach_done = true
+		state.save()
+		coach.point_at(null, "")
+	elif state.next_serial == 1:
+		coach.point_at(launch_btn, "Press LAUNCH to send Robbie down")
+	elif not _coach_scrubbed:
+		coach.point_at(timeline, "Robbie is lost. Drag along here to see why")
+	elif not _coach_edited:
+		coach.point_at(editor, "Change a rule, or add one with + New rule")
+	else:
+		coach.point_at(launch_btn, "Send the next Robbie")
+
+
+func _any_exit() -> bool:
+	for id in GameState.ROOMS:
+		if state.program_made_it(id, state.room_state(id).program_text):
+			return true
+	return false
+
+
 func _process(_delta: float) -> void:
+	_update_coach()
 	if not replay.has_dive():
 		play_btn.set_icon("play")
 		return

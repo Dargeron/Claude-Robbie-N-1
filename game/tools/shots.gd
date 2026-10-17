@@ -22,6 +22,7 @@ func _ready() -> void:
 	steps = [
 		["wait", 10], ["shot", "01-start"],
 		["launch"], ["seek", 0.35], ["wait", 5], ["shot", "02-dark-naive-mid"],
+		["scrubbed"], ["wait", 5], ["shot", "02b-coach-editor"],
 		["launch"], ["seek", 1.0], ["wait", 5], ["shot", "03-dark-hint"],
 		["program", "follow_wall left"], ["launch"], ["seek", 0.3], ["wait", 5], ["shot", "04-dark-chart"],
 		["watch"], ["seek", 0.55], ["wait", 5], ["shot", "05-watch-large"], ["watch"],
@@ -81,6 +82,8 @@ func _process(_d: float) -> void:
 					station.replay.seek(float(int(e["t"]) + int(s[2])))
 					station.replay.playing = false
 					break
+		"scrubbed":
+			station._coach_scrubbed = true
 		"wall":
 			station._open_wall()
 		"wall_pick":

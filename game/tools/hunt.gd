@@ -40,7 +40,13 @@ func _init() -> void:
 			continue
 		for a2 in actions:
 			candidates.append(r1 + "\n" + a2)
-	found.append_array(done_found)
+	# Re-check what earlier runs found: the rooms and the sim change, and a finding
+	# that no longer passes shouldn't linger in the report.
+	for f in done_found:
+		var prog_text := f.substr(0, f.find("  (")).replace(" / ", "\n")
+		var still: Array[String] = []
+		_try(room, prog_text, seeds, still)
+		found.append_array(still)
 	for idx in range(done_index, candidates.size()):
 		tried += _try(room, candidates[idx], seeds, found)
 		if progress_path != "" and idx % 50 == 0:

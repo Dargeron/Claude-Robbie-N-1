@@ -18,8 +18,8 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 - [x] **Station memory**: the faint chart of what earlier Robbies saw (block 1).
 - [x] **Survey fleet in the UI** (s02).
 - [x] **Save/load** programs and the archive (s02).
-- [~] **Onboarding:** mission-control lines and hints are in (block 1); still to do: a pre-broken first program
-      and pointing at the editor on the first visit.
+- [x] **Onboarding:** mission-control lines and hints (block 1); a broken one-rule starter program; a first-visit
+      coach pointing at LAUNCH, the timeline and the editor (block 9).
 - [x] **Watch large** mode at 2x (block 1).
 
 ## Next: P0c, readable and charming
@@ -30,7 +30,6 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 - [x] Ghost of the previous Robbie's path in the replay (block 5).
 - [x] Sound v1: 15 synthesised sounds, event-synced, mute (block 2).
 - [ ] Histograms per room: CPU and Robbies spent (seeded from solver runs).
-- [ ] Onboarding: Room 1 opens with a pre-written broken program and one hint.
 
 ## Simulation and design
 
