@@ -36,7 +36,11 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 
 - [~] Exploit hunts (resumable, tools/hunt.sh): jellyfish wall-hug fixed (block 1); valve far-wall
       shortcut fixed with a second lurker (block 2); jellyfish fixed routes fixed with a fresh swarm every
-      dive and a lamp glow (block 3). Hunts re-running on the new maps.
+      dive and a lamp glow (block 3); valve "shoot + open water" closed by laser-proof lurkers (block 6).
+      The Valve hunt finished (8,420 programs); The Jellyfish hunt is running.
+- [ ] **Survey luck**: a program that passes 60% of dives passed 8 of the 10 fixed survey dives. Consider a larger
+      fleet, or 9 of 10, once there are more rooms to check it against.
+- [ ] Hunt three-rule programs (sampled), now that two-rule sweeps are done.
 - [ ] The keep_distance / beacon zigzag at the edge of a range: decide whether it needs a fix.
 - [ ] `keep_distance` reverses blind and can back Robbie into rock (2 of 20 jellyfish dives). Candidate
       lesson: a `wall_behind` condition, or a room that teaches it.

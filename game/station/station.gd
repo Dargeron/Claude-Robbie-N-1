@@ -508,6 +508,8 @@ func _event_text(e: Dictionary) -> String:
 		"lurker_strikes":
 			return "the lurker struck" + (" and hit" if e["hit"] else " and missed")
 		"laser":
+			if e.get("bounced", false):
+				return "the laser glanced off the %s" % e["kind"]
 			return "laser fired at a %s" % e["kind"]
 		"valve":
 			return "valve %s" % e["state"]

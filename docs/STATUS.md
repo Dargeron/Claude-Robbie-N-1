@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-17, after hourly block 5 (03:31 UTC): senses in the Why? panel; the ghost of the last Robbie.
+Updated 2026-10-17, after hourly block 6 (04:40 UTC): lurkers are laser-proof; The Jellyfish's simplest solution is lamp off.
 
 ## Where we are
 

@@ -1,0 +1,7 @@
+# expect: fail
+# certify: no
+# Found by the exploit hunt (block 6): shoot whatever wakes, otherwise explore.
+# It passed the survey fleet until lurkers became laser-proof; now the beam glances
+# off and Robbie stands still while the lurker strikes.
+shoot
+move_towards open_water

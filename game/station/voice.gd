@@ -72,6 +72,10 @@ static func captions(dive: Dive, serial: int, history: Dictionary) -> Array:
 	var low_said := false
 	for e in w.events:
 		match e["type"]:
+			"laser":
+				if e.get("bounced", false) and not hurt_said.has("laser_bounce"):
+					hurt_said["laser_bounce"] = true
+					out.append([e["t"], pick("laser_bounce", serial)])
 			"lurker_wakes":
 				if not hurt_said.has("lurker_wakes"):
 					hurt_said["lurker_wakes"] = true

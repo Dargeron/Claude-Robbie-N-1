@@ -31,6 +31,7 @@ func _ready() -> void:
 		["room", "jellyfish"], ["program", "move_towards beacon"], ["launch"], ["seek", 0.85], ["wait", 5], ["shot", "08-jellyfish-naive"],
 		["program", "lamp off\nkeep_distance 2\nmove_towards beacon"], ["launch"], ["seek", 0.12], ["wait", 5], ["shot", "08b-jellyfish-ghost"],
 		["room", "valve"], ["program", "move_towards beacon"], ["launch"],
+		["program", "shoot\nmove_towards open_water"], ["launch"], ["seek_event", "laser", 3], ["wait", 5], ["shot", "08c-laser-bounce"],
 		["wall"], ["wait", 5], ["shot", "09-wall"],
 		["wall_pick", 3], ["wait", 5], ["shot", "10-from-wall"],
 		["quit"],
@@ -71,6 +72,12 @@ func _process(_d: float) -> void:
 			station._select_room(s[1])
 		"watch":
 			station._toggle_watch()
+		"seek_event":
+			for e in station.current_dive.world.events:
+				if e["type"] == s[1]:
+					station.replay.seek(float(int(e["t"]) + int(s[2])))
+					station.replay.playing = false
+					break
 		"wall":
 			station._open_wall()
 		"wall_pick":

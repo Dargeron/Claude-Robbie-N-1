@@ -503,14 +503,18 @@ func apply(decision: Dictionary) -> void:
 		var ti: int = decision.get("target", -1)
 		if ti >= 0 and ti < bodies.size() and bodies[ti].alive:
 			var b := bodies[ti]
-			b.alive = false
-			b.glow = 0
+			# Lurkers are armoured rock: the beam glances off. Robbie still pays for the
+			# shot and stands still while it fires, which is the worst place to be.
+			var bounced := b.kind == Body.Kind.LURKER
+			if not bounced:
+				b.alive = false
+				b.glow = 0
 			energy -= LASER_COST
 			commit = LASER_COMMIT
 			laser_cd = LASER_COOLDOWN
 			last_laser_target = ti
 			robbie.angle = Fx.angle_of(b.x - robbie.x, b.y - robbie.y)
-			events.append({"t": tick, "type": "laser", "target": ti, "kind": b.kind_name()})
+			events.append({"t": tick, "type": "laser", "target": ti, "kind": b.kind_name(), "bounced": bounced})
 		act = Act.STOP
 
 

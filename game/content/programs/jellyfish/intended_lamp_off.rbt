@@ -1,0 +1,6 @@
+# expect: exit
+# certify: yes
+# The whole lesson in one rule: darkness hides Robbie. Found to be enough by the
+# exploit hunt (block 6); keeping distance as well is the careful version.
+lamp off
+move_towards beacon

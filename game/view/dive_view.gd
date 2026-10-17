@@ -282,6 +282,14 @@ func _draw_lasers(k: int) -> void:
 			var fade := 1.0 - float(k - e["t"]) / World.LASER_COMMIT
 			draw_line(a, z, Color(1, 0.3, 0.25, fade), 2.0)
 			draw_line(a, z, Color(1, 0.9, 0.8, fade), 1.0)
+			if e.get("bounced", false):
+				# Glancing off armoured rock: sparks scattering back towards Robbie.
+				var back := (a - z).normalized()
+				var age := float(k - e["t"])
+				for s in 7:
+					var dir := back.rotated((s - 3) * 0.45 + sin(s * 12.9898) * 0.2)
+					var p0 := z + dir * (2.0 + age * 1.2)
+					draw_line(p0, p0 + dir * 3.0, Color(1, 0.85, 0.5, fade), 1.0)
 
 
 func _draw_robbie(k: int, pos: Vector2, now: float) -> void:

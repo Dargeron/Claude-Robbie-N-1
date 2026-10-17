@@ -81,10 +81,16 @@ fixed route works twice. A lit lamp draws jellyfish from its beam and from a 3-t
 (`LAMP_HALO`), so sneaking past with the lamp on and the swarm behind you doesn't work either.
 
 **Teaches:** light attracts. Darkness hides Robbie, and the jellyfish's own glow still warns it. Or: the loud way, with the laser.
+One new idea after The Dark: a setting (the lamp). The hunt (block 6) showed that `lamp off` alone is enough; keeping
+distance as well is the careful version, and costs more CPU. We tried making dark jellyfish notice Robbie up close
+(block 6): it punished the careful program more than the simple one, because lingering near a jellyfish is worse than
+swimming past it, so it was dropped.
 
 | Program | CPU | Survey fleet (20 seeds) | What happens |
 | --- | --- | --- | --- |
-| `lamp off` / `keep_distance 2` / `move_towards beacon` (intended) | 6 | 18/20 | Slips through the swarm in the dark. Backing away is blind: twice in 20 a drifting jellyfish herds Robbie into rock |
+| `lamp off` / `move_towards beacon` (intended, simplest) | 3 | 20/20 | Swims straight through the dark; the scattered swarm rarely drifts into its path |
+| `lamp off` / `move 90` | 2 | 20/20 | The same, knowing the exit is due east: the cheapest known solution |
+| `lamp off` / `keep_distance 2` / `move_towards beacon` (intended, careful) | 6 | 18/20 | Slips through the swarm in the dark. Backing away is blind: twice in 20 a drifting jellyfish herds Robbie into rock |
 | `shoot if hostile_near 4` / `move_towards beacon` (intended, loud) | 8 | 20/20 | Faster (about 20 s) but spends energy on every shot |
 | `move_towards beacon` | 2 | 0/20 | Lit jellyfish dart at the lamp faster than Robbie swims |
 | `keep_distance 2` / `move_towards beacon` | 5 | 0/20 | Backing away with the lamp on: the swarm follows |
@@ -130,6 +136,7 @@ CPU budget 10 · energy 6000 · valve cycle 60/45/150 ticks (open/closing/shut)
 | `keep_distance 4` / `move_towards beacon` | 5 | 5/20 | Ignores the valve: stung to death by it three times in four |
 | `move_towards beacon if valve_open` / `stop if wall_ahead` / `move_towards beacon` | 10 | 0/20 | Waits perfectly, then swims straight into the lurker |
 | `move_towards beacon` | 2 | 0/20 | Valve or lurker, whichever comes first |
-| `move_towards open_water if not hostile_near 4` / `shoot` | 10 | 12/20 (8/10 on the survey seeds) | Found by the exploit hunt (block 4) and **accepted** as the loud way: it explores, shoots the lurker when it wakes, and the shut valve looks like rock to its open-water sense, so it waits by accident. It costs the whole CPU budget, more than the intended program |
+| `shoot` / `move_towards open_water` | 6 | 0/20 | Found by the exploit hunt (block 6): shoot whatever wakes, otherwise explore (the shut valve looks like rock to the open-water sense, so it waits by accident). It passed the survey fleet at 6 CPU, cheaper than the intended 9, so **lurkers are now laser-proof**: the beam glances off, Robbie pays for the shot and stands still while the lurker strikes. The 10-CPU variant accepted in block 4 fails too |
+| `keep_distance 4` / `move_towards open_water` | 6 | 9/20 (7/10 on the survey seeds) | Flinch and explore: close to certifying, wanders and runs out of energy too often |
 
 ![The Valve intended](../devlog/img/s01/valve-intended.png)

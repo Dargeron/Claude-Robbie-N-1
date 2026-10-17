@@ -17,6 +17,11 @@
     "That wall is looking at me.",
     "Eyes! Backing away politely."
   ],
+  "laser_bounce": [
+    "The rock is laser-proof. Noted.",
+    "That did nothing. It is still very much a rock.",
+    "Laser reflected. The lurker seems unimpressed."
+  ],
   "hurt_jellyfish": [
     "Ow. Soft, but not friendly.",
     "Stung. Updating my opinion of jellyfish."
@@ -64,7 +69,7 @@
     "Tell {next}: soft does not mean friendly."
   ],
   "last_lurker": [
-    "I backed away exactly as instructed. Just not far enough.",
+    "The rock moved. Rocks are not supposed to move.",
     "The rock had teeth. I would like that added to the map.",
     "Tell {next} to mind the wall with eyes.",
     "The wall blinked. Then it bit.",
