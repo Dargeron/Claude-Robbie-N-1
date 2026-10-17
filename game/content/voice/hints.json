@@ -70,6 +70,28 @@
         "after": 1,
         "text": "Waiting costs energy too. A Robbie that never moves on runs dry."
       }
+    ],
+    "listeners/eel": [
+      {
+        "after": 2,
+        "text": "The eels don't hunt by sight. Watch what Robbie is doing at the moment one turns on it."
+      },
+      {
+        "after": 4,
+        "text": "A Robbie that holds still is just another rock to them."
+      }
+    ],
+    "listeners/wall": [
+      {
+        "after": 1,
+        "text": "Backing away is still swimming, and swimming is noise."
+      }
+    ],
+    "listeners/energy": [
+      {
+        "after": 1,
+        "text": "Waiting costs energy too. Hold still only while one is close."
+      }
     ]
   },
   "stuck": {

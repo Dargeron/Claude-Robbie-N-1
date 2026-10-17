@@ -1,6 +1,6 @@
 # The Jellyfish Rooms: prototype room designs
 
-Four one-screen rooms (40 x 22 tiles, 1 tile = 1 m = 16 px) that share one set of orders.
+Five one-screen rooms (40 x 22 tiles, 1 tile = 1 m = 16 px) that share one set of orders.
 Each has an intended solution, naive programs that must fail, and the idea it teaches.
 Programs live in `game/content/programs/<room>/`; `tests/test_reference_programs.gd` checks every claim below.
 
@@ -188,3 +188,56 @@ CPU budget 10 · energy 6000 · valve cycle 60/45/150 ticks (open/closing/shut)
 | `keep_distance 4` / `move_towards open_water` | 6 | 9/20 (7/10 on the survey seeds) | Flinch and explore: close to certifying, wanders and runs out of energy too often |
 
 ![The Valve intended](../devlog/img/s01/valve-intended.png)
+
+## 5. The Listeners
+
+CPU budget 7 · energy 4000 · four eels, each patrolling its own shaft across the corridor, starting anywhere in it
+
+```text
+########################################
+########################################
+########################################
+########################################
+########################################
+#########.p######..######..#####..######
+#########H.######..######..#####..######
+#########..######..######H.#####..######
+#########..######..######..#####..######
+#....####..######..######..#####..######
+#...................................EEE#
+#.S.................................EEE#
+#...................................EEE#
+#....####..######..######..#####..######
+#########..######..######..#####H.######
+#########..######H.######..#####..######
+#########..######..######..#####..######
+#########..######..######.p#####..######
+########################################
+########################################
+########################################
+########################################
+```
+
+`H` marks an eel's shaft. Added in block 11, with a new creature.
+
+**The eel ("listener")** is blind. It swims up and down its shaft at 0.9 px per tick, faster than Robbie can back away
+(0.75). If Robbie is **moving** within three tiles and in line of sight, the eel hears it and lunges at 1.5 px per tick
+for 2.5 s; a bite costs 2 hull. Then it swims back to its shaft and rests for 3 s. A Robbie that holds still is just
+another rock to it. Its stripes glow, so Robbie senses it within four tiles in any light. It slips out of the laser.
+
+**Teaches:** some things hunt by sound: stop and let them pass. It's the opposite of The Valve's lesson, where you
+back away from the lurker. Backing away from an eel is still swimming. Range matters too: stopping at two tiles is too
+late, because the eel hears at three.
+
+| Program | CPU | Survey fleet (20 seeds) | What happens |
+| --- | --- | --- | --- |
+| `stop if hostile_near 4` / `move_towards beacon` (intended) | 6 | 20/20 | Holds still while an eel crosses, about 25–40 s |
+| `stop if hostile_near 6` / `move_towards beacon` | 6 | 20/20 | Waits earlier and longer |
+| `move_towards beacon` | 2 | 4/20 | Only when every eel happens to be far up or down its shaft |
+| `stop if hostile_near 2` / `move_towards beacon` | 6 | 1/20 | Too late: the eel hears at three tiles |
+| `keep_distance 4` / `move_towards beacon` | 5 | 6/20 | The Valve's lesson: backing away is noise, and it backs into the corridor walls |
+| `lamp off` / `move_towards beacon` | 3 | 4/20 | The eels are blind |
+| `shoot` / `move_towards beacon` | 5 | 0/20 | Eels slip out of the beam |
+
+![The Listeners, intended](../devlog/img/s13/listeners-intended.png)
+

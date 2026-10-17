@@ -2,7 +2,7 @@ class_name Body
 extends RefCounted
 ## Anything that moves in the simulation: Robbie or a creature. Integers only.
 
-enum Kind { ROBBIE, JELLYFISH, LURKER }
+enum Kind { ROBBIE, JELLYFISH, LURKER, EEL }
 
 var index := 0
 var kind := Kind.JELLYFISH
@@ -17,6 +17,7 @@ var timer := 0
 var timer2 := 0
 var windup := 12
 var glow := 0          ## glow radius in sub-pixels; 0 = dark
+var home_x := 0        ## eels: the x of the shaft they patrol
 var rng: Rng = null
 
 
@@ -28,4 +29,6 @@ func kind_name() -> String:
 			return "jellyfish"
 		Kind.LURKER:
 			return "lurker"
+		Kind.EEL:
+			return "eel"
 	return "?"

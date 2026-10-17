@@ -8,7 +8,7 @@ not shipped with the game. Run after tools/solve_all.sh; commit the result.
 import json, os, sys
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 out = {}
-for room in ["dark", "jellyfish", "nursery", "valve"]:
+for room in ["dark", "jellyfish", "nursery", "valve", "listeners"]:
     p = os.path.join(root, "out", "solve", room + ".json")
     if not os.path.exists(p):
         continue

@@ -1,0 +1,17 @@
+{
+  "cause": "eel",
+  "final_hash": 4025879623,
+  "hashes": [
+    2961920484,
+    3546767066,
+    458577800,
+    1685420256,
+    1488591031,
+    2991550318
+  ],
+  "program": "listeners/naive_beacon.rbt",
+  "result": "destroyed",
+  "room": "listeners",
+  "seed": 2,
+  "ticks": 209
+}

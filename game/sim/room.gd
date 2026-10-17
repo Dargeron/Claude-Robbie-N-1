@@ -4,6 +4,7 @@ extends RefCounted
 ## "---", then the tile grid. Grid symbols:
 ##   #  rock          .  water        S  Robbie's start     E  exit (beacon)
 ##   G  valve (gate)  J  jellyfish    L  lurker niche       p  glowing plant (decor)
+##   H  eel ("listener"): patrols the vertical shaft it starts in
 
 enum Tile { WATER = 0, ROCK = 1, GATE = 2 }
 
@@ -21,6 +22,7 @@ var cpu_budget := 10
 var energy := 6000
 var jelly_spawns: Array[Vector2i] = []
 var lurker_spawns: Array[Vector2i] = []
+var eel_spawns: Array[Vector2i] = []
 var plants: Array[Vector2i] = []
 var gate_tiles: Array[Vector2i] = []
 var exit_cx := 0   # sub-pixel centre of the exit area (the beacon)
@@ -89,6 +91,8 @@ func parse(text: String) -> void:
 					jelly_spawns.append(Vector2i(x, y))
 				"L":
 					lurker_spawns.append(Vector2i(x, y))
+				"H":
+					eel_spawns.append(Vector2i(x, y))
 				"p":
 					plants.append(Vector2i(x, y))
 			tiles[y * w + x] = t

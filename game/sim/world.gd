@@ -55,6 +55,16 @@ const L_GLOW := 40 * 256
 const L_COOLDOWN := 120
 const L_DAMAGE := 3
 
+# Eel, "the listener": patrols a shaft, blind, and hunts by the sound of a moving Robbie
+const E_RADIUS := 5 * 256
+const E_GLOW := 64 * 256        # its stripes glow: sensed within 4 tiles in any light
+const E_PATROL := 230           # 0.9 px per tick: faster than Robbie can back away
+const E_HEAR := 48 * 256        # hears a moving Robbie within 3 tiles
+const E_LUNGE := 384            # 1.5 px per tick
+const E_LUNGE_TICKS := 75
+const E_REST := 90
+const E_DAMAGE := 2
+
 var room: Room
 var seed_value := 0
 var calm := false
@@ -142,10 +152,36 @@ func _init(r: Room, seed_v: int, calm_v: bool = false) -> void:
 		b.rng = Rng.new(eff_seed, 200 + i)
 		b.windup = 17 if calm else vr.between(15, 20)
 		bodies.append(b)
+	for i in room.eel_spawns.size():
+		var sp: Vector2i = room.eel_spawns[i]
+		var b := Body.new()
+		b.kind = Body.Kind.EEL
+		b.index = bodies.size()
+		b.radius = E_RADIUS
+		b.glow = E_GLOW
+		b.home_x = sp.x * Fx.TILE + Fx.TILE / 2
+		b.x = b.home_x
+		b.y = _eel_start_y(sp, vr)
+		b.rng = Rng.new(eff_seed, 300 + i)
+		b.angle = 0 if calm or vr.below(2) == 0 else Fx.HALF_TURN
+		bodies.append(b)
 
 	seen.resize(room.w * room.h)
 	_update_gate(true)
 	_update_seen()
+
+
+## Where an eel starts in its shaft: anywhere along the run of water above and
+## below its marker (the marker itself on calm dives).
+func _eel_start_y(sp: Vector2i, vr: Rng) -> int:
+	var top := sp.y
+	while top > 0 and room.tile_at(sp.x, top - 1) == Room.Tile.WATER:
+		top -= 1
+	var bottom := sp.y
+	while bottom < room.h - 1 and room.tile_at(sp.x, bottom + 1) == Room.Tile.WATER:
+		bottom += 1
+	var ty := sp.y if calm else vr.between(top, bottom)
+	return ty * Fx.TILE + Fx.TILE / 2
 
 
 ## A fresh swarm for every dive: n open-water tiles chosen by the seed, away from
@@ -505,7 +541,7 @@ func apply(decision: Dictionary) -> void:
 			var b := bodies[ti]
 			# Lurkers are armoured rock: the beam glances off. Robbie still pays for the
 			# shot and stands still while it fires, which is the worst place to be.
-			var bounced := b.kind == Body.Kind.LURKER
+			var bounced := b.kind == Body.Kind.LURKER or b.kind == Body.Kind.EEL   # eels slip aside
 			if not bounced:
 				b.alive = false
 				b.glow = 0
@@ -632,6 +668,8 @@ func _update_creatures() -> void:
 				_step_jellyfish(b)
 			Body.Kind.LURKER:
 				_step_lurker(b)
+			Body.Kind.EEL:
+				_step_eel(b)
 
 
 func _step_jellyfish(b: Body) -> void:
@@ -685,6 +723,50 @@ func _step_lurker(b: Body) -> void:
 			b.timer -= 1
 			if b.timer <= 0:
 				b.state = 0
+
+
+## state 0: patrol up and down its shaft; 1: lunge at the sound; 2: swim back and rest.
+func _step_eel(b: Body) -> void:
+	match b.state:
+		0:
+			if moving and dist_to(b) <= E_HEAR and los(robbie.x, robbie.y, b.x, b.y):
+				b.state = 1
+				b.timer = E_LUNGE_TICKS
+				events.append({"t": tick, "type": "eel_hears", "src": b.index})
+				return
+			if not _eel_swim(b, b.angle, E_PATROL):
+				b.angle = Fx.norm(b.angle + Fx.HALF_TURN)
+		1:
+			b.angle = Fx.angle_of(robbie.x - b.x, robbie.y - b.y)
+			_eel_swim(b, b.angle, E_LUNGE)
+			b.timer -= 1
+			if dist_to(b) < b.radius + robbie.radius:
+				_damage(E_DAMAGE, "eel", b.index, true)
+				b.state = 2
+				b.timer = E_REST
+			elif b.timer <= 0:
+				b.state = 2
+				b.timer = E_REST
+		2:
+			var dx := b.home_x - b.x
+			if absi(dx) > E_PATROL:
+				_eel_swim(b, Fx.angle_of(dx, 0), E_PATROL)
+			else:
+				b.x = b.home_x
+			b.timer -= 1
+			if b.timer <= 0 and b.x == b.home_x:
+				b.state = 0
+				b.angle = 0 if b.rng.below(2) == 0 else Fx.HALF_TURN
+
+
+func _eel_swim(b: Body, a: int, spd: int) -> bool:
+	var nx := b.x + Fx.mul_trig(spd, Fx.dir_x(a))
+	var ny := b.y + Fx.mul_trig(spd, Fx.dir_y(a))
+	if _circle_hits_solid(nx, ny, b.radius):
+		return false
+	b.x = nx
+	b.y = ny
+	return true
 
 
 func _damage(n: int, why: String, src: int, respect_invuln: bool) -> void:

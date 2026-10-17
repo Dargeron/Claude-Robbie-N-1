@@ -36,6 +36,8 @@ func _ready() -> void:
 		["room", "nursery"], ["program", "lamp off\nfollow_wall left"], ["launch"], ["seek", 0.9], ["wait", 5], ["shot", "08d-nursery-dark"],
 		["program", "shoot\nfollow_wall left"], ["launch"], ["seek_event", "laser", 2], ["wait", 5], ["shot", "08e-nursery-laser"],
 		["seek", 0.5], ["wait", 5], ["shot", "08f-nursery-mid"],
+		["room", "listeners"], ["program", "move_towards beacon"], ["launch"], ["seek_event", "eel_hears", 10], ["wait", 5], ["shot", "08g-listeners-heard"],
+		["program", "stop if hostile_near 4\nmove_towards beacon"], ["launch"], ["seek", 0.4], ["wait", 5], ["shot", "08h-listeners-still"],
 		["wall"], ["wait", 5], ["shot", "09-wall"],
 		["wall_pick", 3], ["wait", 5], ["shot", "10-from-wall"],
 		["quit"],

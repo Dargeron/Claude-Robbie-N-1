@@ -1,0 +1,17 @@
+{
+  "cause": "eel",
+  "final_hash": 3867268714,
+  "hashes": [
+    3741986957,
+    2171379011,
+    3870321005,
+    1704641309,
+    3482412318,
+    1615999559
+  ],
+  "program": "listeners/naive_dark.rbt",
+  "result": "destroyed",
+  "room": "listeners",
+  "seed": 2,
+  "ticks": 209
+}

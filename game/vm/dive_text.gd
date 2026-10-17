@@ -77,11 +77,18 @@ static func senses(room: Room, entry: Dictionary) -> Array:
 	if s.size() < 5:
 		return out
 	out.append(["wall ahead", "yes" if s[0] == 1 else "no", s[0] == 1])
-	if not room.jelly_spawns.is_empty() or not room.lurker_spawns.is_empty() or room.variation("jelly_scatter", 0) > 0:
+	if not room.jelly_spawns.is_empty() or not room.lurker_spawns.is_empty() or not room.eel_spawns.is_empty() or room.variation("jelly_scatter", 0) > 0:
 		if s[1] < 0:
 			out.append(["nearest hostile", "none sensed", false])
 		else:
-			var kind := "jellyfish" if s[2] == Body.Kind.JELLYFISH else ("lurker" if s[2] == Body.Kind.LURKER else "hostile")
+			var kind := "hostile"
+			match s[2]:
+				Body.Kind.JELLYFISH:
+					kind = "jellyfish"
+				Body.Kind.LURKER:
+					kind = "lurker"
+				Body.Kind.EEL:
+					kind = "eel"
 			var where := "touching Robbie" if s[1] <= 0 else "at " + tenths(s[1])
 			out.append(["nearest hostile", "%s %s" % [kind, where], s[1] <= 6 * Fx.TILE])
 	if not room.gate_tiles.is_empty():

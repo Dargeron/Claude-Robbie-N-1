@@ -1,0 +1,6 @@
+# expect: exit
+# certify: yes
+# The eels are blind and hunt by the sound of a moving Robbie, within three tiles.
+# Hold still while one is within four, and they swim past.
+stop if hostile_near 4
+move_towards beacon

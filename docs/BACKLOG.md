@@ -45,7 +45,8 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
       lesson: a `wall_behind` condition, or a room that teaches it.
 - [ ] Jellyfish turn smoothly instead of snapping to a new heading.
 - [x] One room that rewards the laser: The Nursery (block 7).
-- [ ] More rooms for the slice: a current, a vent, a second lurker type.
+- [x] A new creature that needs a new answer: the eel, and The Listeners (block 11).
+- [ ] More rooms for the slice: a current, a vent; rooms that combine two creatures.
 - [~] Solver v1 (mutation search, block 10): running room by room; records for The Dark so far. Refresh
       `content/solver/records.json` with `tools/solver_records.py` as results come in.
 

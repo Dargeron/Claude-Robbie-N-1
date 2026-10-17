@@ -1,0 +1,18 @@
+{
+  "cause": "wall",
+  "final_hash": 3072873497,
+  "hashes": [
+    2961920484,
+    3546767066,
+    1488127089,
+    1005930235,
+    2229318188,
+    3405182632,
+    4094511204
+  ],
+  "program": "listeners/naive_laser.rbt",
+  "result": "destroyed",
+  "room": "listeners",
+  "seed": 2,
+  "ticks": 221
+}

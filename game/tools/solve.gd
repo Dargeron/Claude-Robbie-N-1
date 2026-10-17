@@ -4,7 +4,8 @@ extends SceneTree
 ## sweeps every short program, the solver wanders through longer ones (up to
 ## MAX_RULES), starting from our reference programs and from random ones.
 ##
-##   godot --headless --path game --script res://tools/solve.gd -- <room> [evaluations=400] [progress_file]
+##   godot --headless --path game --script res://tools/solve.gd -- <room> [total_evaluations=400] [progress_file]
+## The count is cumulative across runs: a resumed search stops when the room's total reaches it.
 ##
 ## With a progress file the search is resumable and cumulative: every certified
 ## program it ever found is kept (text, CPU, survey passes), which also seeds the
@@ -42,8 +43,7 @@ func _init() -> void:
 	for t in pool:
 		_evaluate(t)
 
-	var started := evaluations
-	while evaluations - started < budget:
+	while evaluations < budget:
 		var parent := _pick_parent(pool)
 		var child := _mutate(parent)
 		for i in rng.randi_range(0, 2):

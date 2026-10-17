@@ -25,6 +25,8 @@ static func cause_label(cause: String) -> String:
 			return "the jellyfish"
 		"lurker":
 			return "the lurker"
+		"eel":
+			return "the eel"
 		"valve":
 			return "the valve"
 		"energy":
@@ -76,6 +78,10 @@ static func captions(dive: Dive, serial: int, history: Dictionary) -> Array:
 				if e.get("bounced", false) and not hurt_said.has("laser_bounce"):
 					hurt_said["laser_bounce"] = true
 					out.append([e["t"], pick("laser_bounce", serial)])
+			"eel_hears":
+				if not hurt_said.has("eel_hears"):
+					hurt_said["eel_hears"] = true
+					out.append([e["t"], pick("eel_hears", serial)])
 			"lurker_wakes":
 				if not hurt_said.has("lurker_wakes"):
 					hurt_said["lurker_wakes"] = true

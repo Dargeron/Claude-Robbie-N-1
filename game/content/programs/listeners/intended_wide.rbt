@@ -1,0 +1,5 @@
+# expect: exit
+# certify: yes
+# Waiting earlier works too; it just takes longer.
+stop if hostile_near 6
+move_towards beacon

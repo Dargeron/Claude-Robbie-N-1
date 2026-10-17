@@ -17,6 +17,7 @@ const C_PLANT := Color(0.35, 1.0, 0.7)
 const C_BEACON := Color(0.35, 1.0, 0.45)
 const C_ROBBIE := Color(1.0, 0.78, 0.3)
 const C_VALVE := Color(0.95, 0.5, 0.2)
+const C_EEL := Color(0.78, 1.0, 0.45)
 const LAMP_RAYS := 33
 
 var dive: Dive
@@ -254,6 +255,8 @@ func _draw_creatures(k: int, k2: int, f: float, rpos: Vector2, lamp_on: bool, no
 					var sway := sin(now * 4.0 + i + tnt) * 1.5
 					var base := pos + Vector2(-2 + tnt * 2, 2)
 					draw_line(base, base + Vector2(sway, 4), Color(col, 0.6 * strength), 1.0)
+			Body.Kind.EEL:
+				_draw_eel(i, k, pos, state, now)
 			Body.Kind.LURKER:
 				if state == 1:
 					_glow(pos, C_LURKER, 16.0, 1.0)
@@ -270,6 +273,36 @@ func _draw_creatures(k: int, k2: int, f: float, rpos: Vector2, lamp_on: bool, no
 			var b: int = e["src"]
 			var pos := _p(rec.bx[b][e["t"]], rec.by[b][e["t"]])
 			draw_arc(pos, 10.0 + (k - e["t"]) * 4.0, 0, TAU, 24, Color(C_LURKER, 1.0 - (k - e["t"]) / 8.0), 2.0)
+
+
+## An eel: a glowing striped body trailing behind its head. Pale while it patrols,
+## red-eyed while it lunges at a sound, dim while it swims back to its shaft.
+func _draw_eel(i: int, k: int, pos: Vector2, state: int, now: float) -> void:
+	var rec := dive.rec
+	var back_k := maxi(k - 4, 0)
+	var dir := pos - _p(rec.bx[i][back_k], rec.by[i][back_k])
+	if dir.length() < 0.5:
+		dir = Vector2(0, 1)
+	dir = dir.normalized()
+	var side := Vector2(-dir.y, dir.x)
+	var col := C_EEL
+	var strength := 0.75
+	if state == 1:
+		col = Color(1.0, 0.45, 0.3)
+		strength = 1.0
+	elif state == 2:
+		strength = 0.4
+	_glow(pos, col, 9.0, strength * 0.6)
+	var pts := PackedVector2Array()
+	for s in 7:
+		var wave := sin(now * 7.0 - s * 0.9 + i) * (0.6 + s * 0.35)
+		pts.append(pos - dir * (s * 2.2) + side * wave)
+	draw_polyline(pts, Color(col, 0.85 * strength), 2.5)
+	for s in [1, 3, 5]:
+		draw_circle(pts[s], 1.1, Color(1, 1, 0.85, 0.7 * strength))   # the glowing stripes
+	var eye := Color(1, 0.2, 0.15) if state == 1 else Color(col, strength)
+	draw_circle(pos + dir * 1.5 + side * 1.2, 0.8, eye)
+	draw_circle(pos + dir * 1.5 - side * 1.2, 0.8, eye)
 
 
 func _draw_lasers(k: int) -> void:

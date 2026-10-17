@@ -128,7 +128,7 @@ static func plan_auto_speeds(dive: Dive, caption_list: Array) -> PackedFloat32Ar
 	var spans: Array = []   # [from tick, to tick, speed]; packed arrays can't be changed inside a lambda
 	for e in dive.world.events:
 		match e["type"]:
-			"damage", "lurker_wakes", "lurker_strikes", "valve_sting", "exit":
+			"damage", "lurker_wakes", "lurker_strikes", "valve_sting", "exit", "eel_hears":
 				spans.append([int(e["t"]) - 30, int(e["t"]) + 30, AUTO_SLOW])
 			"laser":
 				spans.append([int(e["t"]) - 15, int(e["t"]) + 15, 2.0])   # shots are frequent: ease off, don't stop
@@ -198,6 +198,8 @@ func _sounds() -> void:
 						sfx.play("strike")
 			"lurker_wakes":
 				sfx.play("lurker_wake", -2.0)
+			"eel_hears":
+				sfx.play("lurker_wake", -3.0, 1.5)
 			"lurker_strikes":
 				if not e["hit"]:
 					sfx.play("strike", -8.0, 1.3)

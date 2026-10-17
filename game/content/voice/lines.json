@@ -17,6 +17,11 @@
     "That wall is looking at me.",
     "Eyes! Backing away politely."
   ],
+  "eel_hears": [
+    "Something heard me.",
+    "I think that was a reply.",
+    "Note: it moves when I move."
+  ],
   "laser_bounce": [
     "The rock is laser-proof. Noted.",
     "That did nothing. It is still very much a rock.",
@@ -33,6 +38,10 @@
   "hurt_valve": [
     "The valve bites! Good to know.",
     "Ouch. That door has opinions."
+  ],
+  "hurt_eel": [
+    "Bitten. It came out of nowhere, very fast.",
+    "Teeth! I was only swimming."
   ],
   "low_energy": [
     "Energy at a quarter. I will talk less. (I won't.)",
@@ -87,6 +96,16 @@
     "Wrong side of the valve, wrong moment.",
     "Tell {next}: count the beats before you go.",
     "A closing door is not an invitation."
+  ],
+  "last_eel": [
+    "I was quiet. Then I wasn't.",
+    "It heard every move I made.",
+    "Tell {next}: hold still when they pass.",
+    "The eel was very fast and I was very loud.",
+    "I kept moving. That was the mistake.",
+    "It never saw me. It didn't need to.",
+    "Tell {next}: they listen.",
+    "Swimming is noisy. Who knew."
   ],
   "last_energy": [
     "Energy gone. I'll describe the exit from memory: it was probably lovely.",

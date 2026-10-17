@@ -45,6 +45,8 @@ func _draw() -> void:
 				draw_rect(Rect2(x - 1, 2, 3, h - 12), UiTheme.RED)
 			"lurker_wakes":
 				draw_rect(Rect2(x - 1, 4, 2, h - 14), Color(1, 0.3, 0.8))
+			"eel_hears":
+				draw_rect(Rect2(x - 1, 4, 2, h - 14), Color(0.8, 1.0, 0.4))
 			"laser":
 				draw_rect(Rect2(x, 4, 1, h - 14), Color.WHITE)
 			"valve":

@@ -75,8 +75,8 @@ func _build() -> void:
 		var b := Button.new()
 		b.toggle_mode = true
 		b.button_group = group
-		b.custom_minimum_size = Vector2(150, 0)
-		b.add_theme_font_size_override("font_size", 13)
+		b.custom_minimum_size = Vector2(118, 0)
+		b.add_theme_font_size_override("font_size", 12)
 		b.pressed.connect(func() -> void: _select_room(id))
 		tabs.add_child(b)
 		room_buttons[id] = b
@@ -562,10 +562,14 @@ func _event_text(e: Dictionary) -> String:
 			return "scraped rock"
 		"lurker_wakes":
 			return "the lurker woke"
+		"eel_hears":
+			return "an eel heard Robbie moving"
 		"lurker_strikes":
 			return "the lurker struck" + (" and hit" if e["hit"] else " and missed")
 		"laser":
 			if e.get("bounced", false):
+				if e["kind"] == "eel":
+					return "the eel slipped out of the beam"
 				return "the laser glanced off the %s" % e["kind"]
 			return "laser fired at a %s" % e["kind"]
 		"valve":

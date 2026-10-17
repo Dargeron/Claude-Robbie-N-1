@@ -1,0 +1,5 @@
+# certify: no
+# The Valve's lesson, wrongly applied: backing away is still swimming, and eels are
+# faster than Robbie in reverse. Often it backs into the corridor wall instead.
+keep_distance 4
+move_towards beacon

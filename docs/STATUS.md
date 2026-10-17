@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-17, after hourly block 10 (09:16 UTC): Solver v1; "the cheapest known" after certification.
+Updated 2026-10-17, after hourly block 11 (10:25 UTC): the eel, and a fifth room, The Listeners.
 
 ## Where we are
 
@@ -11,13 +11,14 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 ## What works
 
 - Deterministic simulation in integer maths: Robbie, walls, the lamp and its line of sight,
-  jellyfish, a lurker, a valve, energy, crashes, an explored-tiles map. Same inputs give the
+  jellyfish, lurkers, eels, a valve, energy, crashes, an explored-tiles map. Same inputs give the
   same dive, checked by hash every second of dive time.
 - Robbie's rule interpreter, with 9 orders and 7 conditions, CPU costs and a trace of every think.
   The trace explains in words why each rule ran or was skipped (the seed of the Why? panel).
-- Four prototype rooms (The Dark, The Jellyfish, The Nursery, The Valve), one idea each. Each has an intended
+- Five prototype rooms (The Dark, The Jellyfish, The Nursery, The Valve, The Listeners), one idea each. Each has an intended
   program that passes the survey fleet (20 of 20 dives), and naive programs that fail (see `docs/design/rooms.md`).
-  Jellyfish are partly scattered afresh on every dive, so no fixed route works; lurkers are laser-proof.
+  Three creatures: jellyfish (light attracts them), lurkers (laser-proof; back away), eels (blind, hunt by sound;
+  hold still). Jellyfish are partly scattered afresh on every dive, so no fixed route works.
 - Sound v1: 15 synthesised sounds synced to the transmission, with a mute button.
 - A first-visit coach points at LAUNCH, the timeline and the editor until Robbie 002 is sent.
 - AUTO playback: skims quiet water at 4x and slows to normal speed around every event.
@@ -26,7 +27,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
   the room swims alongside the replay as a ghost.
 - Survey fleet (certification over 10 seeds of its own), headless dive runner, PNG path images, golden
   replays, exploit hunt, and a mutation solver that finds the cheapest certifying program per room.
-- 34 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
+- 35 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
   sim), golden replays, reference programs.
 - A dive takes about 0.1 s to simulate. The solver bot is cheaper than we feared.
 

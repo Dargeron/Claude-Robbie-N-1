@@ -1,0 +1,5 @@
+# expect: fail
+# certify: no
+# Stopping at two tiles is too late: the eel hears at three.
+stop if hostile_near 2
+move_towards beacon
