@@ -28,6 +28,7 @@ func _ready() -> void:
 		["watch"], ["seek", 0.55], ["wait", 5], ["shot", "05-watch-large"], ["watch"],
 		["seek", 1.0], ["survey_start"], ["wait", 4], ["shot", "06a-survey-out"], ["await_survey"], ["wait", 5], ["shot", "06-dark-certified"],
 		["log"], ["wait", 5], ["shot", "06c-station-log"], ["log_close"],
+		["manual"], ["wait", 5], ["shot", "06d-manual"], ["manual_close"],
 		["room", "valve"], ["program", "keep_distance 4\nstop if valve_shut\nmove_towards beacon"], ["launch"],
 		["seek_event", "lurker_wakes", 8], ["wait", 5], ["shot", "07-valve-lurker"],
 		["room", "jellyfish"], ["program", "move_towards beacon"], ["launch"], ["seek", 0.85], ["wait", 5], ["shot", "08-jellyfish-naive"],
@@ -76,6 +77,10 @@ func _process(_d: float) -> void:
 		"survey":
 			station._survey()
 			steps.push_front(["await_survey"])
+		"manual":
+			station._open_manual()
+		"manual_close":
+			station.manual.visible = false
 		"log":
 			station._open_log()
 		"log_close":

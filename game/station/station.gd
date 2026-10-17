@@ -22,6 +22,7 @@ var serial_label: Button
 var wall: RobbieWall
 var log_btn: Button
 var station_log: StationLog
+var manual: RobbieManual
 var coach: Coach
 var _coach_scrubbed := false      # the player has dragged along a transmission's timeline
 var _coach_edited := false        # ...and changed the program since the first loss
@@ -230,6 +231,7 @@ func _build() -> void:
 	var actions := HBoxContainer.new()
 	col.add_child(actions)
 	actions.add_child(_button("+ New rule", "Add a rule at the bottom of the list", func() -> void: editor.add_rule()))
+	actions.add_child(_button("Manual", "Every order and condition, explained (H)", _open_manual))
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions.add_child(sp)
@@ -276,6 +278,11 @@ func _build() -> void:
 		station_log.visible = false
 		_refresh())
 	add_child(station_log)
+
+	manual = RobbieManual.new()
+	manual.visible = false
+	manual.closed.connect(func() -> void: manual.visible = false)
+	add_child(manual)
 
 
 ## Room tabs: number and name; certified rooms turn green.
@@ -535,7 +542,7 @@ func _restore_program() -> void:
 
 ## First visit: point at the one thing to do next, until Robbie 002 has been sent.
 func _update_coach() -> void:
-	if state.coach_done or wall.visible or station_log.visible or watch_large:
+	if state.coach_done or wall.visible or station_log.visible or manual.visible or watch_large:
 		coach.point_at(null, "")
 		return
 	if state.next_serial >= 3 or (state.next_serial == 2 and _any_exit()):
@@ -679,6 +686,13 @@ func _open_wall() -> void:
 	wall.visible = true
 
 
+func _open_manual() -> void:
+	if watch_large:
+		_toggle_watch()
+	move_child(manual, get_child_count() - 1)
+	manual.visible = true
+
+
 func _open_log() -> void:
 	if watch_large:
 		_toggle_watch()
@@ -737,7 +751,7 @@ func _toggle_watch() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if wall.visible or station_log.visible:
+	if wall.visible or station_log.visible or manual.visible:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
@@ -746,6 +760,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				accept_event()
 			KEY_L:
 				_open_log()
+				accept_event()
+			KEY_H:
+				_open_manual()
 				accept_event()
 			KEY_F:
 				_toggle_watch()

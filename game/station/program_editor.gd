@@ -72,7 +72,9 @@ func _row(i: int) -> Control:
 	var act := OptionButton.new()
 	for a in ACTION_ORDER:
 		act.add_item(Catalogue.ACTIONS[a]["label"])
+		act.set_item_tooltip(act.item_count - 1, Catalogue.HELP.get(a, ""))
 	act.select(ACTION_ORDER.find(rule["action"]))
+	act.tooltip_text = Catalogue.HELP.get(rule["action"], "")
 	act.custom_minimum_size = Vector2(230, 0)
 	act.item_selected.connect(func(idx: int) -> void: _set_action(i, ACTION_ORDER[idx]))
 	top.add_child(act)
@@ -103,9 +105,12 @@ func _row(i: int) -> Control:
 	bottom.add_child(ifl)
 	var cond := OptionButton.new()
 	cond.add_item("always")
+	cond.set_item_tooltip(0, Catalogue.HELP["always"])
 	for c in COND_ORDER:
 		cond.add_item(Catalogue.CONDITIONS[c]["label"])
+		cond.set_item_tooltip(cond.item_count - 1, Catalogue.HELP.get(c, ""))
 	cond.select(0 if rule["cond"] == "" else COND_ORDER.find(rule["cond"]) + 1)
+	cond.tooltip_text = Catalogue.HELP.get(rule["cond"] if rule["cond"] != "" else "always", "")
 	cond.custom_minimum_size = Vector2(170, 0)
 	cond.item_selected.connect(func(idx: int) -> void: _set_cond(i, "" if idx == 0 else COND_ORDER[idx - 1]))
 	bottom.add_child(cond)
@@ -113,7 +118,7 @@ func _row(i: int) -> Control:
 		var neg := CheckBox.new()
 		neg.text = "not"
 		neg.button_pressed = rule["negate"]
-		neg.tooltip_text = "Run this rule when the condition is NOT true"
+		neg.tooltip_text = Catalogue.HELP["not"]
 		neg.toggled.connect(func(on: bool) -> void:
 			program.rules[i]["negate"] = on
 			_changed_light())

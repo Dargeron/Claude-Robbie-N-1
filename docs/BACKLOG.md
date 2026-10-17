@@ -25,6 +25,8 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 
 ## Next: P0c, readable and charming
 
+- [x] Robbie's manual and tooltips for every order and condition (block 16).
+
 - [x] **Robbie's senses in the Why? panel**: what each condition read at that moment (block 5).
 - [ ] Live first viewing (fast-forward only until the transmission ends), then full scrubbing.
 - [x] Fast-forward that slows down by itself at markers: AUTO speed (block 8).

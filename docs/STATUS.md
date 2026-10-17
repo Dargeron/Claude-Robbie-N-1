@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-17, after hourly block 15 (15:03 UTC): the web build checked end to end in Chromium; the sim is up to 4x faster.
+Updated 2026-10-17, after hourly block 16 (16:21 UTC): Robbie's manual, and help on every order and condition.
 
 ## Where we are
 
@@ -13,7 +13,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 - Deterministic simulation in integer maths: Robbie, walls, the lamp and its line of sight,
   jellyfish, lurkers, eels, a valve, energy, crashes, an explored-tiles map. Same inputs give the
   same dive, checked by hash every second of dive time.
-- Robbie's rule interpreter, with 9 orders and 7 conditions, CPU costs and a trace of every think.
+- Robbie's rule interpreter, with 7 orders and 6 conditions, CPU costs and a trace of every think.
   The trace explains in words why each rule ran or was skipped (the seed of the Why? panel).
 - Five prototype rooms (The Dark, The Jellyfish, The Nursery, The Valve, The Listeners), one idea each. Each has an intended
   program that passes the survey fleet (20 of 20 dives), and naive programs that fail (see `docs/design/rooms.md`).
@@ -21,6 +21,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
   hold still). Jellyfish are partly scattered afresh on every dive, so no fixed route works.
 - Sound v1: 15 synthesised sounds synced to the transmission, with a mute button.
 - The station log: dated entries unlocked by certifying rooms; the slow story (content/story/log.json).
+- Robbie's manual (H) and tooltips on every order and condition, from one source (Catalogue.HELP).
 - A first-visit coach points at LAUNCH, the timeline and the editor until Robbie 002 is sent.
 - AUTO playback: skims quiet water at 4x and slows to normal speed around every event.
 - The Wall of Robbies: every Robbie sent, its route on a small map, how it ended and its last words; the per-room
