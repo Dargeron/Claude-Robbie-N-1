@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-17, after hourly block 16 (16:21 UTC): Robbie's manual, and help on every order and condition.
+Updated 2026-10-17, after hourly block 17 (17:27 UTC): a static website build (tools/site.sh); a scripted browser playtest.
 
 ## Where we are
 

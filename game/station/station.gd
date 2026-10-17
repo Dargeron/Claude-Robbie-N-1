@@ -244,6 +244,8 @@ func _build() -> void:
 	status_label.bbcode_enabled = true
 	status_label.fit_content = true
 	status_label.scroll_active = false
+	# Room for three lines whatever it says, so LAUNCH doesn't jump up and down as the text changes.
+	status_label.custom_minimum_size = Vector2(0, 64)
 	col.add_child(status_label)
 	survey_btn = _button("SEND THE SURVEY FLEET", "%d Robbies dive with this program under new conditions. %d must make it." % [Survey.FLEET, Survey.needed_for(Survey.FLEET)], _survey)
 	col.add_child(survey_btn)
@@ -360,6 +362,7 @@ func _intro_text() -> String:
 
 
 func _on_program_changed() -> void:
+	_last_why_tick = -1   # the Why? panel notes when the replayed Robbie's program differs: refresh it
 	if state.next_serial > 1:
 		_coach_edited = true
 	state.room_state(room_id).program_text = program.to_text()

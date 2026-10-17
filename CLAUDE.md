@@ -40,6 +40,7 @@ Then post a short plan to Albert: the goal, three to six tasks, what he will see
 | `tools/solve_all.sh [n]` / `tools/solve.sh <room> [n]` | Solver v1 in the background (n evaluations per room); results in out/solve/ |
 | `tools/webcheck.sh` | After `tools/web_artifact.sh`: the packed page in headless Chromium with the station's `perf` benchmark; fails on script errors |
 | `tools/site.sh` | After `tools/web_artifact.sh`: a static website (out/site, robbie-n1-site.zip) for any host, every file under 25 MiB |
+| `python3 tools/web/playtest.py <url> <dir>` | A scripted first-time player in headless Chromium (serve out/site first): launch, scrub, edit, launch, survey |
 | `tools/smoke.sh` | Render smoke test: the station tour under Xvfb; fails on script errors, missing or blank shots |
 | `python3 tools/solver_records.py` | Write content/solver/records.json (cheapest known CPU per room) from the solver's results |
 | `tools/hunt.sh <room>` | Resumable exploit hunt in the background; results in out/hunt/<room>.json |

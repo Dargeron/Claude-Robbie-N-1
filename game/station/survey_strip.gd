@@ -10,14 +10,12 @@ var fleet := 0
 
 func _init() -> void:
 	custom_minimum_size = Vector2(0, 14)
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	visible = false
+	mouse_filter = Control.MOUSE_FILTER_IGNORE   # always takes its space (empty when there's no survey), so nothing jumps
 
 
 func start(r: Survey.Run) -> void:
 	run = r
 	fleet = r.fleet
-	visible = true
 	queue_redraw()
 
 
@@ -26,7 +24,6 @@ func show_report(report: Dictionary) -> void:
 	run = null
 	dives = report.get("dives", [])
 	fleet = int(report.get("fleet", 0))
-	visible = fleet > 0
 	queue_redraw()
 
 
