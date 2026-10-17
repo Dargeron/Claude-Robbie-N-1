@@ -10,6 +10,7 @@ signal closed
 
 const COLUMNS := 3
 const PLAQUE_W := 396.0
+const THUMB_W := 110.0
 
 var state: GameState
 var _grid: GridContainer
@@ -47,14 +48,14 @@ func _init() -> void:
 	_summary.bbcode_enabled = true
 	_summary.scroll_active = false
 	_summary.position = Vector2(24, 74)
-	_summary.size = Vector2(1232, 30)
+	_summary.size = Vector2(1180, 44)
 	_summary.add_theme_font_size_override("normal_font_size", 13)
 	_summary.add_theme_font_size_override("bold_font_size", 13)
 	add_child(_summary)
 
 	_scroll = ScrollContainer.new()
-	_scroll.position = Vector2(24, 110)
-	_scroll.size = Vector2(1240, 596)
+	_scroll.position = Vector2(24, 122)
+	_scroll.size = Vector2(1240, 586)
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	add_child(_scroll)
 	_grid = GridContainer.new()
@@ -131,7 +132,7 @@ func _room_lines(s: GameState) -> Array:
 			if sm["certified"]:
 				txt += "  [color=#7dffa0]certified at %d CPU[/color]" % s.room_state(id).best_cpu
 			elif sm["first_exit"] > 0:
-				txt += "  [color=#7dffa0]through with Robbie %03d[/color]" % sm["first_exit"]
+				txt += "  [color=#7dffa0]through with Robbie\u00a0%03d[/color]" % sm["first_exit"]
 		lines.append(txt)
 	return lines
 
@@ -179,28 +180,41 @@ func _plaque(it: Dictionary) -> Control:
 	where.add_theme_font_size_override("font_size", 11)
 	head.add_child(where)
 
+	# The route on a small map, with the words beside it.
+	var body := HBoxContainer.new()
+	body.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	body.add_theme_constant_override("separation", 10)
+	col.add_child(body)
+	var rm := state.room_state(room_id).room
+	body.add_child(RouteThumb.make(rm, e, Vector2(THUMB_W, THUMB_W * rm.h / rm.w)))
+	var words_col := VBoxContainer.new()
+	words_col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	words_col.add_theme_constant_override("separation", 3)
+	words_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_child(words_col)
+
 	var how := Label.new()
 	how.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var what := "reached the exit" if made_it else "lost: %s" % Voice.cause_label(e["cause"])
 	var extra := "  ·  conditions %d" % ((int(e["seed"]) - 1) % 100 + 1) if survey else ""
-	how.text = "%s  ·  %s s  ·  %d CPU%s" % [what, e["seconds"], int(e["cpu"]), extra]
+	how.text = "%s\n%s s  ·  %d CPU%s" % [what, e["seconds"], int(e["cpu"]), extra]
 	how.add_theme_color_override("font_color", UiTheme.GREEN if made_it else UiTheme.RED.lerp(UiTheme.TEXT, 0.35))
-	how.add_theme_font_size_override("font_size", 12)
-	col.add_child(how)
+	how.add_theme_font_size_override("font_size", 11)
+	words_col.add_child(how)
 
 	var words: String = e.get("last_words", "")
 	var epitaph := Label.new()
 	epitaph.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	epitaph.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	epitaph.custom_minimum_size = Vector2(PLAQUE_W - 24, 0)
+	epitaph.custom_minimum_size = Vector2(PLAQUE_W - 34 - THUMB_W, 0)
 	if words != "":
 		epitaph.text = "\"%s\"" % words
 		epitaph.add_theme_color_override("font_color", Color("ffe9b8"))
 	else:
 		epitaph.text = "Survey Robbies don't send last words." if survey else ""
 		epitaph.add_theme_color_override("font_color", UiTheme.TEXT_DIM)
-	epitaph.add_theme_font_size_override("font_size", 13)
-	col.add_child(epitaph)
+	epitaph.add_theme_font_size_override("font_size", 12)
+	words_col.add_child(epitaph)
 	return p
 
 

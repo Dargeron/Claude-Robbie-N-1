@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-17, after hourly block 11 (10:25 UTC): the eel, and a fifth room, The Listeners.
+Updated 2026-10-17, after hourly block 12 (11:36 UTC): routes on the Wall; a render smoke test.
 
 ## Where we are
 
@@ -22,7 +22,8 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 - Sound v1: 15 synthesised sounds synced to the transmission, with a mute button.
 - A first-visit coach points at LAUNCH, the timeline and the editor until Robbie 002 is sent.
 - AUTO playback: skims quiet water at 4x and slows to normal speed around every event.
-- The Wall of Robbies: every Robbie sent, how it ended and its last words; the per-room score. Click to rewatch.
+- The Wall of Robbies: every Robbie sent, its route on a small map, how it ended and its last words; the per-room
+  score. Click to rewatch.
 - The Why? panel shows what Robbie sensed (wall ahead, nearest hostile, valve, energy); the previous Robbie in
   the room swims alongside the replay as a ghost.
 - Survey fleet (certification over 10 seeds of its own), headless dive runner, PNG path images, golden

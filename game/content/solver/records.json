@@ -1,7 +1,22 @@
 {
   "dark": {
-    "certified_programs": 1,
+    "certified_programs": 6,
     "cpu": 3,
+    "evaluations": 154
+  },
+  "jellyfish": {
+    "certified_programs": 10,
+    "cpu": 3,
+    "evaluations": 50
+  },
+  "listeners": {
+    "certified_programs": 7,
+    "cpu": 5,
     "evaluations": 25
+  },
+  "nursery": {
+    "certified_programs": 2,
+    "cpu": 6,
+    "evaluations": 50
   }
 }

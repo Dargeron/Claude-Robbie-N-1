@@ -38,6 +38,7 @@ Then post a short plan to Albert: the goal, three to six tasks, what he will see
 | `tools/save.sh` / `tools/restore.sh` | Back up the repo to /mnt/user-data/outputs, or rebuild it from there |
 | `python3 tools/gen_audio.py` | Regenerate the synthesised sounds in game/audio/ |
 | `tools/solve_all.sh [n]` / `tools/solve.sh <room> [n]` | Solver v1 in the background (n evaluations per room); results in out/solve/ |
+| `tools/smoke.sh` | Render smoke test: the station tour under Xvfb; fails on script errors, missing or blank shots |
 | `python3 tools/solver_records.py` | Write content/solver/records.json (cheapest known CPU per room) from the solver's results |
 | `tools/hunt.sh <room>` | Resumable exploit hunt in the background; results in out/hunt/<room>.json |
 | `python3 tools/gen_fx_tables.py` | Regenerate the integer trig tables (never needed unless Fx changes) |
@@ -70,6 +71,10 @@ Rendering works here too: `xvfb-run -a tools/godot.sh --path game --rendering-dr
 - Background hunts compete for the two cores: `pkill -STOP -f "[h]unt.gd"` before tests or renders,
   `pkill -CONT -f "[h]unt.gd"` after.
 - GDScript lambdas capture packed arrays by value: changes inside the lambda are lost. Use a loop.
+- Tool scripts run with `--path game`: pass absolute file paths (`$PWD/out/...`). A relative path fails
+  silently and nothing is saved.
+- `tools/smoke.sh` runs the station tour and checks every screenshot is there and not blank: run it before
+  publishing anything visual.
 - Integer division warnings are disabled in `project.godot`; integer division is intended everywhere.
 
 ## Definition of done

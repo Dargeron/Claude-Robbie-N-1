@@ -40,6 +40,7 @@ func _init() -> void:
 		if path.get_base_dir().get_file() == room.id:
 			pool.append(_normalise(ProgramFiles.load_program(path).to_text()))
 	pool.append_array(earlier)   # re-checked below: the rooms and the sim change
+	pool.append_array(_hunt_finds(progress))
 	for t in pool:
 		_evaluate(t)
 
@@ -227,6 +228,24 @@ func _report() -> Dictionary:
 		histogram[c] = int(histogram.get(c, 0)) + 1
 	return {"room": room.id, "budget": room.cpu_budget, "evaluations": evaluations,
 		"certified_programs": texts.size(), "cheapest": best, "cpu_histogram": histogram}
+
+
+## Programs the exploit hunt found passing in this room (out/hunt/<room>.json next to
+## out/solve/), as more starting points.
+func _hunt_finds(progress: String) -> Array[String]:
+	var out: Array[String] = []
+	if progress == "":
+		return out
+	var hunt_path := progress.get_base_dir().get_base_dir().path_join("hunt").path_join(room.id + ".json")
+	if not FileAccess.file_exists(hunt_path):
+		return out
+	var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(hunt_path))
+	if typeof(d) != TYPE_DICTIONARY:
+		return out
+	for f in d.get("passing", []):
+		var s := str(f)
+		out.append(_normalise(s.substr(0, s.find("  (")).replace(" / ", "\n")))
+	return out
 
 
 func _load(path: String) -> Array[String]:

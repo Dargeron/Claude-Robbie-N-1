@@ -14,7 +14,7 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 - [x] **Why? panel**: the rule-by-rule explanation for the moment under the playhead (s02).
 - [x] **Robbie's voice v1**: subtitles and last words, 40 lines (s02).
 - [x] **Wall of Robbies**: a screen of every serial with its epitaph; doubles as the score (block 4).
-      Later: a small path thumbnail on each plaque; survey Robbies with serials of their own (decision for Albert).
+      Route thumbnails on each plaque (block 12). Later: survey Robbies with serials of their own (decision for Albert).
 - [x] **Station memory**: the faint chart of what earlier Robbies saw (block 1).
 - [x] **Survey fleet in the UI** (s02).
 - [x] **Save/load** programs and the archive (s02).
@@ -52,7 +52,7 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 
 ## Quality and tooling
 
-- [ ] Smoke test that renders one replay frame under Xvfb and checks it isn't blank.
+- [x] Smoke test: tools/smoke.sh renders the station tour and checks every shot (block 12).
 - [ ] Tests for DiveText explanations.
 - [ ] Profile the sim; keep a dive under 0.1 s as rooms grow.
 - [ ] Custom size-optimised web export template (only if the web build is too big to share).

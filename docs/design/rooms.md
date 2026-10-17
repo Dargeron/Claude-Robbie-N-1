@@ -136,7 +136,7 @@ narrow, darkness doesn't stop Robbie swimming into a jellyfish that is resting i
 
 | Program | CPU | Survey fleet (20 seeds) | What happens |
 | --- | --- | --- | --- |
-| `shoot` / `follow_wall left` (intended) | 6 | 20/20 | Clears the tunnel shot by shot, about 55 s, roughly a fifth of the energy left |
+| `shoot` / `follow_wall left` (intended) | 6 | 20/20 (39/40; 8/10 on the survey seeds) | Clears the tunnel shot by shot, about 55 s, roughly a fifth of the energy left. Now and then a hit at the C/D corner makes it lose the wall and lap the middle tunnel until the energy runs out |
 | `shoot` / `follow_wall right` (intended) | 6 | 20/20 | Either hand works |
 | `lamp off` / `shoot` / `follow_wall left` | 7 | 19/20 | Works, but the lamp makes no difference here (one energy failure) |
 | `lamp off` / `follow_wall left` | 4 | 0/20 | The Jellyfish's answer: stung by the jellyfish resting in the tunnel |
@@ -233,6 +233,7 @@ late, because the eel hears at three.
 | --- | --- | --- | --- |
 | `stop if hostile_near 4` / `move_towards beacon` (intended) | 6 | 20/20 | Holds still while an eel crosses, about 25–40 s |
 | `stop if hostile_near 6` / `move_towards beacon` | 6 | 20/20 | Waits earlier and longer |
+| `move 90 if not hostile_near 4` | 5 | 20/20 | Found by the hunt (block 12), cheapest known: when no rule applies Robbie drifts, which is as still as stopping. Same lesson, one rule |
 | `move_towards beacon` | 2 | 4/20 | Only when every eel happens to be far up or down its shaft |
 | `stop if hostile_near 2` / `move_towards beacon` | 6 | 1/20 | Too late: the eel hears at three tiles |
 | `keep_distance 4` / `move_towards beacon` | 5 | 6/20 | The Valve's lesson: backing away is noise, and it backs into the corridor walls |
