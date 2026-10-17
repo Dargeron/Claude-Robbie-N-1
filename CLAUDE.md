@@ -33,6 +33,7 @@ Then post a short plan to Albert: the goal, three to six tasks, what he will see
 | `xvfb-run -a tools/godot.sh --path game --rendering-driver opengl3 --audio-driver Dummy res://tools/shots.tscn -- <out_dir>` | Scripted tour of the station UI, saving screenshots to look at |
 | `tools/godot.sh --headless --path game --export-release <Linux/Windows/macOS/Web> <path>` | Builds (templates in ~/.local/share/godot/export_templates/4.7.2.stable) |
 | `tools/web_artifact.sh` | Web build packed for a claude.ai page (engine gzipped inside a script); then publish build/artifact/robbie-play.html with its files |
+| `tools/desktop.sh [out_dir]` | Export Linux/Windows/macOS and zip them into /mnt/user-data/outputs (about 90 s) |
 | `tools/fleet.sh [glob] [n]` | Survey fleet summary for every reference program |
 | `tools/save.sh` / `tools/restore.sh` | Back up the repo to /mnt/user-data/outputs, or rebuild it from there |
 | `python3 tools/gen_audio.py` | Regenerate the synthesised sounds in game/audio/ |
