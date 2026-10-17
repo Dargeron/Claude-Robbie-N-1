@@ -52,7 +52,7 @@ func _init() -> void:
 		var r := _evaluate(child)
 		if r.is_empty():
 			continue
-		if r["certified"] or r["passed"] >= Survey.PASS_NEEDED - 2:
+		if r["certified"] or r["passed"] >= Survey.PASS_NEEDED - 4:
 			pool.append(child)
 		if progress != "" and evaluations % 25 == 0:
 			_save(progress)

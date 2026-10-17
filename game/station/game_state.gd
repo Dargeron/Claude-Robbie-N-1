@@ -80,8 +80,12 @@ func history_for(id: String) -> Dictionary:
 
 
 func survey(id: String, program: Program) -> Dictionary:
+	return finish_survey(id, program, Survey.run(room_state(id).room, program, Survey.FLEET, SURVEY_FIRST_SEED))
+
+
+## Record a finished survey (run all at once by survey(), or a few dives per frame by the station).
+func finish_survey(id: String, program: Program, report: Dictionary) -> Dictionary:
 	var rs := room_state(id)
-	var report := Survey.run(rs.room, program, Survey.FLEET, SURVEY_FIRST_SEED)
 	rs.survey = report
 	if report["certified"]:
 		rs.certified = true

@@ -37,6 +37,8 @@ var status_label: RichTextLabel
 var survey_btn: Button
 var archive: ItemList
 var restore_btn: Button
+var survey_run: Survey.Run = null   # a survey fleet that is out right now
+var survey_strip: SurveyStrip
 var archive_entries: Array = []
 
 
@@ -205,8 +207,10 @@ func _build() -> void:
 	status_label.fit_content = true
 	status_label.scroll_active = false
 	col.add_child(status_label)
-	survey_btn = _button("SEND THE SURVEY FLEET", "Ten Robbies dive with this program under new conditions. Eight must make it.", _survey)
+	survey_btn = _button("SEND THE SURVEY FLEET", "%d Robbies dive with this program under new conditions. %d must make it." % [Survey.FLEET, Survey.needed_for(Survey.FLEET)], _survey)
 	col.add_child(survey_btn)
+	survey_strip = SurveyStrip.new()
+	col.add_child(survey_strip)
 	var arch_head := Label.new()
 	arch_head.text = "TRANSMISSIONS RECEIVED"
 	arch_head.add_theme_color_override("font_color", UiTheme.TEXT_DIM)
@@ -272,6 +276,10 @@ func _select_room(id: String) -> void:
 		b.button_pressed = rid == id
 	current_dive = null
 	current_entry = {}
+	if survey_run == null or survey_run.room.id != id:
+		survey_strip.show_report(rs.survey)
+	else:
+		survey_strip.start(survey_run)
 	_refresh_archive()
 	var own := state.own_dives(id)
 	if not own.is_empty():
@@ -321,7 +329,7 @@ func _refresh() -> void:
 	launch_btn.disabled = over or program.rules.is_empty()
 	launch_btn.text = "LAUNCH ROBBIE %03d" % state.next_serial
 	serial_label.text = "Robbies sent: %d  ·  Wall" % (state.next_serial - 1)
-	survey_btn.disabled = not state.program_made_it(room_id, program.to_text()) or over
+	survey_btn.disabled = not state.program_made_it(room_id, program.to_text()) or over or survey_run != null
 	survey_btn.visible = not rs.certified or not rs.survey.is_empty()
 	_refresh_status()
 
@@ -365,8 +373,35 @@ func _launch() -> void:
 	_refresh()
 
 
+## The survey fleet goes out a few Robbies per frame (see _process), so the station
+## stays responsive and the results come back one by one.
 func _survey() -> void:
-	var report := state.survey(room_id, program)
+	if survey_run != null:
+		return
+	survey_run = Survey.Run.new(state.room_state(room_id).room, Program.parse(program.to_text()))
+	survey_btn.disabled = true
+	survey_strip.start(survey_run)
+
+
+func _step_survey() -> void:
+	var t0 := Time.get_ticks_msec()
+	while not survey_run.done() and Time.get_ticks_msec() - t0 < 12:
+		survey_run.step()
+	survey_strip.queue_redraw()
+	if not survey_run.done():
+		survey_btn.text = "SURVEY FLEET: %d OF %d BACK" % [survey_run.dives.size(), survey_run.fleet]
+		return
+	var run := survey_run
+	survey_run = null
+	survey_btn.text = "SEND THE SURVEY FLEET"
+	_finish_survey(run)
+
+
+func _finish_survey(run: Survey.Run) -> void:
+	var report := state.finish_survey(run.room.id, run.program, run.report())
+	if run.room.id != room_id:
+		return   # the player moved to another room meanwhile; the result is saved there
+	Sfx.play("exit" if report["certified"] else "burst", -6.0)
 	_refresh_archive()
 	_select_room_buttons_only()
 	_refresh()
@@ -478,6 +513,8 @@ func _any_exit() -> bool:
 
 func _process(_delta: float) -> void:
 	_update_coach()
+	if survey_run != null:
+		_step_survey()
 	if not replay.has_dive():
 		play_btn.set_icon("play")
 		return

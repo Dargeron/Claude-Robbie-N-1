@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-17, after hourly block 12 (11:36 UTC): routes on the Wall; a render smoke test.
+Updated 2026-10-17, after hourly block 13 (12:46 UTC): the survey fleet is 20 Robbies (16 must make it), sent with progress.
 
 ## Where we are
 
@@ -26,7 +26,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
   score. Click to rewatch.
 - The Why? panel shows what Robbie sensed (wall ahead, nearest hostile, valve, energy); the previous Robbie in
   the room swims alongside the replay as a ghost.
-- Survey fleet (certification over 10 seeds of its own), headless dive runner, PNG path images, golden
+- Survey fleet (certification: 16 of 20 dives on seeds of its own, sent a few per frame with progress), headless dive runner, PNG path images, golden
   replays, exploit hunt, and a mutation solver that finds the cheapest certifying program per room.
 - 35 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
   sim), golden replays, reference programs.

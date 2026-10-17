@@ -24,8 +24,10 @@ func test_reference_programs() -> void:
 				check(first["result"] != "exit", "%s should fail on seed 1" % label)
 		match meta.get("certify", ""):
 			"yes":
-				var s := Survey.run(room, prog)
-				check(s["certified"], "%s should pass the survey fleet, got %d/%d" % [label, s["passed"], s["fleet"]])
+				if not Survey.certifies(room, prog):
+					var s := Survey.run(room, prog)
+					failures.append("%s should pass the survey fleet, got %d/%d" % [label, s["passed"], s["fleet"]])
 			"no":
-				var s := Survey.run(room, prog)
-				check(not s["certified"], "%s should fail the survey fleet, got %d/%d" % [label, s["passed"], s["fleet"]])
+				if Survey.certifies(room, prog):
+					var s := Survey.run(room, prog)
+					failures.append("%s should fail the survey fleet, got %d/%d" % [label, s["passed"], s["fleet"]])
