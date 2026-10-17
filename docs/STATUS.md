@@ -4,6 +4,9 @@ Updated 2026-10-17, after hourly block 18 (18:39 UTC): rooms open one after anot
 
 ## Where we are
 
+**Hourly blocks paused** at Albert's request until his usage resets on Wednesday 21 October at 16:00 (Spain).
+A one-off reminder resumes them at 14:05 UTC that day, starting with his feedback list.
+
 **Albert played it (2026-10-17, evening): "I had FUN... the barest core is good."** The core loop passes his gate. He has many
 changes, suggestions and problems to fix; those come first in the backlog as soon as he sends them.
 
