@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-17, after hourly block 3 (01:00 UTC): The Jellyfish now has a fresh swarm on every dive.
+Updated 2026-10-17, after hourly block 4 (02:18 UTC): the Wall of Robbies.
 
 ## Where we are
 
@@ -19,17 +19,18 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
   passes the survey fleet (18–20 of 20 dives), and naive programs that fail (see `docs/design/rooms.md`).
   The Jellyfish scatters 16 of its 24 jellyfish afresh on every dive, so no fixed route works.
 - Sound v1: 15 synthesised sounds synced to the transmission, with a mute button.
+- The Wall of Robbies: every Robbie sent, how it ended and its last words; the per-room score. Click to rewatch.
 - Survey fleet (certification over 10 seeds), headless dive runner, PNG path images, golden
   replays, exploit hunt tool.
-- 29 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
+- 31 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
   sim), golden replays, reference programs.
 - A dive takes about 0.1 s to simulate. The solver bot is cheaper than we feared.
 
 ## Next three tasks
 
 1. Verify the web page inside the claude.ai frame (needs Albert's eyes); fix or fall back.
-2. The Wall of Robbies, and live first viewing.
-3. Onboarding: a pre-broken first program and a pointer at the editor.
+2. Robbie's senses in the Why? panel, so players discover conditions in context.
+3. Live first viewing; onboarding pointer at the editor on the first visit.
 
 ## Known issues and open questions
 

@@ -10,6 +10,7 @@ const STARTER := "move_towards beacon\n"
 const SURVEY_FIRST_SEED := 101
 
 var next_serial := 1
+var persist := true   # tests turn this off so they never touch the player's save
 var rooms := {}   # id -> RoomState
 
 
@@ -152,6 +153,8 @@ func _remember(rs: RoomState, dive: Dive) -> void:
 
 
 func save() -> void:
+	if not persist:
+		return
 	var data := {"version": 1, "next_serial": next_serial, "rooms": {}}
 	for id in ROOMS:
 		var rs := room_state(id)

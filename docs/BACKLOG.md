@@ -13,7 +13,8 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 - [x] **Replay controls on screen**: transport, timeline with markers, click-to-seek (s02).
 - [x] **Why? panel**: the rule-by-rule explanation for the moment under the playhead (s02).
 - [x] **Robbie's voice v1**: subtitles and last words, 40 lines (s02).
-- [ ] **Wall of Robbies**: a screen of every serial with its epitaph; doubles as the score.
+- [x] **Wall of Robbies**: a screen of every serial with its epitaph; doubles as the score (block 4).
+      Later: a small path thumbnail on each plaque; survey Robbies with serials of their own (decision for Albert).
 - [x] **Station memory**: the faint chart of what earlier Robbies saw (block 1).
 - [x] **Survey fleet in the UI** (s02).
 - [x] **Save/load** programs and the archive (s02).
@@ -23,6 +24,9 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 
 ## Next: P0c, readable and charming
 
+- [ ] **Robbie's senses in the Why? panel**: what each condition read at that moment (wall ahead, nearest
+      hostile, valve, energy), so players discover conditions in context. The panel is sparse when only one
+      rule exists.
 - [ ] Live first viewing (fast-forward only until the transmission ends), then full scrubbing.
 - [ ] Fast-forward that slows down by itself at markers.
 - [ ] Ghost of the previous Robbie's path in the replay.

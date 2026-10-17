@@ -29,6 +29,10 @@ func _ready() -> void:
 		["room", "valve"], ["program", "keep_distance 4\nstop if valve_shut\nmove_towards beacon"], ["launch"],
 		["seek_tick", 362], ["wait", 5], ["shot", "07-valve-lurker"],
 		["room", "jellyfish"], ["program", "move_towards beacon"], ["launch"], ["seek", 0.85], ["wait", 5], ["shot", "08-jellyfish-naive"],
+		["program", "lamp off\nkeep_distance 2\nmove_towards beacon"], ["launch"],
+		["room", "valve"], ["program", "move_towards beacon"], ["launch"],
+		["wall"], ["wait", 5], ["shot", "09-wall"],
+		["wall_pick", 3], ["wait", 5], ["shot", "10-from-wall"],
 		["quit"],
 	]
 
@@ -67,5 +71,11 @@ func _process(_d: float) -> void:
 			station._select_room(s[1])
 		"watch":
 			station._toggle_watch()
+		"wall":
+			station._open_wall()
+		"wall_pick":
+			var items := RobbieWall.plaques(station.state)
+			var it: Dictionary = items[s[1]]
+			station._open_from_wall(it["room"], it["entry"])
 		"quit":
 			get_tree().quit()

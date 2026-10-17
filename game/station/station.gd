@@ -19,7 +19,8 @@ var mute_btn: IconButton
 var watch_hint: Label
 var monitor_hint: Label
 var room_buttons := {}
-var serial_label: Label
+var serial_label: Button
+var wall: RobbieWall
 var timeline: Timeline
 var play_btn: IconButton
 var speed_btn: Button
@@ -75,8 +76,9 @@ func _build() -> void:
 		b.pressed.connect(func() -> void: _select_room(id))
 		tabs.add_child(b)
 		room_buttons[id] = b
-	serial_label = Label.new()
-	serial_label.position = Vector2(1060, 12)
+	serial_label = _button("", "The Wall of Robbies: every Robbie sent, and its last words (W)", _open_wall)
+	serial_label.position = Vector2(1000, 8)
+	serial_label.custom_minimum_size = Vector2(266, 0)
 	serial_label.add_theme_color_override("font_color", UiTheme.TEXT_DIM)
 	add_child(serial_label)
 
@@ -213,6 +215,12 @@ func _build() -> void:
 	restore_btn.disabled = true
 	col.add_child(restore_btn)
 
+	wall = RobbieWall.new()
+	wall.visible = false
+	wall.closed.connect(_close_wall)
+	wall.entry_chosen.connect(_open_from_wall)
+	add_child(wall)
+
 
 func _button(text: String, tip: String, on_press: Callable) -> Button:
 	var b := Button.new()
@@ -290,7 +298,7 @@ func _refresh() -> void:
 	var over := used > budget
 	launch_btn.disabled = over or program.rules.is_empty()
 	launch_btn.text = "LAUNCH ROBBIE %03d" % state.next_serial
-	serial_label.text = "Robbies sent: %d" % (state.next_serial - 1)
+	serial_label.text = "Robbies sent: %d  ·  Wall" % (state.next_serial - 1)
 	survey_btn.disabled = not state.program_made_it(room_id, program.to_text()) or over
 	survey_btn.visible = not rs.certified or not rs.survey.is_empty()
 	_refresh_status()
@@ -420,7 +428,9 @@ func _process(_delta: float) -> void:
 	speed_btn.text = "×%s" % str(replay.speed()).trim_suffix(".0")
 	var k := replay.tick()
 	timeline.set_playhead(replay.view.t)
-	editor.set_highlight(current_dive.rec.rrule[k] if current_dive != null else -1)
+	# Light up the rule Robbie is following, but only when the editor holds that Robbie's program.
+	var same: bool = current_dive != null and current_entry.get("text", "") == program.to_text()
+	editor.set_highlight(current_dive.rec.rrule[k] if same else -1)
 	if k != _last_why_tick:
 		_last_why_tick = k
 		why.text = _why_text(k)
@@ -443,7 +453,10 @@ func _why_text(k: int) -> String:
 			hi = mid - 1
 	var out := "[color=#ffc35a][b]T+%s[/b][/color]   " % DiveText.time_of(k)
 	var who := "Robbie %03d" % current_entry.get("serial", 0) if current_entry.get("serial", -1) > 0 else "Survey Robbie"
-	out += "[color=#8b8f94]%s · why it did what it did[/color]\n\n" % who
+	out += "[color=#8b8f94]%s · why it did what it did[/color]\n" % who
+	if current_entry.get("text", "") != program.to_text():
+		out += "[color=#8b8f94][i]This Robbie ran a different program from the one in the editor. \"Use this Robbie's program\" loads it.[/i][/color]\n"
+	out += "\n"
 	if found >= 0:
 		for line in DiveText.explain(current_dive.program, trace[found]):
 			var l: String = line
@@ -499,6 +512,33 @@ func _event_text(e: Dictionary) -> String:
 	return e["type"]
 
 
+# ---------------------------------------------------------------- the Wall of Robbies
+
+func _open_wall() -> void:
+	if watch_large:
+		_toggle_watch()
+	replay.playing = false
+	wall.refresh(state)
+	move_child(wall, get_child_count() - 1)
+	wall.visible = true
+
+
+func _close_wall() -> void:
+	wall.visible = false
+
+
+func _open_from_wall(id: String, entry: Dictionary) -> void:
+	_close_wall()
+	if id != room_id:
+		_select_room(id)
+	for i in archive_entries.size():
+		if archive_entries[i] == entry:
+			archive.select(i)
+			archive.ensure_current_is_visible()
+			_on_archive_selected(i)
+			return
+
+
 func _toggle_mute() -> void:
 	Sfx.set_muted(not Sfx.muted)
 	mute_btn.set_icon("muted" if Sfx.muted else "sound")
@@ -531,8 +571,13 @@ func _toggle_watch() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if wall.visible:
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
+			KEY_W:
+				_open_wall()
+				accept_event()
 			KEY_F:
 				_toggle_watch()
 				accept_event()

@@ -36,37 +36,73 @@
   "exit": [
     "Beacon reached! Firing the burst. Tell {next} the way is clear.",
     "I made it! Transmitting everything. It was an honour.",
-    "Exit found. Sending the whole trip, including the boring bits."
+    "Exit found. Sending the whole trip, including the boring bits.",
+    "Exit reached. I would like it noted that I enjoyed every metre.",
+    "Through! The beacon is even nicer up close.",
+    "I am at the exit. I am also slightly amazed.",
+    "Arrived. Please give {next} my program. It's a good one.",
+    "Made it. Sending the map home before I forget anything."
   ],
   "last_wall": [
     "Please note: the wall was exactly where the map said it would be.",
     "I hit the same rock three times. In my defence, it didn't move.",
-    "Tell {next}: walls are not optional."
+    "Tell {next}: walls are not optional.",
+    "Rock: one. Robbie: nil. Rematch with {next}.",
+    "I found the edge of the map. With my nose.",
+    "I was sure that was water. It was not water.",
+    "Hull breached. The rock is fine, if anyone asks.",
+    "Steering was a suggestion. The wall disagreed."
   ],
   "last_jellyfish": [
     "Please note for the record that I was right about the jellyfish.",
     "They were attracted to my light. I understand them completely.",
-    "Tell {next}: the glow is not a greeting."
+    "Tell {next}: the glow is not a greeting.",
+    "They were so soft. There were so many.",
+    "I lit them up and they all came to say hello.",
+    "Stung. Fascinating creatures. Painful, but fascinating.",
+    "Note for science: jellyfish like my lamp more than I do.",
+    "Tell {next}: soft does not mean friendly."
   ],
   "last_lurker": [
     "I backed away exactly as instructed. Just not far enough.",
     "The rock had teeth. I would like that added to the map.",
-    "Tell {next} to mind the wall with eyes."
+    "Tell {next} to mind the wall with eyes.",
+    "The wall blinked. Then it bit.",
+    "I didn't see it until it saw me.",
+    "Something in the rock was waiting. It was very patient.",
+    "Tell {next}: if the rock glows, leave.",
+    "I was close to the exit. The lurker was closer."
   ],
   "last_valve": [
     "The valve closed. I was in the way. We both regret it.",
-    "Tell {next}: wait for the door. Doors don't wait for you."
+    "Tell {next}: wait for the door. Doors don't wait for you.",
+    "I trusted the door. The door had other plans.",
+    "Squeezed. I am now slightly thinner and much wiser.",
+    "The valve and I had different ideas about timing.",
+    "Wrong side of the valve, wrong moment.",
+    "Tell {next}: count the beats before you go.",
+    "A closing door is not an invitation."
   ],
   "last_energy": [
     "Energy gone. I'll describe the exit from memory: it was probably lovely.",
-    "Out of power. I spent it all on enthusiasm."
+    "Out of power. I spent it all on enthusiasm.",
+    "Battery empty. I was having such a nice swim.",
+    "Going quiet now. The water is very calm.",
+    "I took the scenic route. Too scenic.",
+    "Power at zero. Lamp off. Thinking about the beacon.",
+    "Tell {next} to pack more energy, or fewer detours."
   ],
   "last_timeout": [
-    "I waited as long as I could."
+    "I waited as long as I could.",
+    "Still here. Still waiting. Still hopeful.",
+    "I held position perfectly. Nobody told me when to stop."
   ],
   "same_death": [
     "Same {cause} as {prev}. Different me.",
     "{prev} and I agree about {cause}.",
-    "{prev} was right about {cause}. I checked."
+    "{prev} was right about {cause}. I checked.",
+    "{prev} warned me about {cause}. I had to see for myself.",
+    "{prev} and I both met {cause}. Somebody should change the program.",
+    "Another Robbie for {cause}. We should start a club."
   ]
 }

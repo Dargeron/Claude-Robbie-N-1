@@ -130,5 +130,6 @@ CPU budget 10 · energy 6000 · valve cycle 60/45/150 ticks (open/closing/shut)
 | `keep_distance 4` / `move_towards beacon` | 5 | 5/20 | Ignores the valve: stung to death by it three times in four |
 | `move_towards beacon if valve_open` / `stop if wall_ahead` / `move_towards beacon` | 10 | 0/20 | Waits perfectly, then swims straight into the lurker |
 | `move_towards beacon` | 2 | 0/20 | Valve or lurker, whichever comes first |
+| `move_towards open_water if not hostile_near 4` / `shoot` | 10 | 12/20 (8/10 on the survey seeds) | Found by the exploit hunt (block 4) and **accepted** as the loud way: it explores, shoots the lurker when it wakes, and the shut valve looks like rock to its open-water sense, so it waits by accident. It costs the whole CPU budget, more than the intended program |
 
 ![The Valve intended](../devlog/img/s01/valve-intended.png)
