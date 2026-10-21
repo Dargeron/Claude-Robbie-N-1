@@ -1,0 +1,5 @@
+# expect: fail
+# certify: no
+# Waits for the valve, but swims straight past the eel shafts.
+stop if valve_shut
+move_towards beacon

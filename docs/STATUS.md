@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-21, after hourly block 22 (17:53 UTC): hundreds of last words (Albert's #10).
+Updated 2026-10-21, after hourly block 23 (19:05 UTC): a sixth room, The Lock (valve and eels together).
 
 ## Where we are
 
@@ -21,7 +21,8 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
   same dive, checked by hash every second of dive time.
 - Robbie's rule interpreter, with 7 orders and 6 conditions, CPU costs and a trace of every think.
   The trace explains in words why each rule ran or was skipped (the seed of the Why? panel).
-- Five prototype rooms (The Dark, The Jellyfish, The Nursery, The Valve, The Listeners), one idea each. Each has an intended
+- Six prototype rooms (The Dark, The Jellyfish, The Nursery, The Valve, The Listeners, The Lock): one idea each, and The Lock
+  needs two at once. Each has an intended
   program that passes the survey fleet (20 of 20 dives), and naive programs that fail (see `docs/design/rooms.md`).
   Three creatures: jellyfish (light attracts them), lurkers (laser-proof; back away), eels (blind, hunt by sound;
   hold still). Jellyfish are partly scattered afresh on every dive, so no fixed route works.
@@ -49,7 +50,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 1. Albert's #5: the beacon opens the next room; optional objectives per room. Needs his answer on the two currencies.
 2. Verify the web page inside the claude.ai frame (needs Albert's eyes).
-3. Hunt three-rule programs (sampled); more rooms that combine two creatures.
+3. The Lock's hunt and solver; keep_distance backing into rock.
 
 ## Known issues and open questions
 

@@ -1,0 +1,7 @@
+# expect: exit
+# certify: yes
+# Both lessons at once. The eels hunt by sound: hold still while one is near.
+# The valve crushes: hold still while it's shut. Then swim for the beacon.
+stop if hostile_near 4
+stop if valve_shut
+move_towards beacon

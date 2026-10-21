@@ -1,105 +1,125 @@
 {
-  "_about": "Mission control's hints. Shown in the station after Robbies keep failing the same way in a room. Keys: <room>/<cause>, then general ones. 'after' = consecutive Robbies lost to that cause before the hint appears. Hints nudge; they never give the answer.",
-  "start": "Mission control: Robbie {n} is ready with a one-rule program. Press LAUNCH and watch what it does.",
-  "first_loss": "Mission control: Drag along the timeline under the monitor. The panel below it says which rule Robbie was following, and why. Change a rule, then launch the next Robbie.",
-  "rooms": {
-    "dark/wall": [
-      {
-        "after": 2,
-        "text": "The beacon tells Robbie where the exit is, not how to get there. In a cave, something that keeps in touch with the rock might go further."
-      }
-    ],
-    "dark/energy": [
-      {
-        "after": 1,
-        "text": "That Robbie took the long way round. In this cave, left and right are not the same."
-      }
-    ],
-    "jellyfish/jellyfish": [
-      {
-        "after": 2,
-        "text": "Watch what the jellyfish do when Robbie's lamp touches them. What if Robbie stopped shining at them?"
-      },
-      {
-        "after": 4,
-        "text": "In the dark, Robbie can still see a jellyfish's own glow. Keeping a little distance might be enough."
-      }
-    ],
-    "jellyfish/wall": [
-      {
-        "after": 2,
-        "text": "Backing away from one thing can mean backing into another."
-      }
-    ],
-    "nursery/jellyfish": [
-      {
-        "after": 2,
-        "text": "In a tunnel this narrow, the dark won't keep them out of Robbie's way. Something has to clear the path."
-      },
-      {
-        "after": 4,
-        "text": "Robbie carries a laser. It fires at whatever Robbie senses close by, and every shot costs energy."
-      }
-    ],
-    "nursery/wall": [
-      {
-        "after": 2,
-        "text": "The beacon is on the far side of a winding tunnel. The trick from the first room still works here."
-      }
-    ],
-    "nursery/energy": [
-      {
-        "after": 1,
-        "text": "Shots and detours both cost energy. That Robbie spent it before the end of the tunnel."
-      }
-    ],
-    "valve/valve": [
-      {
-        "after": 2,
-        "text": "The valve has a rhythm. Robbie can tell whether it is shut, as long as the valve is ahead of it."
-      }
-    ],
-    "valve/lurker": [
-      {
-        "after": 1,
-        "text": "Something in the rock struck that Robbie. Lurkers are camouflaged: Robbie can't sense one until it wakes and its eyes glow, a moment before it strikes."
-      },
-      {
-        "after": 2,
-        "text": "The moment a lurker's eyes glow, Robbie can sense it. Keeping a distance from what Robbie senses might be enough, and a lurker that has just struck needs a while to recover."
-      }
-    ],
-    "valve/energy": [
-      {
-        "after": 1,
-        "text": "Waiting costs energy too. A Robbie that never moves on runs dry."
-      }
-    ],
-    "listeners/eel": [
-      {
-        "after": 2,
-        "text": "The eels don't hunt by sight. Watch what Robbie is doing at the moment one turns on it."
-      },
-      {
-        "after": 4,
-        "text": "A Robbie that holds still is just another rock to them."
-      }
-    ],
-    "listeners/wall": [
-      {
-        "after": 1,
-        "text": "Backing away is still swimming, and swimming is noise."
-      }
-    ],
-    "listeners/energy": [
-      {
-        "after": 1,
-        "text": "Waiting costs energy too. Hold still only while one is close."
-      }
-    ]
-  },
-  "stuck": {
-    "after": 5,
-    "text": "Every rule costs CPU, but a second rule can catch what the first one misses. Rules are read from the top: the first one that applies wins."
-  }
+ "_about": "Mission control's hints. Shown in the station after Robbies keep failing the same way in a room. Keys: <room>/<cause>, then general ones. 'after' = consecutive Robbies lost to that cause before the hint appears. Hints nudge; they never give the answer.",
+ "start": "Mission control: Robbie {n} is ready with a one-rule program. Press LAUNCH and watch what it does.",
+ "first_loss": "Mission control: Drag along the timeline under the monitor. The panel below it says which rule Robbie was following, and why. Change a rule, then launch the next Robbie.",
+ "rooms": {
+  "dark/wall": [
+   {
+    "after": 2,
+    "text": "The beacon tells Robbie where the exit is, not how to get there. In a cave, something that keeps in touch with the rock might go further."
+   }
+  ],
+  "dark/energy": [
+   {
+    "after": 1,
+    "text": "That Robbie took the long way round. In this cave, left and right are not the same."
+   }
+  ],
+  "jellyfish/jellyfish": [
+   {
+    "after": 2,
+    "text": "Watch what the jellyfish do when Robbie's lamp touches them. What if Robbie stopped shining at them?"
+   },
+   {
+    "after": 4,
+    "text": "In the dark, Robbie can still see a jellyfish's own glow. Keeping a little distance might be enough."
+   }
+  ],
+  "jellyfish/wall": [
+   {
+    "after": 2,
+    "text": "Backing away from one thing can mean backing into another."
+   }
+  ],
+  "nursery/jellyfish": [
+   {
+    "after": 2,
+    "text": "In a tunnel this narrow, the dark won't keep them out of Robbie's way. Something has to clear the path."
+   },
+   {
+    "after": 4,
+    "text": "Robbie carries a laser. It fires at whatever Robbie senses close by, and every shot costs energy."
+   }
+  ],
+  "nursery/wall": [
+   {
+    "after": 2,
+    "text": "The beacon is on the far side of a winding tunnel. The trick from the first room still works here."
+   }
+  ],
+  "nursery/energy": [
+   {
+    "after": 1,
+    "text": "Shots and detours both cost energy. That Robbie spent it before the end of the tunnel."
+   }
+  ],
+  "valve/valve": [
+   {
+    "after": 2,
+    "text": "The valve has a rhythm. Robbie can tell whether it is shut, as long as the valve is ahead of it."
+   }
+  ],
+  "valve/lurker": [
+   {
+    "after": 1,
+    "text": "Something in the rock struck that Robbie. Lurkers are camouflaged: Robbie can't sense one until it wakes and its eyes glow, a moment before it strikes."
+   },
+   {
+    "after": 2,
+    "text": "The moment a lurker's eyes glow, Robbie can sense it. Keeping a distance from what Robbie senses might be enough, and a lurker that has just struck needs a while to recover."
+   }
+  ],
+  "valve/energy": [
+   {
+    "after": 1,
+    "text": "Waiting costs energy too. A Robbie that never moves on runs dry."
+   }
+  ],
+  "listeners/eel": [
+   {
+    "after": 2,
+    "text": "The eels don't hunt by sight. Watch what Robbie is doing at the moment one turns on it."
+   },
+   {
+    "after": 4,
+    "text": "A Robbie that holds still is just another rock to them."
+   }
+  ],
+  "listeners/wall": [
+   {
+    "after": 1,
+    "text": "Backing away is still swimming, and swimming is noise."
+   }
+  ],
+  "listeners/energy": [
+   {
+    "after": 1,
+    "text": "Waiting costs energy too. Hold still only while one is close."
+   }
+  ],
+  "lock/eel": [
+   {
+    "after": 1,
+    "text": "The eels are back, and they still hunt by sound. What did Robbie do when one came near in The Listeners?"
+   },
+   {
+    "after": 2,
+    "text": "Backing away is still swimming. Holding still is the only quiet thing Robbie can do."
+   }
+  ],
+  "lock/valve": [
+   {
+    "after": 1,
+    "text": "The valve is back too. Robbie needs both answers: hold still for the eels, and wait while the valve is shut."
+   },
+   {
+    "after": 2,
+    "text": "Two stops in one program is fine. Robbie follows the first rule that applies."
+   }
+  ]
+ },
+ "stuck": {
+  "after": 5,
+  "text": "Every rule costs CPU, but a second rule can catch what the first one misses. Rules are read from the top: the first one that applies wins."
+ }
 }

@@ -1,0 +1,5 @@
+# expect: fail
+# certify: no
+# The Listeners' answer: hold still for the eels. Nothing waits for the valve.
+stop if hostile_near 4
+move_towards beacon

@@ -69,7 +69,7 @@ Full notes and triage: docs/design/feedback-2026-10-17.md. Order to confirm with
 - [ ] Jellyfish turn smoothly instead of snapping to a new heading.
 - [x] One room that rewards the laser: The Nursery (block 7).
 - [x] A new creature that needs a new answer: the eel, and The Listeners (block 11).
-- [ ] More rooms for the slice: a current, a vent; rooms that combine two creatures.
+- [~] More rooms for the slice: The Lock combines the valve and the eels (block 23). Next: a current, a vent; jellyfish with eels.
 - [~] Solver v1 (mutation search, block 10): running room by room; records for The Dark so far. Refresh
       `content/solver/records.json` with `tools/solver_records.py` as results come in.
 

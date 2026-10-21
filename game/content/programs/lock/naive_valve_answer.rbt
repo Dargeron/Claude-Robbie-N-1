@@ -1,0 +1,7 @@
+# expect: fail
+# certify: no
+# The Valve's answer: back away from danger and wait for the door. Backing away is
+# still swimming, and the eels hear it.
+keep_distance 4
+stop if valve_shut
+move_towards beacon

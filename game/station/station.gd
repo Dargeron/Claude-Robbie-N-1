@@ -114,7 +114,7 @@ func _build() -> void:
 		var b := Button.new()
 		b.toggle_mode = true
 		b.button_group = group
-		b.custom_minimum_size = Vector2(118, 0)
+		b.custom_minimum_size = Vector2(96, 0)
 		b.add_theme_font_size_override("font_size", 12)
 		b.pressed.connect(func() -> void: _select_room(id))
 		tabs.add_child(b)
@@ -300,7 +300,7 @@ func _label_room_tab(b: Button, rid: String) -> void:
 	var done := state.room_state(rid).certified
 	var i := GameState.ROOMS.find(rid)
 	var open := state.room_unlocked(rid)
-	b.text = "%d · %s" % [i + 1, _room_name(rid)]
+	b.text = "%d · %s" % [i + 1, _room_name(rid).trim_prefix("The ")]   # short: six tabs share the bar
 	b.disabled = not open
 	b.add_theme_color_override("font_color", UiTheme.GREEN if done else UiTheme.TEXT)
 	if not open:

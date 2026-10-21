@@ -42,6 +42,7 @@ func _ready() -> void:
 		["seek", 0.5], ["wait", 5], ["shot", "08f-nursery-mid"],
 		["room", "listeners"], ["program", "move_towards beacon"], ["launch"], ["seek_event", "eel_hears", 10], ["wait", 5], ["shot", "08g-listeners-heard"],
 		["program", "stop if hostile_near 4\nmove_towards beacon"], ["launch"], ["seek", 0.4], ["wait", 5], ["shot", "08h-listeners-still"],
+		["room", "lock"], ["program", "stop if hostile_near 4\nstop if valve_shut\nmove_towards beacon"], ["launch"], ["seek", 0.45], ["wait", 5], ["shot", "08i-lock"],
 		["wall"], ["wait", 5], ["shot", "09-wall"],
 		["wall_pick", 3], ["wait", 5], ["shot", "10-from-wall"],
 		["quit"],

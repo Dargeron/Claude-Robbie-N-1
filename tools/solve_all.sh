@@ -8,7 +8,7 @@ mkdir -p "$ROOT/out/solve"
 (
   rooms=$(cd "$ROOT" && python3 -c "
 import json, os
-rs = ['dark', 'jellyfish', 'nursery', 'valve', 'listeners']
+rs = ['dark', 'jellyfish', 'nursery', 'valve', 'listeners', 'lock']
 def n(r):
     p = 'out/solve/%s.json' % r
     return json.load(open(p)).get('evaluations', 0) if os.path.exists(p) else 0

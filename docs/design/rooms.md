@@ -242,3 +242,46 @@ late, because the eel hears at three.
 
 ![The Listeners, intended](../devlog/img/s13/listeners-intended.png)
 
+
+## 6. The Lock
+
+CPU budget 16 · energy 9000 · valve: open 60, closing 45, shut 150 ticks, phase varies per dive
+
+```text
+########################################
+########################################
+########################################
+##########....#########..#####..########
+##########....#########..#####..########
+##########H...#########..#####..########
+#......###....#########..#####.H########
+#......###....#########..#####..########
+#......###....#########..#####..########
+#.................G.................EEE#
+#..S..............G.................EEE#
+#.................G.................EEE#
+#......###....#########..#####..########
+#.p....###....#########..#####..########
+#......###....#########..#####..########
+##########....#########.H#####..########
+##########...H#########..#####..########
+##########....#########..#####..########
+########################################
+########################################
+########################################
+########################################
+```
+
+Added in block 23. No new creature: the first room that needs two earlier lessons at once.
+A wide shaft with two eels before the valve, two more shafts after it.
+
+**Teaches:** combine answers. The eels need Robbie to hold still while one is near (The Listeners); the valve needs
+Robbie to wait while it is shut (The Valve). Each room's own answer fails here on its own.
+
+| Program | CPU | Survey fleet (20 seeds) | What happens |
+| --- | --- | --- | --- |
+| `stop if hostile_near 4` / `stop if valve_shut` / `move_towards beacon` (intended) | 10 | 18/20 | Out in about 30 s. Twice an eel lingers in range and Robbie waits until its battery runs out |
+| `keep_distance 4` / `stop if valve_shut` / `move_towards beacon` | 9 | 5/20 | The Valve's answer: backing away is noise, and it backs into rock |
+| `stop if hostile_near 4` / `move_towards beacon` | 6 | 8/20 | The Listeners' answer: crushed in the valve |
+| `stop if valve_shut` / `move_towards beacon` | 6 | 8/20 | Waits for the valve, then swims past the eels |
+| `move_towards beacon` | 2 | 2/20 | Crushed or bitten |
