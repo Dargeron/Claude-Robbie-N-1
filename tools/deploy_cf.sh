@@ -6,11 +6,11 @@
 # looked up from the token when CLOUDFLARE_ACCOUNT_ID isn't set. Config: tools/cloudflare/wrangler.toml
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-: "${CLOUDFLARE_API_TOKEN:?not set: add it to the cloud environment's variables}"
+: "${CLOUDFLARE_API_TOKEN:?not set: add it to the cloud environment variables}"
 [[ -f "$ROOT/out/site/index.html" ]] || { echo "run tools/site.sh first"; exit 1; }
 if [[ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]]; then
   CLOUDFLARE_ACCOUNT_ID=$(curl -sS "https://api.cloudflare.com/client/v4/accounts?per_page=5" \
-    -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | python3 -c "import sys,json; print(json.load(sys.stdin)['result'][0]['id'])")
+    -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | python3 -c 'import sys,json; print(json.load(sys.stdin)["result"][0]["id"])')
   export CLOUDFLARE_ACCOUNT_ID
 fi
 export WRANGLER_SEND_METRICS=false
