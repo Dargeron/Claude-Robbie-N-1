@@ -61,8 +61,12 @@
     ],
     "valve/lurker": [
       {
+        "after": 1,
+        "text": "Something in the rock struck that Robbie. Lurkers are camouflaged: Robbie can't sense one until it wakes and its eyes glow, a moment before it strikes."
+      },
+      {
         "after": 2,
-        "text": "The rock's eyes glow just before it strikes. A Robbie that keeps its distance from what it sees might live."
+        "text": "The moment a lurker's eyes glow, Robbie can sense it. Keeping a distance from what Robbie senses might be enough, and a lurker that has just struck needs a while to recover."
       }
     ],
     "valve/energy": [

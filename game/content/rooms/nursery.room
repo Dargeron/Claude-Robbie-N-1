@@ -1,4 +1,4 @@
-{"id": "nursery", "name": "The Nursery", "order": 3, "cpu": 8, "energy": 7500, "start_heading": 90, "teaches": "When there is no way round, clear the way: the laser, in the dark", "variation": {"jelly_jitter_px": 6, "jelly_scatter": 6}}
+{"id": "nursery", "name": "The Nursery", "order": 3, "cpu": 12, "energy": 7500, "start_heading": 90, "teaches": "When there is no way round, clear the way: the laser, in the dark", "variation": {"jelly_jitter_px": 6, "jelly_scatter": 6}}
 ---
 ########################################
 #....###################################

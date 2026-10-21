@@ -41,6 +41,8 @@ var survey_btn: Button
 var archive: ItemList
 var restore_btn: Button
 var survey_run: Survey.Run = null   # a survey fleet that is out right now
+var skip_btn: IconButton
+var skip_ahead := true              # skip fast to just before where the last Robbie was lost
 var survey_strip: SurveyStrip
 var archive_entries: Array = []
 
@@ -175,6 +177,9 @@ func _build() -> void:
 	speed_btn.custom_minimum_size = Vector2(50, 0)
 	speed_btn.add_theme_font_size_override("font_size", 12)
 	transport.add_child(speed_btn)
+	skip_btn = IconButton.make("skip", "Skip ahead: play fast until just before where the last Robbie was lost (K)", _toggle_skip)
+	skip_btn.modulate = UiTheme.AMBER
+	transport.add_child(skip_btn)
 	transport.add_child(IconButton.make("expand", "Watch large (F)", _toggle_watch))
 	mute_btn = IconButton.make("sound", "Sound on/off (M)", _toggle_mute)
 	transport.add_child(mute_btn)
@@ -439,6 +444,14 @@ func _launch() -> void:
 	var res := state.launch(room_id, program)
 	_refresh_archive()
 	_show(res["dive"], res["entry"], res["history"])
+	# Skip ahead to the trouble: fast until 3 s before where the previous Robbie was lost.
+	var g: Dictionary = replay.view.ghost
+	if skip_ahead and g.get("lost", false):
+		var path: PackedVector2Array = g["path"]
+		replay.skip_until = maxi(0, (path.size() - 1) * GameState.PATH_STEP - 3 * World.TICKS_PER_SECOND)
+	# Launching goes straight to the full-screen transmission.
+	if not watch_large:
+		_toggle_watch()
 	_refresh()
 
 
@@ -513,7 +526,10 @@ func _play_entry(entry: Dictionary) -> void:
 
 
 func _on_replay_end() -> void:
-	pass
+	if watch_large and watch_hint != null:
+		watch_hint.text = "Transmission over.  Click the picture or press F to go back to Mission Control"
+		watch_hint.visible = true
+		watch_hint.modulate.a = 1.0
 
 
 func _refresh_archive() -> void:
@@ -733,6 +749,13 @@ func _open_from_wall(id: String, entry: Dictionary) -> void:
 			return
 
 
+func _toggle_skip() -> void:
+	skip_ahead = not skip_ahead
+	if not skip_ahead:
+		replay.skip_until = -1
+	skip_btn.modulate = UiTheme.AMBER if skip_ahead else Color.WHITE
+
+
 func _toggle_mute() -> void:
 	Sfx.set_muted(not Sfx.muted)
 	mute_btn.set_icon("muted" if Sfx.muted else "sound")
@@ -741,13 +764,15 @@ func _toggle_mute() -> void:
 func _toggle_watch() -> void:
 	watch_large = not watch_large
 	if watch_large:
+		if watch_hint != null:
+			watch_hint.text = "Click the picture or press F to go back to Mission Control  ·  Space pauses  ·  Left/Right change speed  ·  K skips ahead"
 		monitor.stretch_shrink = 2
 		monitor.position = Vector2.ZERO
 		monitor.size = Vector2(1280, 720)
 		move_child(monitor, get_child_count() - 1)
 		if watch_hint == null:
 			watch_hint = Label.new()
-			watch_hint.text = "Click the picture or press F to go back to the station  ·  Space pauses  ·  arrow keys step 1 s"
+			watch_hint.text = "Click the picture or press F to go back to Mission Control  ·  Space pauses  ·  Left/Right change speed  ·  K skips ahead"
 			watch_hint.add_theme_color_override("font_color", Color(1, 1, 1, 0.55))
 			watch_hint.add_theme_font_size_override("font_size", 12)
 			watch_hint.position = Vector2(16, 34)
@@ -793,6 +818,17 @@ func _unhandled_input(event: InputEvent) -> void:
 				replay.playing = not replay.playing
 				accept_event()
 			KEY_LEFT:
-				replay.seek(replay.view.t - World.TICKS_PER_SECOND if replay.has_dive() else 0.0)
+				replay.skip_until = -1
+				replay.step_speed(-1)
+				accept_event()
 			KEY_RIGHT:
+				replay.skip_until = -1
+				replay.step_speed(1)
+				accept_event()
+			KEY_COMMA:
+				replay.seek(replay.view.t - World.TICKS_PER_SECOND if replay.has_dive() else 0.0)
+			KEY_PERIOD:
 				replay.seek(replay.view.t + World.TICKS_PER_SECOND if replay.has_dive() else 0.0)
+			KEY_K:
+				_toggle_skip()
+				accept_event()

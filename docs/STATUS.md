@@ -1,11 +1,11 @@
 # Status
 
-Updated 2026-10-17, after hourly block 18 (18:39 UTC): rooms open one after another.
+Updated 2026-10-21, after hourly block 19 (14:08 UTC): Albert's notes, part 1 (the lurker, CPU budgets, watching a launch).
 
 ## Where we are
 
-**Hourly blocks paused** at Albert's request until his usage resets on Wednesday 21 October at 16:00 (Spain).
-A one-off reminder resumes them at 14:05 UTC that day, starting with his feedback list.
+**Hourly blocks resumed** on 21 October, working through Albert's 14 playtest notes first
+(docs/design/feedback-2026-10-17.md). Done: #14 the lurker, #8 CPU budgets, #2 full-screen launch and skip-ahead.
 
 **Albert played it (2026-10-17, evening): "I had FUN... the barest core is good."** The core loop passes his gate. He has many
 changes, suggestions and problems to fix; those come first in the backlog as soon as he sends them.
@@ -29,6 +29,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 - The station log: dated entries unlocked by certifying rooms; the slow story (content/story/log.json).
 - Robbie's manual (H) and tooltips on every order and condition, from one source (Catalogue.HELP).
 - Rooms open one after another as each is certified (Ctrl+Shift+U opens all, for testing).
+- Launching goes full screen and skips fast to just before where the previous Robbie was lost (K toggles).
 - A first-visit coach points at LAUNCH, the timeline and the editor until Robbie 002 is sent.
 - AUTO playback: skims quiet water at 4x and slows to normal speed around every event.
 - The Wall of Robbies: every Robbie sent, its route on a small map, how it ended and its last words; the per-room
@@ -43,9 +44,9 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 ## Next three tasks
 
-1. Verify the web page inside the claude.ai frame (needs Albert's eyes). It runs in headless Chromium (webcheck, block 15).
-2. Live first viewing (pending Albert's call on the plan's open decision).
-3. Let the solver finish every room; act on anything cheaper than our intended programs.
+1. Albert's #11: everything hidden until the lamp finds it, the exit included.
+2. Albert's #4 and #3: a big, obvious objectives control; a light guided first room.
+3. Albert's #5: the beacon opens the next room; optional objectives per room. Needs his answer on the two currencies.
 
 ## Known issues and open questions
 

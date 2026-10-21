@@ -1,4 +1,4 @@
-{"id": "jellyfish", "name": "The Jellyfish", "order": 2, "cpu": 8, "energy": 6000, "start_heading": 90, "teaches": "Light attracts; lamp off or keep distance. The swarm is different on every dive.", "variation": {"jelly_jitter_px": 16, "jelly_scatter": 16}}
+{"id": "jellyfish", "name": "The Jellyfish", "order": 2, "cpu": 12, "energy": 6000, "start_heading": 90, "teaches": "Light attracts; lamp off or keep distance. The swarm is different on every dive.", "variation": {"jelly_jitter_px": 16, "jelly_scatter": 16}}
 ---
 ########################################
 #................J.....................#

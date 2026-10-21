@@ -19,6 +19,8 @@ var view: DiveView
 var hud: Hud
 var speed_i := 1
 var auto := true                # AUTO speed: fast through quiet water, normal speed around events
+var skip_until := -1            # skip ahead at SKIP_SPEED until this tick (just before the last Robbie was lost)
+const SKIP_SPEED := 8.0
 var auto_speeds := PackedFloat32Array()
 var playing := true
 var rewinding := false
@@ -91,29 +93,42 @@ func tick() -> int:
 func seek(t: float) -> void:
 	if view == null:
 		return
+	skip_until = -1   # once the player takes the playhead, stop skipping
 	view.t = clampf(t, 0.0, float(view.last_tick()))
 	_ended = view.t >= float(view.last_tick())
 
 
 ## The playback speed right now (in AUTO it depends on where the playhead is).
 func speed() -> float:
+	if skip_until > 0 and view != null and playing and not rewinding and tick() < skip_until:
+		return SKIP_SPEED
 	if auto and view != null and auto_speeds.size() > 0:
 		return auto_speeds[tick()]
 	return SPEEDS[speed_i]
 
 
-## Speed button: AUTO, x1, x2, x4, x8, AUTO...
+## Speed button: AUTO, x0.5, x1, x2, x4, x8, AUTO...
 func cycle_speed() -> void:
 	if auto:
 		auto = false
-		speed_i = 1
+		speed_i = 0
 	elif speed_i >= SPEEDS.size() - 1:
 		auto = true
 	else:
 		speed_i += 1
 
 
+## Arrow keys: one step slower or faster through x0.5 ... x8 (AUTO counts as x1 to start from).
+func step_speed(dir: int) -> void:
+	if auto:
+		auto = false
+		speed_i = 1
+	speed_i = clampi(speed_i + dir, 0, SPEEDS.size() - 1)
+
+
 func speed_label() -> String:
+	if skip_until > 0 and view != null and tick() < skip_until:
+		return "SKIP"
 	return "AUTO" if auto else "×%s" % str(SPEEDS[speed_i]).trim_suffix(".0")
 
 
@@ -313,6 +328,8 @@ class Hud:
 		var mode := "PAUSED" if not replay.playing else ("REWIND x%s" % shown if replay.rewinding else ("PLAY x%s" % shown if absf(spd - 1.0) > 0.05 else "PLAY"))
 		if replay.auto and replay.playing and not replay.rewinding:
 			mode = "AUTO x%s" % shown
+		if replay.skip_until > 0 and k < replay.skip_until and replay.playing and not replay.rewinding:
+			mode = "SKIPPING AHEAD"
 		draw_string(font, Vector2(560, 355), mode, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, dim)
 		if k >= v.last_tick():
 			var ok := d.world.result == World.Result.EXIT

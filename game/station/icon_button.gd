@@ -37,6 +37,10 @@ func _draw() -> void:
 		"rewind":
 			_tri(c + Vector2(-3, 0), s, -1, col)
 			_tri(c + Vector2(4, 0), s, -1, col)
+		"skip":
+			_tri(c + Vector2(-4, 0), s, 1, col)
+			_tri(c + Vector2(2, 0), s, 1, col)
+			draw_rect(Rect2(c.x + 6, c.y - 5, 2, 10), col)
 		"faster":
 			_tri(c + Vector2(-3, 0), s, 1, col)
 			_tri(c + Vector2(4, 0), s, 1, col)

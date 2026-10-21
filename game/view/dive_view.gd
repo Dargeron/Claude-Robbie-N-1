@@ -258,21 +258,52 @@ func _draw_creatures(k: int, k2: int, f: float, rpos: Vector2, lamp_on: bool, no
 			Body.Kind.EEL:
 				_draw_eel(i, k, pos, state, now)
 			Body.Kind.LURKER:
-				if state == 1:
-					_glow(pos, C_LURKER, 16.0, 1.0)
-					draw_circle(pos + Vector2(-2, 0), 1.2, Color(1, 0.9, 1))
-					draw_circle(pos + Vector2(2, 0), 1.2, Color(1, 0.9, 1))
-				elif state == 2:
-					draw_circle(pos + Vector2(-2, 0), 0.8, Color(C_LURKER, 0.4))
-					draw_circle(pos + Vector2(2, 0), 0.8, Color(C_LURKER, 0.4))
-				elif lamp_on and pos.distance_to(rpos) < 96.0:
-					draw_circle(pos, 5.0, Color(0.2, 0.18, 0.2, 0.35))   # a shape in the rock, barely
+				_draw_lurker(k, pos, rpos, state, lamp_on, now)
 	# Strike flashes.
 	for e in dive.world.events:
 		if e["type"] == "lurker_strikes" and k >= e["t"] and k < e["t"] + 8:
 			var b: int = e["src"]
 			var pos := _p(rec.bx[b][e["t"]], rec.by[b][e["t"]])
 			draw_arc(pos, 10.0 + (k - e["t"]) * 4.0, 0, TAU, 24, Color(C_LURKER, 1.0 - (k - e["t"]) / 8.0), 2.0)
+
+
+## A lurker. Awake (winding up): wide glowing eyes and a pulsing ring, the moment Robbie
+## can sense it. Resting after a strike: half-shut eyes. Asleep: camouflaged, but when the
+## lamp's beam falls on it the player sees a lumpy shape with closed eyes. Robbie itself
+## still can't sense it then (that's the point of camouflage); the hints and manual say so.
+func _draw_lurker(k: int, pos: Vector2, rpos: Vector2, state: int, lamp_on: bool, now: float) -> void:
+	var lit := false
+	if lamp_on and pos.distance_to(rpos) < 48.0:   # inside the lamp's halo (World.LAMP_HALO)
+		lit = true
+	elif lamp_on and pos.distance_to(rpos) < 96.0:   # or ahead, in the beam
+		var ang := dive.rec.ra[k] * TAU / 4096.0
+		var fwd := Vector2(sin(ang), -cos(ang))
+		lit = absf(fwd.angle_to(pos - rpos)) < 0.62
+	if state == 1:
+		var pulse := 0.5 + 0.5 * sin(now * 18.0)
+		_glow(pos, C_LURKER, 16.0, 1.0)
+		draw_arc(pos, 9.0 + pulse * 3.0, 0, TAU, 24, Color(C_LURKER, 0.7), 1.5)
+		draw_circle(pos + Vector2(-2.2, 0), 1.6, Color(1, 0.9, 1))
+		draw_circle(pos + Vector2(2.2, 0), 1.6, Color(1, 0.9, 1))
+		draw_circle(pos + Vector2(-2.2, 0), 0.6, Color(0.3, 0, 0.2))
+		draw_circle(pos + Vector2(2.2, 0), 0.6, Color(0.3, 0, 0.2))
+	elif state == 2:
+		draw_circle(pos, 6.0, Color(0.25, 0.2, 0.26, 0.5))
+		draw_line(pos + Vector2(-3.2, 0), pos + Vector2(-1.2, 0), Color(C_LURKER, 0.6), 1.0)
+		draw_line(pos + Vector2(1.2, 0), pos + Vector2(3.2, 0), Color(C_LURKER, 0.6), 1.0)
+	elif lit:
+		var reach := clampf(pos.distance_to(rpos) / 96.0, 0.0, 1.0)
+		var a := lerpf(0.9, 0.35, reach)
+		# A lump in the rock that isn't quite rock: a bumpy outline and two closed eyes.
+		var pts := PackedVector2Array()
+		for s in 13:
+			var t := s * TAU / 12.0
+			var r := 6.5 + sin(t * 3.0 + 1.3) * 0.9
+			pts.append(pos + Vector2(cos(t), sin(t)) * r)
+		draw_colored_polygon(pts, Color(0.36, 0.3, 0.36, a * 0.8))
+		draw_polyline(pts, Color(0.62, 0.52, 0.6, a), 1.0)
+		draw_arc(pos + Vector2(-2.3, 0.3), 1.4, 0.2, PI - 0.2, 6, Color(0.95, 0.8, 0.95, a), 1.0)
+		draw_arc(pos + Vector2(2.3, 0.3), 1.4, 0.2, PI - 0.2, 6, Color(0.95, 0.8, 0.95, a), 1.0)
 
 
 ## An eel: a glowing striped body trailing behind its head. Pale while it patrols,

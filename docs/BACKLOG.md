@@ -9,10 +9,10 @@ Status marks: `[ ]` to do · `[~]` in progress · `[x]` done (with the session i
 
 Full notes and triage: docs/design/feedback-2026-10-17.md. Order to confirm with Albert.
 
-- [ ] #14 The Valve's lurker can't be read: shape visible in the lamp, clearer wake, earlier hint (not a crash; ours passes 20/20).
-- [ ] #8 Raise CPU budgets now (later: CPU as an upgrade).
+- [x] #14 The Valve's lurker can't be read: a sleeping lurker shows in the lamp's glow, clearer wake, hint and manual say it's camouflaged (s21).
+- [x] #8 Raise CPU budgets now, by about half (s21). Later: CPU as an upgrade.
 - [ ] #5 Beacon opens the next room; optional objectives per room pay currency (survey becomes one of them?).
-- [ ] #2 Full-screen Game on launch; Space/arrows speed incl. x0.5; toggle "fast until just before the last death".
+- [x] #2 Full-screen Game on launch; Left/Right speed incl. x0.5; K skips fast to just before where the last Robbie was lost, on by default (s21).
 - [ ] #3/#4 Tutorial (and a big, obvious survey/objectives control).
 - [ ] #11 Everything hidden until discovered, exit included (the beacon order still works).
 - [ ] #10 Hundreds of last words, by cause and circumstance.

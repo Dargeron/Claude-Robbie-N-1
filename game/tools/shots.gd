@@ -22,7 +22,7 @@ func _ready() -> void:
 	add_child(station)
 	steps = [
 		["wait", 10], ["shot", "01-start"],
-		["launch"], ["seek", 0.35], ["wait", 5], ["shot", "02-dark-naive-mid"],
+		["launch_large"], ["seek", 0.35], ["wait", 5], ["shot", "02-dark-naive-mid"], ["small"],
 		["scrubbed"], ["wait", 5], ["shot", "02b-coach-editor"],
 		["launch"], ["seek", 1.0], ["wait", 5], ["shot", "03-dark-hint"],
 		["program", "follow_wall left"], ["launch"], ["seek", 0.3], ["wait", 5], ["shot", "04-dark-chart"],
@@ -31,6 +31,7 @@ func _ready() -> void:
 		["log"], ["wait", 5], ["shot", "06c-station-log"], ["log_close"],
 		["manual"], ["wait", 5], ["shot", "06d-manual"], ["manual_close"],
 		["room", "valve"], ["program", "keep_distance 4\nstop if valve_shut\nmove_towards beacon"], ["launch"],
+		["seek_event", "lurker_wakes", -6], ["wait", 5], ["shot", "07a-valve-lurker-asleep"],
 		["seek_event", "lurker_wakes", 8], ["wait", 5], ["shot", "07-valve-lurker"],
 		["room", "jellyfish"], ["program", "move_towards beacon"], ["launch"], ["seek", 0.85], ["wait", 5], ["shot", "08-jellyfish-naive"],
 		["program", "lamp off\nkeep_distance 2\nmove_towards beacon"], ["launch"], ["seek", 0.12], ["wait", 5], ["shot", "08b-jellyfish-ghost"],
@@ -63,8 +64,15 @@ func _process(_d: float) -> void:
 			var img := get_viewport().get_texture().get_image()
 			img.save_png("%s/%s.png" % [out_dir, s[1]])
 			print("shot ", s[1])
-		"launch":
+		"launch":   # launching goes full screen; most shots want the station around it
 			station._launch()
+			if station.watch_large:
+				station._toggle_watch()
+		"launch_large":
+			station._launch()
+		"small":
+			if station.watch_large:
+				station._toggle_watch()
 		"seek":
 			station.replay.seek(s[1] * float(station.replay.view.last_tick()))
 			station.replay.playing = false
