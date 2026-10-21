@@ -378,6 +378,72 @@ func sensed(b: Body) -> bool:
 	return in_cone(b.x, b.y)
 
 
+## sensed() for a recorded moment, with everything passed in: the replay uses it to show
+## the player only what Robbie could sense (Albert's note #11). Same rules as sensed();
+## tests/test_sight.gd checks they agree on every tick of real dives.
+func sensed_from(rx_: int, ry_: int, ra_: int, lamp: bool, gstate: int, bx_: int, by_: int, kind: int, state: int, glowing: bool) -> bool:
+	var dx := bx_ - rx_
+	var dy := by_ - ry_
+	if absi(dx) > LAMP_RANGE or absi(dy) > LAMP_RANGE:   # beyond the lamp and every glow
+		return false   # far away: the common case, decided without a square root
+	var d := Fx.dist(dx, dy)
+	if d <= PROX:
+		return true
+	var g := glow_radius(kind) if glowing else 0
+	var by_glow := g > 0 and d <= g
+	var by_lamp := lamp and d <= LAMP_RANGE and not (kind == Body.Kind.LURKER and state != 1)
+	if not by_glow and not by_lamp:
+		return false
+	if not los_at_state(rx_, ry_, bx_, by_, gstate):
+		return false
+	if by_glow:
+		return true
+	return absi(Fx.angle_diff(ra_, Fx.angle_of(dx, dy))) <= LAMP_HALF
+
+
+## A glowing plant at this tile is sensed from (x, y) at this moment: its glow, or the lamp.
+func plant_sensed_from(rx_: int, ry_: int, ra_: int, lamp: bool, gstate: int, p: Vector2i) -> bool:
+	var cx := p.x * Fx.TILE + Fx.TILE / 2
+	var cy := p.y * Fx.TILE + Fx.TILE / 2
+	var dx := cx - rx_
+	var dy := cy - ry_
+	if absi(dx) > LAMP_RANGE or absi(dy) > LAMP_RANGE:
+		return false
+	var d := Fx.dist(dx, dy)
+	var by_lamp := lamp and d <= LAMP_RANGE and absi(Fx.angle_diff(ra_, Fx.angle_of(dx, dy))) <= LAMP_HALF
+	if d > PLANT_GLOW and not by_lamp:
+		return false
+	return los_at_state(rx_, ry_, cx, cy, gstate)
+
+
+## How far a glowing body of this kind can be sensed by its own light.
+static func glow_radius(kind: int) -> int:
+	match kind:
+		Body.Kind.JELLYFISH:
+			return J_GLOW
+		Body.Kind.EEL:
+			return E_GLOW
+		Body.Kind.LURKER:
+			return L_GLOW
+	return 0
+
+
+## los() with the valve's state passed in.
+func los_at_state(ax: int, ay: int, bx_: int, by_: int, gstate: int) -> bool:
+	var dx := bx_ - ax
+	var dy := by_ - ay
+	var d := Fx.dist(dx, dy)
+	if d <= RAY_STEP:
+		return true
+	var steps := d / RAY_STEP
+	for i in range(1, steps):
+		var px_ := ax + dx * i * RAY_STEP / d
+		var py_ := ay + dy * i * RAY_STEP / d
+		if solid_at_state(px_ / Fx.TILE, py_ / Fx.TILE, gstate):
+			return false
+	return true
+
+
 ## Nearest sensed hostile as [body_index, distance], or [-1, -1]. Several rules can ask
 ## in one think; nothing moves during a think, so the answer is kept until something
 ## that matters changes (the tick, the lamp, or Robbie's position or heading).

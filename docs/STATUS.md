@@ -1,11 +1,11 @@
 # Status
 
-Updated 2026-10-21, after hourly block 19 (14:08 UTC): Albert's notes, part 1 (the lurker, CPU budgets, watching a launch).
+Updated 2026-10-21, after hourly block 20 (15:24 UTC): nothing shows until Robbie finds it (Albert's #11).
 
 ## Where we are
 
 **Hourly blocks resumed** on 21 October, working through Albert's 14 playtest notes first
-(docs/design/feedback-2026-10-17.md). Done: #14 the lurker, #8 CPU budgets, #2 full-screen launch and skip-ahead.
+(docs/design/feedback-2026-10-17.md). Done: #14 the lurker, #8 CPU budgets, #2 full-screen launch and skip-ahead, #11 hidden until found.
 
 **Albert played it (2026-10-17, evening): "I had FUN... the barest core is good."** The core loop passes his gate. He has many
 changes, suggestions and problems to fix; those come first in the backlog as soon as he sends them.
@@ -29,6 +29,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 - The station log: dated entries unlocked by certifying rooms; the slow story (content/story/log.json).
 - Robbie's manual (H) and tooltips on every order and condition, from one source (Catalogue.HELP).
 - Rooms open one after another as each is certified (Ctrl+Shift+U opens all, for testing).
+- The transmission shows only what Robbie sensed; a green tick beside Robbie points at the beacon.
 - Launching goes full screen and skips fast to just before where the previous Robbie was lost (K toggles).
 - A first-visit coach points at LAUNCH, the timeline and the editor until Robbie 002 is sent.
 - AUTO playback: skims quiet water at 4x and slows to normal speed around every event.
@@ -38,14 +39,14 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
   the room swims alongside the replay as a ghost.
 - Survey fleet (certification: 16 of 20 dives on seeds of its own, sent a few per frame with progress), headless dive runner, PNG path images, golden
   replays, exploit hunt, and a mutation solver that finds the cheapest certifying program per room.
-- 37 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
+- 40 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
   sim), golden replays, reference programs.
 - A dive takes 0.1–0.4 s to simulate natively, a little more in a browser (tools/webcheck.sh prints timings).
 
 ## Next three tasks
 
-1. Albert's #11: everything hidden until the lamp finds it, the exit included.
-2. Albert's #4 and #3: a big, obvious objectives control; a light guided first room.
+1. Albert's #4 and #3: a big, obvious objectives control; a light guided first room.
+2. Albert's #10: many more last words, by cause and circumstance.
 3. Albert's #5: the beacon opens the next room; optional objectives per room. Needs his answer on the two currencies.
 
 ## Known issues and open questions

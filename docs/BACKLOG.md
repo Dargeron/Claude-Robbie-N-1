@@ -14,7 +14,7 @@ Full notes and triage: docs/design/feedback-2026-10-17.md. Order to confirm with
 - [ ] #5 Beacon opens the next room; optional objectives per room pay currency (survey becomes one of them?).
 - [x] #2 Full-screen Game on launch; Left/Right speed incl. x0.5; K skips fast to just before where the last Robbie was lost, on by default (s21).
 - [ ] #3/#4 Tutorial (and a big, obvious survey/objectives control).
-- [ ] #11 Everything hidden until discovered, exit included (the beacon order still works).
+- [x] #11 Everything hidden until discovered, exit included; a green tick shows the beacon's bearing (s22).
 - [ ] #10 Hundreds of last words, by cause and circumstance.
 - [ ] #1/#6 Design with Albert: two currencies, the Lab (Robbie sprite, slots), shop for equipment and instructions.
 - [ ] #6 Three screens: Game, Mission Control, Lab.

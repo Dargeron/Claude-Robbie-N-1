@@ -3,6 +3,10 @@ extends Node2D
 ## Draws one moment of a recorded dive the way Robbie's camera saw it: black
 ## water, the lamp's cone (computed with the sim's own rays), glowing life,
 ## the beacon, and the station's memory of what earlier moments revealed.
+## Nothing is drawn until Robbie has sensed it (Albert's note #11): creatures show
+## while Robbie senses them and fade where they were last sensed; plants, the valve
+## and the beacon stay on the chart once found. Robbie always knows the beacon's
+## bearing (it's a radio signal), drawn as a small green tick beside it.
 ## Presentation only: floats are fine here, nothing feeds back into the sim.
 
 const C_ROCK_LIT := Color(0.50, 0.42, 0.35)
@@ -19,17 +23,25 @@ const C_ROBBIE := Color(1.0, 0.78, 0.3)
 const C_VALVE := Color(0.95, 0.5, 0.2)
 const C_EEL := Color(0.78, 1.0, 0.45)
 const LAMP_RAYS := 33
+const SENSE_HOLD := 6                # ticks a creature stays drawn after Robbie stops sensing it
+const FADE_TICKS := 60               # then it fades out where it was last sensed
+const NEVER := 1 << 30
 
 var dive: Dive
 var t := 0.0                         # playback position in ticks (fractional)
 var first_seen := PackedInt32Array() # tick at which each tile entered this dive's memory
 var station_memory := PackedByteArray()  # tiles any Robbie in this room has ever seen
 var ghost: Dictionary = {}           # the previous Robbie's route: {serial, path (px every PATH_STEP ticks), lost}
+var last_sensed: Array[PackedInt32Array] = []  # per creature, per tick: the last tick up to then Robbie sensed it, or -1
+var plant_found := PackedInt32Array()  # per plant: the first tick Robbie sensed it
+var first_sensed := PackedInt32Array() # per creature: the first tick Robbie sensed it (a small "found it" ring)
+var exit_found := NEVER                # the first tick Robbie saw the exit
 
 
 func setup(d: Dive) -> void:
 	dive = d
 	_build_memory()
+	_build_sight()
 	queue_redraw()
 
 
@@ -49,6 +61,66 @@ func _build_memory() -> void:
 			var ends := w.lamp_ray_ends(x, y, rec.ra[k], rec.gate[k], 9)
 			for i in range(0, ends.size(), 2):
 				_remember_line(x, y, ends[i], ends[i + 1], k)
+
+
+## Works out once, from the recording, what Robbie sensed and when: the same rules
+## as the sim (World.sensed_from), so the picture never shows what Robbie couldn't know.
+func _build_sight() -> void:
+	var rec := dive.rec
+	var w := dive.world
+	var room := dive.room
+	var n := rec.bx.size()
+	last_sensed.clear()
+	var kinds := PackedInt32Array()
+	for i in n:
+		var arr := PackedInt32Array()
+		arr.resize(rec.ticks)
+		last_sensed.append(arr)
+		kinds.append(w.bodies[i].kind)
+	var last := PackedInt32Array()
+	last.resize(n)
+	last.fill(-1)
+	first_sensed.resize(n)
+	first_sensed.fill(NEVER)
+	plant_found.resize(room.plants.size())
+	plant_found.fill(NEVER)
+	for k in rec.ticks:
+		var x := rec.rx[k]
+		var y := rec.ry[k]
+		var a := rec.ra[k]
+		var lamp := (rec.rflags[k] & 1) == 1
+		var g: int = rec.gate[k]
+		for i in n:
+			var st := rec.bstate[i][k]
+			if (st & 1) == 1 and w.sensed_from(x, y, a, lamp, g, rec.bx[i][k], rec.by[i][k], kinds[i], (st >> 1) & 0x7f, (st & 256) != 0):
+				last[i] = k
+				if first_sensed[i] == NEVER:
+					first_sensed[i] = k
+			last_sensed[i][k] = last[i]
+		if k % 3 == 0:
+			for p in room.plants.size():
+				if plant_found[p] == NEVER and w.plant_sensed_from(x, y, a, lamp, g, room.plants[p]):
+					plant_found[p] = k
+	exit_found = NEVER
+	for ty in room.h:
+		for tx in room.w:
+			if room.is_exit(tx, ty):
+				exit_found = mini(exit_found, first_seen[ty * room.w + tx])
+
+
+## A ring that opens once where something was found for the first time.
+func _found_ring(pos: Vector2, k: int, found: int, col: Color, size: float) -> void:
+	var age := k - found
+	if age < 0 or age >= 24:
+		return
+	var f := float(age) / 24.0
+	draw_arc(pos, 3.0 + f * size, 0, TAU, 24, Color(col, 0.8 * (1.0 - f)), 1.0)
+
+
+func _in_station_memory(tx: int, ty: int) -> bool:
+	var room := dive.room
+	return station_memory.size() == room.w * room.h and tx >= 0 and ty >= 0 and tx < room.w and ty < room.h \
+		and station_memory[ty * room.w + tx] == 1
 
 
 func _remember_around(x: int, y: int, k: int) -> void:
@@ -98,11 +170,12 @@ func _draw() -> void:
 	var lamp_on := (rec.rflags[k] & 1) == 1
 	if lamp_on:
 		_draw_lamp(k, rpos)
-	_draw_plants(now)
-	_draw_beacon(now)
+	_draw_plants(k, now)
+	_draw_beacon(k, now)
 	_draw_valve(k, now)
 	_draw_creatures(k, k2, f, rpos, lamp_on, now)
 	_draw_lasers(k)
+	_draw_bearing(k, rpos, now)
 	_draw_robbie(k, rpos, now)
 
 
@@ -196,19 +269,54 @@ func _glow(pos: Vector2, col: Color, radius: float, strength: float) -> void:
 		draw_circle(pos, r, Color(col, strength * (0.06 + i * 0.05)))
 
 
-func _draw_plants(now: float) -> void:
-	for p in dive.room.plants:
+## Glowing plants: hidden until Robbie senses one, then on the chart for good. Plants
+## an earlier Robbie found show as faint dots.
+func _draw_plants(k: int, now: float) -> void:
+	var plants := dive.room.plants
+	for i in plants.size():
+		var p := plants[i]
 		var pos := Vector2(p.x * 16 + 8, p.y * 16 + 8)
-		var pulse := 0.75 + 0.25 * sin(now * 1.3 + p.x)
-		_glow(pos, C_PLANT, 14.0 * pulse, 0.8)
-		draw_circle(pos, 1.5, C_PLANT)
+		if i < plant_found.size() and plant_found[i] <= k:
+			var pulse := 0.75 + 0.25 * sin(now * 1.3 + p.x)
+			var fresh := clampf(float(k - plant_found[i]) / 20.0, 0.0, 1.0)   # brightens as it's found
+			_glow(pos, C_PLANT, 14.0 * pulse * (0.5 + 0.5 * fresh), 0.8)
+			draw_circle(pos, 1.5, C_PLANT)
+			_found_ring(pos, k, plant_found[i], C_PLANT, 10.0)
+		elif _in_station_memory(p.x, p.y):
+			draw_circle(pos, 1.2, Color(C_PLANT, 0.25))
 
 
-func _draw_beacon(now: float) -> void:
+## The exit's beacon: drawn once Robbie has seen the exit (or faintly, if an earlier
+## Robbie did). Until then only the bearing tick beside Robbie points the way.
+func _draw_beacon(k: int, now: float) -> void:
+	var room := dive.room
+	var c := _p(room.exit_cx, room.exit_cy)
+	if exit_found <= k:
+		var ping := fmod(now, 1.6) / 1.6
+		draw_arc(c, 4.0 + ping * 22.0, 0, TAU, 32, Color(C_BEACON, 0.6 * (1.0 - ping)), 1.0)
+		draw_circle(c, 2.0, C_BEACON)
+		_found_ring(c, k, exit_found, C_BEACON, 30.0)
+	elif _in_station_memory(room.exit_cx / Fx.TILE, room.exit_cy / Fx.TILE):
+		draw_arc(c, 5.0, 0, TAU, 24, Color(C_BEACON, 0.22), 1.0)
+		draw_circle(c, 1.5, Color(C_BEACON, 0.35))
+
+
+## Robbie's radio always knows which way the beacon is, never how far: a small green
+## tick beside Robbie, pulsing with the beacon's ping.
+func _draw_bearing(k: int, rpos: Vector2, now: float) -> void:
+	if dive.rec.rhp[k] <= 0:
+		return
 	var c := _p(dive.room.exit_cx, dive.room.exit_cy)
+	if c.distance_to(rpos) < 14.0:
+		return
+	var dir := (c - rpos).normalized()
+	var side := Vector2(-dir.y, dir.x)
 	var ping := fmod(now, 1.6) / 1.6
-	draw_arc(c, 4.0 + ping * 22.0, 0, TAU, 32, Color(C_BEACON, 0.6 * (1.0 - ping)), 1.0)
-	draw_circle(c, 2.0, C_BEACON)
+	var a := 0.85 - 0.45 * ping
+	var base := rpos + dir * 11.0
+	draw_colored_polygon(PackedVector2Array([base + dir * 4.5, base + side * 2.6, base + dir * 1.2, base - side * 2.6]),
+		Color(C_BEACON, a))
+	draw_arc(rpos, 11.0, dir.angle() - 0.35, dir.angle() + 0.35, 8, Color(C_BEACON, a * 0.4), 1.0)
 
 
 func _draw_valve(k: int, now: float) -> void:
@@ -218,6 +326,8 @@ func _draw_valve(k: int, now: float) -> void:
 	var state: int = dive.rec.gate[k]
 	for gt in room.gate_tiles:
 		var seen := first_seen[gt.y * room.w + gt.x] <= k
+		if not seen and not _in_station_memory(gt.x, gt.y):
+			continue   # not found yet
 		var a := 1.0 if seen else 0.25
 		var r := Rect2(gt.x * 16, gt.y * 16, 16, 16)
 		match state:
@@ -242,12 +352,24 @@ func _draw_creatures(k: int, k2: int, f: float, rpos: Vector2, lamp_on: bool, no
 			continue
 		var pos := _lerp_pos(rec.bx[i], rec.by[i], k, k2, f)
 		var state := (st >> 1) & 0x7f
-		match dive.world.bodies[i].kind:
+		var kind := dive.world.bodies[i].kind
+		var ls := last_sensed[i][k] if i < last_sensed.size() else k
+		var sensed := ls >= 0 and k - ls <= SENSE_HOLD
+		if kind == Body.Kind.LURKER:
+			_draw_lurker(k, pos, rpos, state, lamp_on, now, sensed)
+			if not sensed:
+				_draw_lost_track(i, k, ls, C_LURKER)
+			continue
+		if not sensed:
+			_draw_lost_track(i, k, ls, C_JELLY if kind == Body.Kind.JELLYFISH else C_EEL)
+			continue
+		if i < first_sensed.size():
+			_found_ring(pos, k, first_sensed[i], C_JELLY if kind == Body.Kind.JELLYFISH else C_EEL, 10.0)
+		match kind:
 			Body.Kind.JELLYFISH:
-				var near := pos.distance_to(rpos) <= 64.0
 				var darting := state == 1
 				var col := C_JELLY_LIT if darting else C_JELLY
-				var strength := 1.0 if (near or darting) else 0.35
+				var strength := 1.0
 				var pulse := 0.8 + 0.2 * sin(now * 3.0 + i)
 				_glow(pos, col, 10.0 * pulse, strength)
 				draw_circle(pos, 3.0, Color(col, 0.9 * strength))
@@ -257,8 +379,6 @@ func _draw_creatures(k: int, k2: int, f: float, rpos: Vector2, lamp_on: bool, no
 					draw_line(base, base + Vector2(sway, 4), Color(col, 0.6 * strength), 1.0)
 			Body.Kind.EEL:
 				_draw_eel(i, k, pos, state, now)
-			Body.Kind.LURKER:
-				_draw_lurker(k, pos, rpos, state, lamp_on, now)
 	# Strike flashes.
 	for e in dive.world.events:
 		if e["type"] == "lurker_strikes" and k >= e["t"] and k < e["t"] + 8:
@@ -271,7 +391,8 @@ func _draw_creatures(k: int, k2: int, f: float, rpos: Vector2, lamp_on: bool, no
 ## can sense it. Resting after a strike: half-shut eyes. Asleep: camouflaged, but when the
 ## lamp's beam falls on it the player sees a lumpy shape with closed eyes. Robbie itself
 ## still can't sense it then (that's the point of camouflage); the hints and manual say so.
-func _draw_lurker(k: int, pos: Vector2, rpos: Vector2, state: int, lamp_on: bool, now: float) -> void:
+## Otherwise it isn't drawn at all.
+func _draw_lurker(k: int, pos: Vector2, rpos: Vector2, state: int, lamp_on: bool, now: float, sensed: bool) -> void:
 	var lit := false
 	if lamp_on and pos.distance_to(rpos) < 48.0:   # inside the lamp's halo (World.LAMP_HALO)
 		lit = true
@@ -279,7 +400,9 @@ func _draw_lurker(k: int, pos: Vector2, rpos: Vector2, state: int, lamp_on: bool
 		var ang := dive.rec.ra[k] * TAU / 4096.0
 		var fwd := Vector2(sin(ang), -cos(ang))
 		lit = absf(fwd.angle_to(pos - rpos)) < 0.62
-	if state == 1:
+	if not sensed and not lit:
+		return
+	if state == 1 and sensed:
 		var pulse := 0.5 + 0.5 * sin(now * 18.0)
 		_glow(pos, C_LURKER, 16.0, 1.0)
 		draw_arc(pos, 9.0 + pulse * 3.0, 0, TAU, 24, Color(C_LURKER, 0.7), 1.5)
@@ -304,6 +427,16 @@ func _draw_lurker(k: int, pos: Vector2, rpos: Vector2, state: int, lamp_on: bool
 		draw_polyline(pts, Color(0.62, 0.52, 0.6, a), 1.0)
 		draw_arc(pos + Vector2(-2.3, 0.3), 1.4, 0.2, PI - 0.2, 6, Color(0.95, 0.8, 0.95, a), 1.0)
 		draw_arc(pos + Vector2(2.3, 0.3), 1.4, 0.2, PI - 0.2, 6, Color(0.95, 0.8, 0.95, a), 1.0)
+
+
+## Where Robbie lost track of a creature: a faint ring at the spot it was last sensed,
+## fading. It doesn't follow the creature: Robbie doesn't know where it went.
+func _draw_lost_track(i: int, k: int, ls: int, col: Color) -> void:
+	if ls < 0 or k - ls >= FADE_TICKS + SENSE_HOLD:
+		return
+	var fade := 1.0 - float(k - ls - SENSE_HOLD) / FADE_TICKS
+	var at := _p(dive.rec.bx[i][ls], dive.rec.by[i][ls])
+	draw_arc(at, 4.0 + (1.0 - fade) * 3.0, 0, TAU, 16, Color(col, 0.35 * fade), 1.0)
 
 
 ## An eel: a glowing striped body trailing behind its head. Pale while it patrols,

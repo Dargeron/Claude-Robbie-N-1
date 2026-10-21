@@ -31,7 +31,7 @@ const CONDITIONS := {
 ## Plain-language help for the editor's tooltips and Robbie's manual. Keep these true
 ## to the sim (ranges are in tiles; one tile is 16 px).
 const HELP := {
-	"move_towards": "Turn towards a target and swim. The beacon is the exit's signal: it points straight at the exit, through rock if need be. Light is the nearest glow Robbie can sense. Open water is the clearest way ahead (3 CPU). With no light in sight, \"light\" doesn't apply and Robbie reads on.",
+	"move_towards": "Turn towards a target and swim. The beacon is the exit's radio signal: it points straight at the exit, through rock if need be (the green tick beside Robbie). Robbie knows which way it is, not how far. Light is the nearest glow Robbie can sense. Open water is the clearest way ahead (3 CPU). With no light in sight, \"light\" doesn't apply and Robbie reads on.",
 	"move": "Turn to a fixed compass heading and swim that way.",
 	"keep_distance": "If Robbie senses a hostile closer than this, back away from it while facing it. Backing away is slower than swimming forwards, and Robbie can't see behind it. With nothing that close, the rule doesn't apply and Robbie reads on.",
 	"follow_wall": "Keep the rock on one side and swim along it.",

@@ -1,18 +1,18 @@
 {
   "jellyfish": {
-    "certified_programs": 18,
+    "certified_programs": 22,
     "cpu": 3,
-    "evaluations": 125
+    "evaluations": 200
   },
   "listeners": {
-    "certified_programs": 12,
+    "certified_programs": 29,
     "cpu": 5,
-    "evaluations": 125
+    "evaluations": 250
   },
   "nursery": {
-    "certified_programs": 2,
+    "certified_programs": 6,
     "cpu": 6,
-    "evaluations": 100
+    "evaluations": 300
   },
   "valve": {
     "certified_programs": 7,

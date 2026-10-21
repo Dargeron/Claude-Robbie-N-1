@@ -49,6 +49,10 @@ static func body() -> String:
 	out += "Settings (the lamp) are applied and Robbie keeps reading. A shot is finished before Robbie reads again. "
 	out += "If no rule applies, Robbie drifts: it holds still until something changes.\n"
 	out += "Every rule costs CPU, and each room has a CPU budget. A program that doesn't fit can't be launched.\n\n"
+	out += "[color=%s][b]WHAT THE TRANSMISSION SHOWS[/b][/color]\n" % amber
+	out += "Only what Robbie sensed: rock its lamp lit, creatures in its light or glowing close by, anything near enough to feel. "
+	out += "When Robbie loses track of a creature, a ring fades where it was last sensed. Rock, plants and the exit stay on the station's chart once found, "
+	out += "and later Robbies see them faintly. The green tick beside Robbie points at the beacon: Robbie always knows which way the exit is, never how far.\n\n"
 	out += "[color=%s][b]ORDERS[/b][/color]\n" % amber
 	for a in ProgramEditor.ACTION_ORDER:
 		var def: Dictionary = Catalogue.ACTIONS[a]
