@@ -98,19 +98,108 @@ static func captions(dive: Dive, serial: int, history: Dictionary) -> Array:
 	var end := maxi(0, rec.ticks - 1 - LAST_WORDS_LEAD)
 	# Nothing else may talk over the last words.
 	out = out.filter(func(c): return c[0] < end - 30)
-	out.append([end, final_line(dive, serial, history)])
+	# A Robbie's last words are chosen once, at launch, and kept with it (see final_line).
+	var words: String = history.get("last_words", "")
+	out.append([end, words if words != "" else final_line(dive, serial, history)])
 	out.sort_custom(func(a, b): return a[0] < b[0])
 	return out
 
 
-## The last transmission: what this Robbie says as its burst fires.
+## The last transmission: what this Robbie says as its burst fires (Albert's note #10).
+## Chosen by how it ended and the circumstances (circumstances()): lines written for this
+## cause in this circumstance first, then lines for the circumstance, then the cause's
+## general lines. history["used"] lists last words earlier Robbies already sent; those
+## are skipped while there's anything else to say, so lines rarely repeat. Deterministic:
+## the same Robbie with the same history always says the same thing.
 static func final_line(dive: Dive, serial: int, history: Dictionary) -> String:
 	var w := dive.world
-	if w.result == World.Result.EXIT:
-		return pick("exit", serial)
-	if history.get("prev_cause", "") == w.cause and w.cause != "" and serial % 2 == 0:
-		return pick("same_death", serial, history)
-	return pick("last_" + w.cause, serial)
+	var tags := circumstances(dive, history)
+	var head := "exit" if w.result == World.Result.EXIT else "last_" + w.cause
+	var lib := lines()
+	var weighted: Array = []   # [key, weight]
+	for t in tags:
+		weighted.append([head + "/" + t, 6])
+		if head != "exit":
+			weighted.append(["last_any/" + t, 3])
+	if head != "exit" and history.get("prev_cause", "") == w.cause and w.cause != "":
+		weighted.append(["same_death", 1])
+	weighted.append([head, 2])
+	var used_norm := {}
+	for u in history.get("used", []):
+		used_norm[_norm(str(u))] = true
+	var fill := {
+		"n": "%03d" % serial,
+		"next": "Robbie %03d" % (serial + 1),
+		"prev": "Robbie %03d" % int(history.get("prev_serial", serial - 1)),
+		"cause": cause_label(str(history.get("prev_cause", ""))),
+	}
+	for skip_used in [true, false]:
+		var cands: Array = []   # [text, weight]
+		for kw in weighted:
+			for raw in lib.get(kw[0], []):
+				var text := str(raw).format(fill)
+				if skip_used and used_norm.has(_norm(text)):
+					continue
+				cands.append([text, int(kw[1])])
+		if cands.is_empty():
+			continue
+		var total := 0
+		for c in cands:
+			total += int(c[1])
+		var h := (serial * 7919 + head.length() * 104729 + tags.size() * 31) % total
+		for c in cands:
+			h -= int(c[1])
+			if h < 0:
+				return c[0]
+	return ""
+
+
+## A line with its Robbie numbers taken out: "Tell Robbie 008: ..." and "Tell Robbie 012: ..."
+## are the same line for the purpose of not repeating.
+static var _digits: RegEx = null
+
+static func _norm(t: String) -> String:
+	if _digits == null:
+		_digits = RegEx.create_from_string("\\d{3}")
+	return _digits.sub(t, "#", true)
+
+
+## What was going on when this Robbie's dive ended, as tags for choosing its last words.
+## history may hold prev_serial (none: the first Robbie in the room) and losses (since
+## the room's last success, before this Robbie).
+static func circumstances(dive: Dive, history: Dictionary) -> Array[String]:
+	var w := dive.world
+	var rec := dive.rec
+	var k := rec.ticks - 1
+	var tags: Array[String] = []
+	if not history.has("prev_serial"):
+		tags.append("first")
+	if int(history.get("losses", 0)) >= 4:
+		tags.append("persistent")
+	var to_exit := Fx.dist(w.room.exit_cx - rec.rx[k], w.room.exit_cy - rec.ry[k])
+	var lost := w.result != World.Result.EXIT
+	if lost and to_exit <= 7 * Fx.TILE:
+		tags.append("near_exit")
+	if lost and rec.ticks <= 7 * World.TICKS_PER_SECOND:
+		tags.append("early")
+	if rec.ticks >= 40 * World.TICKS_PER_SECOND:
+		tags.append("late")
+	if (rec.rflags[k] & 1) == 0:
+		tags.append("lamp_off")
+	if lost and (rec.rflags[k] & 2) == 0 and w.cause != "energy":
+		tags.append("still")
+	if w.cause != "energy" and rec.ren[k] * 4 < w.energy_max:
+		tags.append("low_energy")
+	var hurt_early := false   # hurt, and kept going for a while after
+	for e in w.events:
+		if e["type"] == "laser":
+			if not tags.has("laser"):
+				tags.append("laser")
+		elif e["type"] == "damage" and (not lost or int(e["t"]) < k - 3 * World.TICKS_PER_SECOND):
+			hurt_early = true
+	if hurt_early:
+		tags.append("bruised")
+	return tags
 
 
 ## The epitaph for the Wall of Robbies.

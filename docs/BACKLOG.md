@@ -15,7 +15,7 @@ Full notes and triage: docs/design/feedback-2026-10-17.md. Order to confirm with
 - [x] #2 Full-screen Game on launch; Left/Right speed incl. x0.5; K skips fast to just before where the last Robbie was lost, on by default (s21).
 - [x] #3/#4 Room goals under LAUNCH with a big survey button that glows when it's time; a guided first room; "New station" in the manual (s23). Later: a fuller tutorial for later rooms if playtests ask.
 - [x] #11 Everything hidden until discovered, exit included; a green tick shows the beacon's bearing (s22).
-- [ ] #10 Hundreds of last words, by cause and circumstance.
+- [x] #10 340 last words, chosen by cause and circumstance, never repeated while others fit (s24). Keep adding; Albert can edit lines.json.
 - [ ] #1/#6 Design with Albert: two currencies, the Lab (Robbie sprite, slots), shop for equipment and instructions.
 - [ ] #6 Three screens: Game, Mission Control, Lab.
 - [ ] #7/#9/#13 Art pass: cute, drawn, steampunk-ish, organic and moving walls (needs Vertex AI credentials).

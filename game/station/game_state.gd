@@ -84,12 +84,21 @@ func launch(id: String, program: Program) -> Dictionary:
 	return {"entry": entry, "dive": dive, "history": history}
 
 
+## What a new Robbie in this room knows: the one before it (prev_serial, prev_cause), how
+## many have been lost since the last success, and the last words earlier Robbies sent
+## from anywhere (so it says something new).
 func history_for(id: String) -> Dictionary:
+	var used: Array = []
+	for rid in ROOMS:
+		for e in room_state(rid).dives:
+			var words: String = e.get("last_words", "")
+			if words != "":
+				used.append(words)
 	var own := own_dives(id)
 	if own.is_empty():
-		return {}
+		return {"used": used}
 	var last: Dictionary = own.back()
-	return {"prev_serial": last["serial"], "prev_cause": last["cause"]}
+	return {"prev_serial": last["serial"], "prev_cause": last["cause"], "losses": losses_since_success(id), "used": used}
 
 
 func survey(id: String, program: Program) -> Dictionary:

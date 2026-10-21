@@ -1,132 +1,498 @@
 {
-  "_about": "Robbie's lines. Helpful, good-natured, chatty, a little naive; it will learn. {n} = this Robbie, {next} = the next one, {prev} = the previous one, {cause} = what got the previous one. Edit freely: the game picks one per moment, the same one every time for the same Robbie.",
-  "launch": [
-    "Robbie {n}, descending. I have a very good feeling about this.",
-    "Hello, Jupiter! Robbie {n} here, ready to be helpful.",
-    "Descent started. I have read every report from my predecessors. Twice.",
-    "Robbie {n} online. Statistically, this is the best day of my life.",
-    "Going down! Please tell the station I said hello."
-  ],
-  "first_jellyfish": [
-    "Oh! Glowing friends.",
-    "Jellyfish detected. They look very soft.",
-    "Something is glowing. For the record: lovely."
-  ],
-  "lurker_wakes": [
-    "The rock has eyes. Noted.",
-    "That wall is looking at me.",
-    "Eyes! Backing away politely."
-  ],
-  "eel_hears": [
-    "Something heard me.",
-    "I think that was a reply.",
-    "Note: it moves when I move."
-  ],
-  "laser_bounce": [
-    "The rock is laser-proof. Noted.",
-    "That did nothing. It is still very much a rock.",
-    "Laser reflected. The lurker seems unimpressed."
-  ],
-  "hurt_jellyfish": [
-    "Ow. Soft, but not friendly.",
-    "Stung. Updating my opinion of jellyfish."
-  ],
-  "hurt_wall": [
-    "The wall is still there. Confirmed.",
-    "Minor contact with geology."
-  ],
-  "hurt_valve": [
-    "The valve bites! Good to know.",
-    "Ouch. That door has opinions."
-  ],
-  "hurt_eel": [
-    "Bitten. It came out of nowhere, very fast.",
-    "Teeth! I was only swimming."
-  ],
-  "low_energy": [
-    "Energy at a quarter. I will talk less. (I won't.)",
-    "Running low. Still enjoying myself."
-  ],
-  "exit": [
-    "Beacon reached! Firing the burst. Tell {next} the way is clear.",
-    "I made it! Transmitting everything. It was an honour.",
-    "Exit found. Sending the whole trip, including the boring bits.",
-    "Exit reached. I would like it noted that I enjoyed every metre.",
-    "Through! The beacon is even nicer up close.",
-    "I am at the exit. I am also slightly amazed.",
-    "Arrived. Please give {next} my program. It's a good one.",
-    "Made it. Sending the map home before I forget anything."
-  ],
-  "last_wall": [
-    "Please note: the wall was exactly where the map said it would be.",
-    "I hit the same rock three times. In my defence, it didn't move.",
-    "Tell {next}: walls are not optional.",
-    "Rock: one. Robbie: nil. Rematch with {next}.",
-    "I found the edge of the map. With my nose.",
-    "I was sure that was water. It was not water.",
-    "Hull breached. The rock is fine, if anyone asks.",
-    "Steering was a suggestion. The wall disagreed."
-  ],
-  "last_jellyfish": [
-    "Please note for the record that I was right about the jellyfish.",
-    "They were attracted to my light. I understand them completely.",
-    "Tell {next}: the glow is not a greeting.",
-    "They were so soft. There were so many.",
-    "I lit them up and they all came to say hello.",
-    "Stung. Fascinating creatures. Painful, but fascinating.",
-    "Note for science: jellyfish like my lamp more than I do.",
-    "Tell {next}: soft does not mean friendly."
-  ],
-  "last_lurker": [
-    "The rock moved. Rocks are not supposed to move.",
-    "The rock had teeth. I would like that added to the map.",
-    "Tell {next} to mind the wall with eyes.",
-    "The wall blinked. Then it bit.",
-    "I didn't see it until it saw me.",
-    "Something in the rock was waiting. It was very patient.",
-    "Tell {next}: if the rock glows, leave.",
-    "I was close to the exit. The lurker was closer."
-  ],
-  "last_valve": [
-    "The valve closed. I was in the way. We both regret it.",
-    "Tell {next}: wait for the door. Doors don't wait for you.",
-    "I trusted the door. The door had other plans.",
-    "Squeezed. I am now slightly thinner and much wiser.",
-    "The valve and I had different ideas about timing.",
-    "Wrong side of the valve, wrong moment.",
-    "Tell {next}: count the beats before you go.",
-    "A closing door is not an invitation."
-  ],
-  "last_eel": [
-    "I was quiet. Then I wasn't.",
-    "It heard every move I made.",
-    "Tell {next}: hold still when they pass.",
-    "The eel was very fast and I was very loud.",
-    "I kept moving. That was the mistake.",
-    "It never saw me. It didn't need to.",
-    "Tell {next}: they listen.",
-    "Swimming is noisy. Who knew."
-  ],
-  "last_energy": [
-    "Energy gone. I'll describe the exit from memory: it was probably lovely.",
-    "Out of power. I spent it all on enthusiasm.",
-    "Battery empty. I was having such a nice swim.",
-    "Going quiet now. The water is very calm.",
-    "I took the scenic route. Too scenic.",
-    "Power at zero. Lamp off. Thinking about the beacon.",
-    "Tell {next} to pack more energy, or fewer detours."
-  ],
-  "last_timeout": [
-    "I waited as long as I could.",
-    "Still here. Still waiting. Still hopeful.",
-    "I held position perfectly. Nobody told me when to stop."
-  ],
-  "same_death": [
-    "Same {cause} as {prev}. Different me.",
-    "{prev} and I agree about {cause}.",
-    "{prev} was right about {cause}. I checked.",
-    "{prev} warned me about {cause}. I had to see for myself.",
-    "{prev} and I both met {cause}. Somebody should change the program.",
-    "Another Robbie for {cause}. We should start a club."
-  ]
+ "_about": "Robbie's lines. Helpful, good-natured, chatty, a little naive; it will learn. {n} = this Robbie, {next} = the next one, {prev} = the previous one, {cause} = what got the previous one ({prev} and {cause} only in same_death and last_any/persistent). Last words: 'last_<cause>' are general; 'last_<cause>/<tag>' and 'last_any/<tag>' are for circumstances (tags: first, persistent, near_exit, early, late, lamp_off, still, low_energy, laser, bruised); 'exit' and 'exit/<tag>' when Robbie gets through. Lines a Robbie has already sent are skipped while others fit, so they rarely repeat. Edit freely; keep each under 80 characters.",
+ "launch": [
+  "Robbie {n}, descending. I have a very good feeling about this.",
+  "Hello, Jupiter! Robbie {n} here, ready to be helpful.",
+  "Descent started. I have read every report from my predecessors. Twice.",
+  "Robbie {n} online. Statistically, this is the best day of my life.",
+  "Going down! Please tell the station I said hello."
+ ],
+ "first_jellyfish": [
+  "Oh! Glowing friends.",
+  "Jellyfish detected. They look very soft.",
+  "Something is glowing. For the record: lovely."
+ ],
+ "lurker_wakes": [
+  "The rock has eyes. Noted.",
+  "That wall is looking at me.",
+  "Eyes! Backing away politely."
+ ],
+ "eel_hears": [
+  "Something heard me.",
+  "I think that was a reply.",
+  "Note: it moves when I move."
+ ],
+ "laser_bounce": [
+  "The rock is laser-proof. Noted.",
+  "That did nothing. It is still very much a rock.",
+  "Laser reflected. The lurker seems unimpressed."
+ ],
+ "hurt_jellyfish": [
+  "Ow. Soft, but not friendly.",
+  "Stung. Updating my opinion of jellyfish."
+ ],
+ "hurt_wall": [
+  "The wall is still there. Confirmed.",
+  "Minor contact with geology."
+ ],
+ "hurt_valve": [
+  "The valve bites! Good to know.",
+  "Ouch. That door has opinions."
+ ],
+ "hurt_eel": [
+  "Bitten. It came out of nowhere, very fast.",
+  "Teeth! I was only swimming."
+ ],
+ "low_energy": [
+  "Energy at a quarter. I will talk less. (I won't.)",
+  "Running low. Still enjoying myself."
+ ],
+ "exit": [
+  "Beacon reached! Firing the burst. Tell {next} the way is clear.",
+  "I made it! Transmitting everything. It was an honour.",
+  "Exit found. Sending the whole trip, including the boring bits.",
+  "Exit reached. I would like it noted that I enjoyed every metre.",
+  "Through! The beacon is even nicer up close.",
+  "I am at the exit. I am also slightly amazed.",
+  "Arrived. Please give {next} my program. It's a good one.",
+  "Made it. Sending the map home before I forget anything.",
+  "Beacon reached. I'd like to thank the rules. All of them.",
+  "Through! Sending the map for {next}.",
+  "Exit! Sending everything before I get emotional.",
+  "Made it. The rules worked. I just followed them.",
+  "Beacon! Beacon! I'm at the beacon!",
+  "I'm at the exit and I'm only a little scratched.",
+  "Arrived safely. Mostly safely. Arrived.",
+  "Exit reached. Somebody up there wrote good rules."
+ ],
+ "last_wall": [
+  "Please note: the wall was exactly where the map said it would be.",
+  "I hit the same rock three times. In my defence, it didn't move.",
+  "Tell {next}: walls are not optional.",
+  "Rock: one. Robbie: nil. Rematch with {next}.",
+  "I found the edge of the map. With my nose.",
+  "I was sure that was water. It was not water.",
+  "Hull breached. The rock is fine, if anyone asks.",
+  "Steering was a suggestion. The wall disagreed.",
+  "Wall. Again. I'm starting to think it's personal.",
+  "Robbie {n}, reporting one (1) wall. Located precisely.",
+  "I would like to file a complaint against geology.",
+  "Contact! Unfortunately, with rock.",
+  "I've mapped this rock in great detail. Mostly with my face.",
+  "Tell {next} the rock is harder than it looks. It looks quite hard.",
+  "Bonk. Sorry. Official report: bonk.",
+  "I went left. The rock went everywhere.",
+  "Hull says ouch. I say: noted.",
+  "The beacon is that way. So is the rock, it turns out.",
+  "Sending the coordinates of one excellent wall. Do not visit.",
+  "I've found the bottom of the problem. It's rock."
+ ],
+ "last_jellyfish": [
+  "Please note for the record that I was right about the jellyfish.",
+  "They were attracted to my light. I understand them completely.",
+  "Tell {next}: the glow is not a greeting.",
+  "They were so soft. There were so many.",
+  "I lit them up and they all came to say hello.",
+  "Stung. Fascinating creatures. Painful, but fascinating.",
+  "Note for science: jellyfish like my lamp more than I do.",
+  "Tell {next}: soft does not mean friendly.",
+  "I only wanted to look. They only wanted to sting.",
+  "Very pretty. Very ouchy.",
+  "They glow so nicely. Do not touch the glow.",
+  "The jellyfish are fine. I'm the one who isn't.",
+  "I counted them. Then they counted me.",
+  "Tell {next}: they drift, and then they don't.",
+  "So many lights, and not one of them was the beacon.",
+  "Jellyfish: many. Robbie: one, briefly.",
+  "They're gentle until you're interesting.",
+  "I think they liked me. That was the problem.",
+  "Note: jellyfish are mostly water and partly needles.",
+  "I swam towards the pretty lights. Classic mistake."
+ ],
+ "last_lurker": [
+  "The rock moved. Rocks are not supposed to move.",
+  "The rock had teeth. I would like that added to the map.",
+  "Tell {next} to mind the wall with eyes.",
+  "The wall blinked. Then it bit.",
+  "I didn't see it until it saw me.",
+  "Something in the rock was waiting. It was very patient.",
+  "Tell {next}: if the rock glows, leave.",
+  "I was close to the exit. The lurker was closer.",
+  "Note for the map: some of the rock is hungry.",
+  "I swam past a rock. The rock didn't let me.",
+  "It was very good at being a rock. Right up until it wasn't.",
+  "Something blinked. I should have blinked first.",
+  "Tell {next}: when the rock opens its eyes, go the other way.",
+  "I said hello to the wall. The wall said something rude.",
+  "It had been waiting a long time. I was its lucky day.",
+  "Camouflage: ten out of ten. Manners: zero.",
+  "The eyes. Tell {next} about the eyes.",
+  "I stopped to admire an interesting rock. It admired me back.",
+  "Map update: the wall at this spot bites.",
+  "It woke up grumpy. I may have woken it up."
+ ],
+ "last_valve": [
+  "The valve closed. I was in the way. We both regret it.",
+  "Tell {next}: wait for the door. Doors don't wait for you.",
+  "I trusted the door. The door had other plans.",
+  "Squeezed. I am now slightly thinner and much wiser.",
+  "The valve and I had different ideas about timing.",
+  "Wrong side of the valve, wrong moment.",
+  "Tell {next}: count the beats before you go.",
+  "A closing door is not an invitation.",
+  "The door closed. I was in the doorway. Simple maths.",
+  "I was halfway through. The valve was all the way closed.",
+  "Timing is everything. Mine was nothing.",
+  "Squish. I'll leave it at squish.",
+  "I thought I could make it. The valve thought otherwise. The valve was right.",
+  "Tell {next}: the valve has a rhythm. Learn it, don't dance with it.",
+  "I heard it closing. I hurried. Hurrying was wrong.",
+  "The valve: still working perfectly. Me: less so.",
+  "Note: the valve does not stop for Robbies.",
+  "Open, closing, closed. I was there for all three.",
+  "Big door, bad timing, flat Robbie.",
+  "I'd like the valve's timetable, please, for {next}."
+ ],
+ "last_eel": [
+  "I was quiet. Then I wasn't.",
+  "It heard every move I made.",
+  "Tell {next}: hold still when they pass.",
+  "The eel was very fast and I was very loud.",
+  "I kept moving. That was the mistake.",
+  "It never saw me. It didn't need to.",
+  "Tell {next}: they listen.",
+  "Swimming is noisy. Who knew.",
+  "It heard me. Of course it heard me. I'm very loud when I swim.",
+  "I didn't see it coming. It didn't see me either. It didn't need to.",
+  "Tell {next}: move when they're far, freeze when they're near.",
+  "Fast, stripy, and an excellent listener.",
+  "My propeller hums. The eel hums along, apparently.",
+  "I tiptoed. You can't tiptoe in water.",
+  "It came out of the wall like it was late for something. It was me.",
+  "Blind as a stone, quick as anything.",
+  "Note: eels hear propellers. I have a propeller.",
+  "I swam past its shaft. It swam into my afternoon.",
+  "Shhh. Too late.",
+  "Tell {next}: if it glows in stripes, stop moving."
+ ],
+ "last_energy": [
+  "Energy gone. I'll describe the exit from memory: it was probably lovely.",
+  "Out of power. I spent it all on enthusiasm.",
+  "Battery empty. I was having such a nice swim.",
+  "Going quiet now. The water is very calm.",
+  "I took the scenic route. Too scenic.",
+  "Power at zero. Lamp off. Thinking about the beacon.",
+  "Tell {next} to pack more energy, or fewer detours.",
+  "Battery flat. I'll just float here and think about what I've done.",
+  "Low power mode. Lower power mode. No power mode.",
+  "Tell {next}: energy is for swimming, not for sightseeing.",
+  "I ran out before the map did.",
+  "The lamp's going dim. So am I. Lovely view, though.",
+  "Running on empty. Then just running out.",
+  "I swam and swam. Then I didn't.",
+  "Out of juice. Please charge {next} all the way."
+ ],
+ "last_timeout": [
+  "I waited as long as I could.",
+  "Still here. Still waiting. Still hopeful.",
+  "I held position perfectly. Nobody told me when to stop.",
+  "Nobody told me to move. So I didn't.",
+  "I've been here a while. It's quite nice, actually.",
+  "Mission time over. I'll stay and keep watch.",
+  "I'm fine. I'm just not anywhere.",
+  "Tell {next}: at some point, you have to swim."
+ ],
+ "same_death": [
+  "{prev} met {cause} too. Different Robbie, same ending.",
+  "{prev} and I agree about {cause}.",
+  "{prev} was right about {cause}. I checked.",
+  "{prev} warned me about {cause}. I had to see for myself.",
+  "{prev} and I both met {cause}. Somebody should change the program.",
+  "Another Robbie for {cause}. We should start a club.",
+  "{prev} said {cause}. I listened. I did it anyway.",
+  "Same as {prev}. We're consistent, at least.",
+  "Again, {cause}. I'm starting to see a pattern.",
+  "{prev} and I would like a different ending, please.",
+  "If {cause} were a lesson, we'd have learned it by now.",
+  "Tell {next}: {cause}. You know the drill."
+ ],
+ "last_wall/near_exit": [
+  "I could hear the beacon. I could also hear the rock.",
+  "So close. The exit was right behind this wall. This very solid wall.",
+  "Tell {next}: the exit is just past here. Go round, not through.",
+  "Nearly there! Then: wall.",
+  "I could see the beacon's glow. Then a lot of rock, very quickly."
+ ],
+ "last_wall/early": [
+  "That was quick. The wall was right there.",
+  "I'd barely said hello.",
+  "Launch, swim, rock. Short report.",
+  "First metre: great. Second metre: rock.",
+  "Tell {next}: the walls start early down here."
+ ],
+ "last_wall/late": [
+  "A long swim. A lovely swim. A rock at the end of it.",
+  "Ages without hitting anything. I got cocky.",
+  "All that careful swimming, and one careless turn.",
+  "I saw so much down here. The last thing was a wall."
+ ],
+ "last_wall/lamp_off": [
+  "In my defence, it was very dark. I made it darker myself.",
+  "Lamp off, eyes closed, wall found.",
+  "Tell {next}: the lamp helps with walls. I can confirm.",
+  "I turned the light off to be stealthy. The rock wasn't fooled.",
+  "Swimming in the dark is peaceful until it isn't."
+ ],
+ "last_wall/laser": [
+  "The laser doesn't work on rock. I asked it nicely.",
+  "I had a laser and I still lost to a rock.",
+  "I shot at everything except the thing I hit."
+ ],
+ "last_wall/low_energy": [
+  "Low battery, bad steering, hard rock.",
+  "I was tired. The wall was not.",
+  "Running on fumes and straight into stone."
+ ],
+ "last_jellyfish/lamp_off": [
+  "I turned my lamp off so they'd ignore me. One didn't get the memo.",
+  "Dark and quiet, and then: tentacle.",
+  "Lamp off. They couldn't see me. I couldn't see them either.",
+  "Tell {next}: lamp off helps. Watching where you swim helps too.",
+  "I was invisible. Unfortunately, not untouchable."
+ ],
+ "last_jellyfish/near_exit": [
+  "The beacon was right there, behind the prettiest jellyfish.",
+  "So close! One of them was guarding the door.",
+  "Nearly out. They saw me off personally.",
+  "Tell {next}: the exit has a welcoming committee."
+ ],
+ "last_jellyfish/early": [
+  "They found me before I found anything.",
+  "Hello, jellyfish. Goodbye, jellyfish.",
+  "Short trip. Lots of jellyfish.",
+  "I switched on the lamp and the whole swarm said hi."
+ ],
+ "last_jellyfish/laser": [
+  "I shot one. Its friends took it personally.",
+  "The laser works on jellyfish. There were more jellyfish than laser.",
+  "I cleared a path. The path refilled.",
+  "Pew. Pew. Pew. Ouch."
+ ],
+ "last_jellyfish/bruised": [
+  "Stung once: fine. Twice: worrying. Three times: this message.",
+  "I collected the full set of stings.",
+  "I kept going after the first sting. And the second.",
+  "Tell {next}: one sting is a warning. I ignored several."
+ ],
+ "last_lurker/near_exit": [
+  "The last rock before the exit was not a rock.",
+  "So near the beacon. The lurker knew. They always know.",
+  "It was guarding the way out. Very professionally.",
+  "Tell {next}: the exit is close, and so is the lurker."
+ ],
+ "last_lurker/laser": [
+  "I shot it. The laser bounced. The lurker didn't.",
+  "The laser just made it angry. Angrier.",
+  "Shooting armoured rock: not recommended.",
+  "Tell {next}: the laser bounces off them. I checked. Twice."
+ ],
+ "last_lurker/still": [
+  "I held very still. It didn't care.",
+  "I stopped next to it. Worst place to stop.",
+  "Waiting was a good idea. Waiting there was not."
+ ],
+ "last_lurker/early": [
+  "It was right at the start. Rude.",
+  "First rock I passed. Last rock I passed.",
+  "I'd hardly started and the scenery bit me."
+ ],
+ "last_lurker/lamp_off": [
+  "Lamp off. I didn't see it. It saw me fine.",
+  "In the dark, every rock looks innocent.",
+  "Tell {next}: lurkers don't need my lamp to find me."
+ ],
+ "last_valve/still": [
+  "I stopped to wait. I stopped in the wrong place.",
+  "I was waiting for the door. I was waiting in the door.",
+  "Tell {next}: wait before the valve, not inside it.",
+  "Holding position, as ordered. The valve had orders too."
+ ],
+ "last_valve/near_exit": [
+  "The exit was on the other side. So was my luck.",
+  "One door away from the beacon.",
+  "So close. The last door had the last word."
+ ],
+ "last_valve/early": [
+  "Straight through the valve! Nearly.",
+  "I rushed the door the moment I got there.",
+  "Tell {next}: the valve isn't open just because you've arrived."
+ ],
+ "last_valve/late": [
+  "I waited so long. Then I went at exactly the wrong moment.",
+  "All that patience, spent in one bad second.",
+  "I watched it open and close for ages. I still got it wrong."
+ ],
+ "last_eel/still": [
+  "I held still! Just a moment too late.",
+  "I stopped. It had already heard.",
+  "Still as a stone, and it still found me. Maybe I twitched.",
+  "Tell {next}: stop sooner. Much sooner."
+ ],
+ "last_eel/laser": [
+  "I fired at it. It wasn't there any more.",
+  "The laser missed. The eel slipped right out of it.",
+  "I shot at it. It didn't even slow down.",
+  "Tell {next}: eels don't wait to be shot."
+ ],
+ "last_eel/near_exit": [
+  "The beacon was right there. I swam to it a bit too loudly.",
+  "Last shaft before the exit. Last swim.",
+  "So close. I should have tiptoed the last bit."
+ ],
+ "last_eel/early": [
+  "First shaft. First eel. Last swim.",
+  "I'd only just started making noise.",
+  "That was the shortest swim on record. Probably."
+ ],
+ "last_eel/lamp_off": [
+  "Lamp off to be sneaky. Eels don't care about lamps.",
+  "Dark, quiet... well, dark.",
+  "Tell {next}: the lamp isn't what they notice. It's the swimming."
+ ],
+ "last_energy/near_exit": [
+  "I can see the beacon. I can't reach it. Ten more seconds would do.",
+  "So close I could almost touch it. 'Almost' isn't a unit of energy.",
+  "Out of power within sight of the exit. That's annoying, isn't it.",
+  "Tell {next}: the exit is right here. Bring more battery, or take fewer laps.",
+  "The beacon is pinging. I'm not."
+ ],
+ "last_energy/still": [
+  "I waited, and waited, and that used it all up.",
+  "Holding still still costs energy. Less, but some.",
+  "I was being patient. Patience ran out with the battery.",
+  "Tell {next}: waiting forever isn't free."
+ ],
+ "last_energy/laser": [
+  "Every shot cost energy. I took a lot of shots.",
+  "I spent my battery on fireworks.",
+  "Laser: excellent. Battery: was."
+ ],
+ "last_energy/lamp_off": [
+  "I even switched the lamp off to save power. Not enough.",
+  "Dark and quiet and out of battery.",
+  "Lamp off, power off, Robbie off."
+ ],
+ "last_any/near_exit": [
+  "So close. Tell {next} it's just a little further.",
+  "The beacon was right there. I could almost read it.",
+  "I could hear the beacon pinging. It sounded like cheering.",
+  "Nearly. Please write down 'nearly'.",
+  "A few more metres. Just a few.",
+  "Tell {next}: when you get here, you're almost there.",
+  "Closest one yet, I hope. Someone check.",
+  "For the record, the exit is close. Very close. Annoyingly close."
+ ],
+ "last_any/early": [
+  "That was short. Sorry. I had more planned.",
+  "I'd barely got my feet wet. I don't have feet.",
+  "Tell {next}: same idea, more swimming, fewer endings.",
+  "Short and sweet. Mostly short.",
+  "I didn't even get to the interesting part.",
+  "Launched. Lost. In that order, quickly."
+ ],
+ "last_any/first": [
+  "First one down here. Somebody had to be.",
+  "I'm the first. I'll leave notes.",
+  "New room, new mistakes. I've made the first one.",
+  "Nobody told me about this. Tell {next}.",
+  "First into the dark. Not first out of it.",
+  "Robbie {n}, first in this room. Sending everything I found.",
+  "Everything here is new to me. Including this.",
+  "I've started the map. Somebody please finish it."
+ ],
+ "last_any/persistent": [
+  "There are a lot of us down here now. Hi, everyone.",
+  "I know, I know. Tell {next} I'm sorry.",
+  "Maybe change the program? Just a thought from down here.",
+  "{prev} and I are starting a support group.",
+  "I read the earlier transmissions. Then I did the same thing.",
+  "Somebody up there should look at the rules again. Kindly.",
+  "Another one for the wall. I hope there's room.",
+  "We're getting closer. Probably. Someone check the wall."
+ ],
+ "last_any/lamp_off": [
+  "It was very dark. I made it that way.",
+  "Lamp off. Brave choice. Short choice.",
+  "Tell {next}: darkness is a tool. So is light.",
+  "I didn't see it coming because I'd switched off the seeing.",
+  "Lights out. Me too."
+ ],
+ "last_any/low_energy": [
+  "I was running low anyway. This just sped things up.",
+  "Tired, slow, and then this.",
+  "Battery nearly gone. Luck completely gone.",
+  "Tell {next}: a full battery is a fast battery.",
+  "I was saving energy for the end. This was the end."
+ ],
+ "last_any/bruised": [
+  "Hit, hit, hit. I'm noticing a pattern.",
+  "I kept going. I'm very determined and now very dented.",
+  "Tell {next}: the first bump is a hint.",
+  "Dented in several new and interesting places.",
+  "I was fine, then fine-ish, then this."
+ ],
+ "last_any/late": [
+  "Long swim. Good swim. Mostly.",
+  "I saw so much. Sending all of it.",
+  "Tell {next}: it's a long way. Bring patience and a plan.",
+  "I'd been going for ages. I'd got comfortable.",
+  "Long mission. I'd like it noted that I lasted a while."
+ ],
+ "last_any/laser": [
+  "I fired my laser. It didn't help as much as I'd hoped.",
+  "Pew. Pew. Not enough pew.",
+  "The laser was fun. The rest, less so.",
+  "Tell {next}: shooting is a plan, not the whole plan."
+ ],
+ "last_any/still": [
+  "I stopped. Things happened anyway.",
+  "Holding still was the plan. It wasn't the whole plan.",
+  "Not moving at all, and somehow still in trouble.",
+  "Tell {next}: stopping works until it doesn't."
+ ],
+ "exit/first": [
+  "First try! Did everyone see that?",
+  "First Robbie in, first Robbie out. Not bad.",
+  "Straight through on the first go. I'm as surprised as you.",
+  "New room, no mistakes. I'll try not to get used to it.",
+  "First one down, first one through. I'd like a plaque."
+ ],
+ "exit/persistent": [
+  "Made it! This one's for everyone on the wall.",
+  "Finally! Tell the others it was worth it.",
+  "Through, at last. Thank you, everyone before me.",
+  "All those Robbies, and now me. We did it.",
+  "The wall taught me everything. Exit reached."
+ ],
+ "exit/low_energy": [
+  "Made it on the last drops of battery. Dramatic, I know.",
+  "Exit reached with energy to spare. Not much. Hardly any.",
+  "Phew. Running on fumes, but through.",
+  "Tell {next}: I got here, but only just. Maybe a shorter way."
+ ],
+ "exit/late": [
+  "Long way round, but here I am.",
+  "The scenic route. Exit reached eventually.",
+  "Took my time. Got there anyway."
+ ],
+ "exit/lamp_off": [
+  "Made it in the dark! Very sneaky.",
+  "Lamp off all the way. Nobody saw me coming.",
+  "Through, without a light. I'm a little proud."
+ ],
+ "exit/bruised": [
+  "Made it! A bit dented. Worth it.",
+  "Through, with a few new dents to show for it.",
+  "Exit reached. The hull has opinions about how."
+ ]
 }

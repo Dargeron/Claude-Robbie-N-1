@@ -516,7 +516,9 @@ func _show(dive: Dive, entry: Dictionary, history: Dictionary) -> void:
 	current_entry = entry
 	monitor_hint.visible = false
 	var serial: int = entry["serial"]
-	replay.play(dive, maxi(serial, 0), Voice.captions(dive, maxi(serial, 1), history) if serial > 0 else [])
+	var h := history.duplicate()
+	h["last_words"] = entry.get("last_words", "")   # chosen at launch; a rewatch says the same
+	replay.play(dive, maxi(serial, 0), Voice.captions(dive, maxi(serial, 1), h) if serial > 0 else [])
 	replay.view.station_memory = state.memory_before(room_id, entry)
 	replay.view.ghost = state.ghost_for(room_id, entry)
 	timeline.set_dive(dive)

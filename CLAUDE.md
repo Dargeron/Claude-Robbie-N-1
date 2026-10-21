@@ -45,6 +45,7 @@ Then post a short plan to Albert: the goal, three to six tasks, what he will see
 | `tools/smoke.sh` | Render smoke test: the station tour under Xvfb; fails on script errors, missing or blank shots |
 | `python3 tools/solver_records.py` | Write content/solver/records.json (cheapest known CPU per room) from the solver's results |
 | `tools/hunt.sh <room>` | Resumable exploit hunt in the background; results in out/hunt/<room>.json |
+| `tools/godot.sh --headless --path game --script res://tools/voice_sample.gd` | Last words a run of Robbies would send for a few typical dives, with their circumstance tags (to read new lines in context) |
 | `python3 tools/gen_fx_tables.py` | Regenerate the integer trig tables (never needed unless Fx changes) |
 
 Rendering works here too: `xvfb-run -a tools/godot.sh --path game --rendering-driver opengl3 --write-movie out/x.png --fixed-fps 30 --quit-after N` writes frames you can look at with the Read tool.
@@ -80,6 +81,7 @@ Rendering works here too: `xvfb-run -a tools/godot.sh --path game --rendering-dr
 - Exported builds leave out `tools/` and `tests/` (export filter). Game code must never use their classes
   (`test_lint` checks), and exports infer types more strictly: annotate loop variables over untyped arrays.
   `tools/webcheck.sh` is the only check that runs the exported game: run it before publishing.
+- `tools/bootstrap.sh` doesn't report GDScript parse errors; the tests and `tools/smoke.sh` do.
 - `tools/smoke.sh` runs the station tour and checks every screenshot is there and not blank: run it before
   publishing anything visual.
 - Integer division warnings are disabled in `project.godot`; integer division is intended everywhere.
