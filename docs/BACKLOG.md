@@ -59,7 +59,8 @@ Full notes and triage: docs/design/feedback-2026-10-17.md. Order to confirm with
 - [~] Exploit hunts (resumable, tools/hunt.sh): jellyfish wall-hug fixed (block 1); valve far-wall
       shortcut fixed with a second lurker (block 2); jellyfish fixed routes fixed with a fresh swarm every
       dive and a lamp glow (block 3); valve "shoot + open water" closed by laser-proof lurkers (block 6).
-      The Valve hunt finished (8,420 programs); The Jellyfish hunt is running.
+      The Valve hunt finished (8,420 programs). The Listeners hunt finished (8,560): its 20 passing programs are all
+      variants of the intended "stop when an eel is near" (block 19). The Nursery hunt is running.
 - [x] **Survey luck**: fixed with a fleet of 20, 16 needed (block 13), after the solver certified a 45% Valve program.
 - [ ] Hunt three-rule programs (sampled), now that two-rule sweeps are done.
 - [ ] The keep_distance / beacon zigzag at the edge of a range: decide whether it needs a fix.
