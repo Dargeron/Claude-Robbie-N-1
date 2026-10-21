@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-21, after hourly block 24 (20:18 UTC): a "wall behind" condition.
+Updated 2026-10-21, after hourly block 25 (21:27 UTC): a cuter Robbie and jellyfish; full screen at full resolution.
 
 ## Where we are
 
@@ -50,7 +50,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 1. Albert's #5: the beacon opens the next room; optional objectives per room. Needs his answer on the two currencies.
 2. Verify the web page inside the claude.ai frame (needs Albert's eyes).
-3. The Lock's hunt and solver; jellyfish turning smoothly.
+3. More drawing without the art pipeline: eel, lurker, beacon, plants, rock edges.
 
 ## Known issues and open questions
 

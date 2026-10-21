@@ -798,9 +798,11 @@ func _toggle_watch() -> void:
 	if watch_large:
 		if watch_hint != null:
 			watch_hint.text = "Click the picture or press F to go back to Mission Control  ·  Space pauses  ·  Left/Right change speed  ·  K skips ahead"
-		monitor.stretch_shrink = 2
+		# Full resolution, not a pixel-doubled picture: the view draws at 2x scale.
+		monitor.stretch_shrink = 1
 		monitor.position = Vector2.ZERO
 		monitor.size = Vector2(1280, 720)
+		(monitor.get_child(0) as SubViewport).canvas_transform = Transform2D.IDENTITY.scaled(Vector2(2, 2))
 		_monitor_index = monitor.get_index()
 		move_child(monitor, get_child_count() - 1)
 		if watch_hint == null:
@@ -816,6 +818,7 @@ func _toggle_watch() -> void:
 		create_tween().tween_property(watch_hint, "modulate:a", 0.0, 1.5).set_delay(3.0)
 	else:
 		monitor.stretch_shrink = 1
+		(monitor.get_child(0) as SubViewport).canvas_transform = Transform2D.IDENTITY
 		monitor.position = Vector2(16, 48)
 		move_child(monitor, _monitor_index)   # back under the guide and the overlays
 		monitor.size = Vector2(640, 360)

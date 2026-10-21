@@ -35,6 +35,7 @@ func _ready() -> void:
 		["seek_event", "lurker_wakes", 8], ["wait", 5], ["shot", "07-valve-lurker"],
 		["room", "jellyfish"], ["program", "move_towards beacon"], ["launch"], ["seek", 0.85], ["wait", 5], ["shot", "08-jellyfish-naive"],
 		["program", "lamp off\nkeep_distance 2\nmove_towards beacon"], ["launch"], ["seek", 0.12], ["wait", 5], ["shot", "08b-jellyfish-ghost"],
+		["program", "move_towards beacon"], ["launch_large"], ["seek", 0.6], ["wait", 5], ["shot", "08b2-jellyfish-large"], ["small"],
 		["room", "valve"], ["program", "move_towards beacon"], ["launch"],
 		["program", "shoot\nmove_towards open_water"], ["launch"], ["seek_event", "laser", 3], ["wait", 5], ["shot", "08c-laser-bounce"],
 		["room", "nursery"], ["program", "lamp off\nfollow_wall left"], ["launch"], ["seek", 0.9], ["wait", 5], ["shot", "08d-nursery-dark"],

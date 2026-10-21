@@ -18,7 +18,8 @@ Full notes and triage: docs/design/feedback-2026-10-17.md. Order to confirm with
 - [x] #10 340 last words, chosen by cause and circumstance, never repeated while others fit (s24). Keep adding; Albert can edit lines.json.
 - [ ] #1/#6 Design with Albert: two currencies, the Lab (Robbie sprite, slots), shop for equipment and instructions.
 - [ ] #6 Three screens: Game, Mission Control, Lab.
-- [ ] #7/#9/#13 Art pass: cute, drawn, steampunk-ish, organic and moving walls (needs Vertex AI credentials).
+- [~] #7/#9/#13 Art pass: cute, drawn, steampunk-ish, organic and moving walls (needs Vertex AI credentials). Without it so far:
+      full screen at full resolution, a round Robbie with a big eye, pulsing jellyfish with smooth paths (s27).
 
 ## Now: P0b, the first playable
 
@@ -66,7 +67,7 @@ Full notes and triage: docs/design/feedback-2026-10-17.md. Order to confirm with
 - [ ] The keep_distance / beacon zigzag at the edge of a range: decide whether it needs a fix.
 - [x] `keep_distance` reverses blind and can back Robbie into rock: a `wall_behind` condition (block 24). Later: a room
       that teaches it.
-- [ ] Jellyfish turn smoothly instead of snapping to a new heading.
+- [~] Jellyfish turn smoothly instead of snapping to a new heading: smoothed in the picture (s27); the sim still snaps.
 - [x] One room that rewards the laser: The Nursery (block 7).
 - [x] A new creature that needs a new answer: the eel, and The Listeners (block 11).
 - [~] More rooms for the slice: The Lock combines the valve and the eels (block 23). Next: a current, a vent; jellyfish with eels.

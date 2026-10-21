@@ -367,16 +367,7 @@ func _draw_creatures(k: int, k2: int, f: float, rpos: Vector2, lamp_on: bool, no
 			_found_ring(pos, k, first_sensed[i], C_JELLY if kind == Body.Kind.JELLYFISH else C_EEL, 10.0)
 		match kind:
 			Body.Kind.JELLYFISH:
-				var darting := state == 1
-				var col := C_JELLY_LIT if darting else C_JELLY
-				var strength := 1.0
-				var pulse := 0.8 + 0.2 * sin(now * 3.0 + i)
-				_glow(pos, col, 10.0 * pulse, strength)
-				draw_circle(pos, 3.0, Color(col, 0.9 * strength))
-				for tnt in 3:
-					var sway := sin(now * 4.0 + i + tnt) * 1.5
-					var base := pos + Vector2(-2 + tnt * 2, 2)
-					draw_line(base, base + Vector2(sway, 4), Color(col, 0.6 * strength), 1.0)
+				_draw_jelly(i, k, f, state, now)
 			Body.Kind.EEL:
 				_draw_eel(i, k, pos, state, now)
 	# Strike flashes.
@@ -427,6 +418,61 @@ func _draw_lurker(k: int, pos: Vector2, rpos: Vector2, state: int, lamp_on: bool
 		draw_polyline(pts, Color(0.62, 0.52, 0.6, a), 1.0)
 		draw_arc(pos + Vector2(-2.3, 0.3), 1.4, 0.2, PI - 0.2, 6, Color(0.95, 0.8, 0.95, a), 1.0)
 		draw_arc(pos + Vector2(2.3, 0.3), 1.4, 0.2, PI - 0.2, 6, Color(0.95, 0.8, 0.95, a), 1.0)
+
+
+## Average recorded position of body i over ticks k-r..k+r, eased between k and k+1.
+## View only: it rounds off the sim's step changes of heading into curves.
+func _smooth_pos(i: int, k: int, f: float, r: int) -> Vector2:
+	var a := _avg_pos(i, k, r)
+	return a.lerp(_avg_pos(i, mini(k + 1, last_tick()), r), f)
+
+
+func _avg_pos(i: int, k: int, r: int) -> Vector2:
+	var rec := dive.rec
+	var sx := 0
+	var sy := 0
+	var n := 0
+	for j in range(maxi(0, k - r), mini(last_tick(), k + r) + 1):
+		sx += rec.bx[i][j]
+		sy += rec.by[i][j]
+		n += 1
+	return Vector2(sx, sy) / float(n * Fx.ONE)
+
+
+## A jellyfish: a pulsing bell with two dot eyes, swimming bell-first, its tentacles
+## swaying behind it. It darts pink when the lamp draws it. Drawn along a smoothed path.
+func _draw_jelly(i: int, k: int, f: float, state: int, now: float) -> void:
+	var pos := _smooth_pos(i, k, f, 6)
+	var travel := _avg_pos(i, mini(k + 6, last_tick()), 6) - _avg_pos(i, maxi(k - 6, 0), 6)
+	# Bell-first when swimming; when it barely moves it floats bell-up.
+	var moving := clampf(travel.length() / 6.0, 0.0, 1.0)
+	var up := Vector2(0, -1)
+	if travel.length() > 0.01:
+		up = (travel.normalized() * moving + Vector2(0, -1) * (1.0 - moving)).normalized()
+	var side := Vector2(-up.y, up.x)
+	var darting := state == 1
+	var col := C_JELLY_LIT if darting else C_JELLY
+	var beat := sin(now * (8.0 if darting else 3.0) + i * 1.7)
+	var w := 3.7 + 0.5 * beat
+	var h := 3.3 - 0.5 * beat
+	_glow(pos, col, 11.0, 0.9)
+	for t in 4:
+		var base := pos + side * ((t - 1.5) * w * 0.42) - up * 0.4
+		var strand := PackedVector2Array([base])
+		for seg in range(1, 5):
+			var sway := sin(now * 4.0 + i + t * 1.3 - seg * 0.9) * (0.3 + seg * 0.35)
+			strand.append(base - up * (seg * 1.5 + 0.4 * beat) + side * sway)
+		draw_polyline(strand, Color(col, 0.55), 1.0)
+	var bell := PackedVector2Array()
+	for s2 in 11:
+		var a := PI * s2 / 10.0
+		bell.append(pos + side * (cos(a) * w) + up * (sin(a) * h))
+	draw_colored_polygon(bell, Color(col, 0.85))
+	draw_polyline(bell, Color(col.lightened(0.4), 0.9), 0.8)
+	var eye_y := up * (h * 0.4)
+	draw_circle(pos + eye_y + side * 1.25, 0.6, Color(0.04, 0.08, 0.16))
+	draw_circle(pos + eye_y - side * 1.25, 0.6, Color(0.04, 0.08, 0.16))
+	draw_circle(pos + up * (h * 0.78) - side * (w * 0.35), 0.55, Color(1, 1, 1, 0.65))
 
 
 ## Where Robbie lost track of a creature: a faint ring at the spot it was last sensed,
@@ -500,15 +546,37 @@ func _draw_robbie(k: int, pos: Vector2, now: float) -> void:
 	if rec.rhp[k] <= 0:
 		_draw_end_burst(k, pos)
 		return
-	if flags & 2:
+	var moving := (flags & 2) != 0
+	if moving:
 		for b in 3:
 			var off := fmod(now * 2.0 + b * 0.33, 1.0)
-			draw_circle(pos - fwd * (6.0 + off * 8.0) + side * sin(now * 7.0 + b) * 1.5, 0.8 + off, Color(0.7, 0.85, 1.0, 0.5 * (1.0 - off)))
-	var hull := PackedVector2Array([pos + fwd * 6.5, pos + side * 4.0 + fwd * 1.0, pos - fwd * 5.0 + side * 3.0,
-		pos - fwd * 5.0 - side * 3.0, pos - side * 4.0 + fwd * 1.0])
+			draw_circle(pos - fwd * (6.5 + off * 8.0) + side * sin(now * 7.0 + b) * 1.5, 0.8 + off, Color(0.7, 0.85, 1.0, 0.5 * (1.0 - off)))
+	# Two little fins at the back, paddling while it swims.
+	var flap := sin(now * 16.0) * 0.9 if moving else 0.0
+	for sgn: float in [-1.0, 1.0]:
+		var root := pos - fwd * 3.2 + side * sgn * 2.6
+		draw_colored_polygon(PackedVector2Array([root, root - fwd * 3.2 + side * sgn * (2.0 + flap), root - fwd * 0.6 + side * sgn * 0.4]),
+			body.darkened(0.25))
+	# A round body, a little longer in front.
+	var hull := PackedVector2Array()
+	for s2 in 18:
+		var a := TAU * s2 / 18.0
+		var along := cos(a) * (6.0 if cos(a) > 0.0 else 4.8)
+		hull.append(pos + fwd * along + side * (sin(a) * 4.3))
 	draw_colored_polygon(hull, body)
-	draw_circle(pos + fwd * 2.5, 1.6, Color(0.15, 0.25, 0.35))
-	draw_circle(pos + fwd * 6.0, 1.0, Color(1, 1, 0.85))
+	hull.append(hull[0])
+	draw_polyline(hull, body.darkened(0.4), 0.8)
+	# One big porthole eye with a glint.
+	var eye := pos + fwd * 1.8
+	draw_circle(eye, 2.4, Color(0.10, 0.17, 0.26))
+	draw_arc(eye, 2.4, 0, TAU, 16, body.darkened(0.5), 0.8)
+	draw_circle(eye + fwd * 0.7 + side * 0.8, 0.75, Color(0.9, 0.97, 1.0))
+	# The radio antenna, its tip blinking with the transmitter.
+	var ant := pos - fwd * 2.8 - side * 2.2
+	draw_line(pos - fwd * 1.5 - side * 1.2, ant, body.darkened(0.45), 0.8)
+	var blink := fmod(now, 1.2) < 0.18
+	draw_circle(ant, 0.8, Color(1.0, 0.35, 0.3) if blink else body.darkened(0.3))
+	draw_circle(pos + fwd * 6.1, 1.0, Color(1, 1, 0.85) if (flags & 1) else Color(0.4, 0.38, 0.3))
 
 
 func _draw_end_burst(k: int, pos: Vector2) -> void:
