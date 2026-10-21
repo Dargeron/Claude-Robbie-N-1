@@ -91,6 +91,7 @@ swimming past it, so it was dropped.
 | `lamp off` / `move_towards beacon` (intended, simplest) | 3 | 20/20 | Swims straight through the dark; the scattered swarm rarely drifts into its path |
 | `lamp off` / `move 90` | 2 | 20/20 | The same, knowing the exit is due east: the cheapest known solution |
 | `lamp off` / `keep_distance 2` / `move_towards beacon` (intended, careful) | 6 | 18/20 | Slips through the swarm in the dark. Backing away is blind: twice in 20 a drifting jellyfish herds Robbie into rock |
+| `lamp off` / `keep_distance 2 if not wall_behind` / `move_towards beacon` | 8 | 19/20 | The same, with a tail: "wall behind" (block 24) stops it backing into rock. Over 40 dives, 3 losses to rock become 1 |
 | `shoot if hostile_near 4` / `move_towards beacon` (intended, loud) | 8 | 20/20 | Faster (about 20 s) but spends energy on every shot |
 | `move_towards beacon` | 2 | 0/20 | Lit jellyfish dart at the lamp faster than Robbie swims |
 | `keep_distance 2` / `move_towards beacon` | 5 | 0/20 | Backing away with the lamp on: the swarm follows |

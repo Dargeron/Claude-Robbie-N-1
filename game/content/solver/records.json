@@ -10,9 +10,14 @@
     "evaluations": 275
   },
   "listeners": {
-    "certified_programs": 29,
+    "certified_programs": 41,
     "cpu": 5,
-    "evaluations": 250
+    "evaluations": 400
+  },
+  "lock": {
+    "certified_programs": 11,
+    "cpu": 9,
+    "evaluations": 100
   },
   "nursery": {
     "certified_programs": 6,
@@ -20,8 +25,8 @@
     "evaluations": 300
   },
   "valve": {
-    "certified_programs": 7,
+    "certified_programs": 26,
     "cpu": 8,
-    "evaluations": 200
+    "evaluations": 375
   }
 }

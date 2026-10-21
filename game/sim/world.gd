@@ -505,6 +505,20 @@ func wall_ahead() -> bool:
 	return false
 
 
+## Rock (or a shut valve) just behind Robbie: it feels it with its tail. Robbie backs away
+## facing the danger, so this is what lies in the way of keep_distance.
+func wall_behind() -> bool:
+	var reach := R_RADIUS + WALL_AHEAD
+	var back := Fx.norm(robbie.angle + Fx.HALF_TURN)
+	if ray_dist(back, reach) < reach:
+		return true
+	if ray_dist(back - 256, reach) < reach:
+		return true
+	if ray_dist(back + 256, reach) < reach:
+		return true
+	return false
+
+
 ## Robbie senses the valve ahead: a valve tile in front of it (not one it is
 ## inside), lit by the lamp or within reach of the pressure sense.
 func valve_sensed() -> bool:

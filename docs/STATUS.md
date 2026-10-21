@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-21, after hourly block 23 (19:05 UTC): a sixth room, The Lock (valve and eels together).
+Updated 2026-10-21, after hourly block 24 (20:18 UTC): a "wall behind" condition.
 
 ## Where we are
 
@@ -19,7 +19,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 - Deterministic simulation in integer maths: Robbie, walls, the lamp and its line of sight,
   jellyfish, lurkers, eels, a valve, energy, crashes, an explored-tiles map. Same inputs give the
   same dive, checked by hash every second of dive time.
-- Robbie's rule interpreter, with 7 orders and 6 conditions, CPU costs and a trace of every think.
+- Robbie's rule interpreter, with 7 orders and 7 conditions, CPU costs and a trace of every think.
   The trace explains in words why each rule ran or was skipped (the seed of the Why? panel).
 - Six prototype rooms (The Dark, The Jellyfish, The Nursery, The Valve, The Listeners, The Lock): one idea each, and The Lock
   needs two at once. Each has an intended
@@ -42,7 +42,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
   the room swims alongside the replay as a ghost.
 - Survey fleet (certification: 16 of 20 dives on seeds of its own, sent a few per frame with progress), headless dive runner, PNG path images, golden
   replays, exploit hunt, and a mutation solver that finds the cheapest certifying program per room.
-- 43 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
+- 45 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
   sim), golden replays, reference programs.
 - A dive takes 0.1–0.4 s to simulate natively, a little more in a browser (tools/webcheck.sh prints timings).
 
@@ -50,7 +50,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 1. Albert's #5: the beacon opens the next room; optional objectives per room. Needs his answer on the two currencies.
 2. Verify the web page inside the claude.ai frame (needs Albert's eyes).
-3. The Lock's hunt and solver; keep_distance backing into rock.
+3. The Lock's hunt and solver; jellyfish turning smoothly.
 
 ## Known issues and open questions
 

@@ -80,6 +80,8 @@ func _cond(rule: Dictionary, i: int, w: World) -> Array:
 			value = nh[1]
 		"wall_ahead":
 			ok = w.wall_ahead()
+		"wall_behind":
+			ok = w.wall_behind()
 		"valve_open":
 			ok = w.gate_open_sensed()
 		"valve_shut":

@@ -64,8 +64,8 @@ Full notes and triage: docs/design/feedback-2026-10-17.md. Order to confirm with
 - [x] **Survey luck**: fixed with a fleet of 20, 16 needed (block 13), after the solver certified a 45% Valve program.
 - [ ] Hunt three-rule programs (sampled), now that two-rule sweeps are done.
 - [ ] The keep_distance / beacon zigzag at the edge of a range: decide whether it needs a fix.
-- [ ] `keep_distance` reverses blind and can back Robbie into rock (2 of 20 jellyfish dives). Candidate
-      lesson: a `wall_behind` condition, or a room that teaches it.
+- [x] `keep_distance` reverses blind and can back Robbie into rock: a `wall_behind` condition (block 24). Later: a room
+      that teaches it.
 - [ ] Jellyfish turn smoothly instead of snapping to a new heading.
 - [x] One room that rewards the laser: The Nursery (block 7).
 - [x] A new creature that needs a new answer: the eel, and The Listeners (block 11).

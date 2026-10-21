@@ -7,7 +7,7 @@ extends VBoxContainer
 signal changed
 
 const ACTION_ORDER := ["move_towards", "move", "keep_distance", "follow_wall", "stop", "shoot", "lamp"]
-const COND_ORDER := ["hostile_near", "wall_ahead", "valve_open", "valve_shut", "energy_below", "executing"]
+const COND_ORDER := ["hostile_near", "wall_ahead", "wall_behind", "valve_open", "valve_shut", "energy_below", "executing"]
 const HEADINGS := ["0", "45", "90", "135", "180", "225", "270", "315"]
 const COMPASS := ["up", "up-right", "right", "down-right", "down", "down-left", "left", "up-left"]
 

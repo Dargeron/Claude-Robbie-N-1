@@ -22,6 +22,7 @@ const ACTIONS := {
 const CONDITIONS := {
 	"hostile_near": {"label": "hostile is near", "param": ["2", "4", "6"], "unit": "tiles", "cpu": 2},
 	"wall_ahead": {"label": "wall ahead", "cpu": 1},
+	"wall_behind": {"label": "wall behind", "cpu": 1},
 	"valve_open": {"label": "valve is open", "cpu": 2},
 	"valve_shut": {"label": "valve is shut", "cpu": 2},
 	"energy_below": {"label": "energy below", "param": ["25", "50", "75"], "unit": "%", "cpu": 1},
@@ -33,13 +34,14 @@ const CONDITIONS := {
 const HELP := {
 	"move_towards": "Turn towards a target and swim. The beacon is the exit's radio signal: it points straight at the exit, through rock if need be (the green tick beside Robbie). Robbie knows which way it is, not how far. Light is the nearest glow Robbie can sense. Open water is the clearest way ahead (3 CPU). With no light in sight, \"light\" doesn't apply and Robbie reads on.",
 	"move": "Turn to a fixed compass heading and swim that way.",
-	"keep_distance": "If Robbie senses a hostile closer than this, back away from it while facing it. Backing away is slower than swimming forwards, and Robbie can't see behind it. With nothing that close, the rule doesn't apply and Robbie reads on.",
+	"keep_distance": "If Robbie senses a hostile closer than this, back away from it while facing it. Backing away is slower than swimming forwards, and Robbie can't see behind it (\"wall behind\" can feel it). With nothing that close, the rule doesn't apply and Robbie reads on.",
 	"follow_wall": "Keep the rock on one side and swim along it.",
 	"stop": "Hold still. Robbie uses half the energy while still.",
 	"shoot": "Fire the laser at the nearest hostile Robbie senses within 6 tiles. Each shot costs energy, and Robbie stands still while it fires. Some creatures can't be hurt by it. With nothing to shoot, the rule doesn't apply and Robbie reads on.",
 	"lamp": "A setting: switch the lamp on or off, then keep reading the rules. The lamp lights 6 tiles ahead and glows 3 tiles all around. Robbie starts each dive with it on.",
 	"hostile_near": "Robbie senses a hostile closer than this. Robbie senses what its lamp lights, anything that glows, and anything within about a tile. Camouflaged creatures (lurkers) can't be sensed until they wake.",
 	"wall_ahead": "There is rock, or a shut valve, just ahead of Robbie.",
+	"wall_behind": "There is rock, or a shut valve, just behind Robbie. It can't see behind, but it can feel it with its tail. Useful with keep distance, which backs away blind.",
 	"valve_open": "Robbie senses the valve ahead, and it is fully open.",
 	"valve_shut": "Robbie senses the valve ahead, and it is closing or shut.",
 	"energy_below": "Robbie's energy is below this share of a full charge.",
