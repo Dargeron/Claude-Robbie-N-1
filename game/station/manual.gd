@@ -4,6 +4,7 @@ extends Control
 ## its CPU cost, in the same words as the editor's tooltips (Catalogue.HELP).
 
 signal closed
+signal start_over
 
 
 func _init() -> void:
@@ -23,6 +24,14 @@ func _init() -> void:
 	close.position = Vector2(1222, 14)
 	close.custom_minimum_size = Vector2(34, 32)
 	add_child(close)
+	var again := Button.new()
+	again.text = "New station..."
+	again.tooltip_text = "Erase every Robbie and start again in The Dark, with the guide"
+	again.position = Vector2(1060, 14)
+	again.custom_minimum_size = Vector2(150, 32)
+	again.add_theme_color_override("font_color", UiTheme.TEXT_DIM)
+	again.pressed.connect(func() -> void: start_over.emit())
+	add_child(again)
 	var scroll := ScrollContainer.new()
 	scroll.position = Vector2(140, 56)
 	scroll.size = Vector2(1000, 650)

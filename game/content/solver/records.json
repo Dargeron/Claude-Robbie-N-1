@@ -1,8 +1,13 @@
 {
-  "jellyfish": {
-    "certified_programs": 22,
+  "dark": {
+    "certified_programs": 31,
     "cpu": 3,
-    "evaluations": 200
+    "evaluations": 300
+  },
+  "jellyfish": {
+    "certified_programs": 27,
+    "cpu": 2,
+    "evaluations": 275
   },
   "listeners": {
     "certified_programs": 29,

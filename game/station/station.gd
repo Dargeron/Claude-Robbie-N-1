@@ -44,6 +44,8 @@ var survey_run: Survey.Run = null   # a survey fleet that is out right now
 var skip_btn: IconButton
 var skip_ahead := true              # skip fast to just before where the last Robbie was lost
 var survey_strip: SurveyStrip
+var goals: RoomGoals
+var _monitor_index := 0
 var archive_entries: Array = []
 
 
@@ -250,19 +252,19 @@ func _build() -> void:
 	status_label.fit_content = true
 	status_label.scroll_active = false
 	# Room for three lines whatever it says, so LAUNCH doesn't jump up and down as the text changes.
-	status_label.custom_minimum_size = Vector2(0, 64)
+	status_label.custom_minimum_size = Vector2(0, 46)
 	col.add_child(status_label)
 	survey_btn = _button("SEND THE SURVEY FLEET", "%d Robbies dive with this program under new conditions. %d must make it." % [Survey.FLEET, Survey.needed_for(Survey.FLEET)], _survey)
-	col.add_child(survey_btn)
-	survey_strip = SurveyStrip.new()
-	col.add_child(survey_strip)
+	goals = RoomGoals.new(survey_btn)
+	col.add_child(goals)
+	survey_strip = goals.strip
 	var arch_head := Label.new()
 	arch_head.text = "TRANSMISSIONS RECEIVED"
 	arch_head.add_theme_color_override("font_color", UiTheme.TEXT_DIM)
 	arch_head.add_theme_font_size_override("font_size", 12)
 	col.add_child(arch_head)
 	archive = ItemList.new()
-	archive.custom_minimum_size = Vector2(0, 150)
+	archive.custom_minimum_size = Vector2(0, 112)
 	archive.add_theme_font_size_override("font_size", 13)
 	archive.item_selected.connect(_on_archive_selected)
 	col.add_child(archive)
@@ -289,6 +291,7 @@ func _build() -> void:
 	manual = RobbieManual.new()
 	manual.visible = false
 	manual.closed.connect(func() -> void: manual.visible = false)
+	manual.start_over.connect(_confirm_start_over)
 	add_child(manual)
 
 
@@ -397,8 +400,16 @@ func _refresh() -> void:
 	log_btn.text = "Log  +%d" % unread if unread > 0 else "Log"
 	log_btn.add_theme_color_override("font_color", UiTheme.AMBER if unread > 0 else UiTheme.TEXT_DIM)
 	survey_btn.disabled = not state.program_made_it(room_id, program.to_text()) or over or survey_run != null
-	survey_btn.visible = not rs.certified or not rs.survey.is_empty()
+	goals.update(rs, _room_made_it(room_id), state.program_made_it(room_id, program.to_text()), GameState.record_cpu(room_id),
+		Survey.needed_for(Survey.FLEET), Survey.FLEET)
 	_refresh_status()
+
+
+func _room_made_it(id: String) -> bool:
+	for e in state.own_dives(id):
+		if e["result"] == "exit":
+			return true
+	return false
 
 
 func _refresh_status() -> void:
@@ -412,8 +423,8 @@ func _refresh_status() -> void:
 	if program.cpu() > rs.room.cpu_budget:
 		lines.append("[color=#ff6a5a]Over the CPU budget: Robbie can't hold this program. Remove or simplify a rule.[/color]")
 	if rs.certified:
-		# At most three lines, so LAUNCH stays put: the verdict (and news), the CPU record.
-		var head := "[color=#7dffa0]Certified: the survey fleet made it %d/%d.[/color]" % [rs.survey.get("passed", 0), rs.survey.get("fleet", 10)]
+		# The verdict and the news; the CPU record is in the room's goals below.
+		var head := "[color=#7dffa0]Certified![/color]"
 		var nxt := GameState.ROOMS.find(room_id) + 1
 		if nxt < GameState.ROOMS.size() and state.room_state(GameState.ROOMS[nxt]).dives.is_empty():
 			head += " [color=#7dffa0]%s is open.[/color]" % _room_name(GameState.ROOMS[nxt])
@@ -421,17 +432,14 @@ func _refresh_status() -> void:
 			head += " [color=#ffc35a]New in the station log (L).[/color]"
 		lines.append(head)
 		var rec := GameState.record_cpu(room_id)
-		var mine := "Your cheapest certified program: [b]%d CPU[/b]." % rs.best_cpu
 		if rec > 0 and rec < rs.best_cpu:
-			lines.append(mine + " The station's simulator has certified one with [b]%d[/b]. Try again with less CPU, or move on." % rec)
+			lines.append("The station's simulator has certified a program with [b]%d CPU[/b]; yours takes %d. Try again with less, or move on." % [rec, rs.best_cpu])
 		elif rec > 0:
-			lines.append(mine + " [color=#7dffa0]That matches the cheapest the station's simulator has found.[/color]")
-		else:
-			lines.append(mine + " Try again with less CPU, or move on.")
+			lines.append("[color=#7dffa0]Your %d CPU matches the cheapest the station's simulator has found.[/color]" % rs.best_cpu)
 	elif not rs.survey.is_empty():
 		lines.append("Last survey: [color=#ff6a5a]%d/%d made it[/color] (%d needed). The failures are in the list below." % [rs.survey["passed"], rs.survey["fleet"], rs.survey["needed"]])
 	elif state.program_made_it(room_id, program.to_text()):
-		lines.append("[color=#7dffa0]This program reached the exit.[/color] Send the survey fleet to prove it wasn't luck.")
+		lines.append("[color=#7dffa0]This program reached the exit.[/color] Now prove it wasn't luck: send the survey fleet.")
 	status_label.text = "\n".join(lines)
 
 
@@ -441,6 +449,8 @@ func _launch() -> void:
 	if program.rules.is_empty() or program.cpu() > state.room_state(room_id).room.cpu_budget:
 		return
 	Sfx.play("ui_launch", -4.0)
+	_coach_scrubbed = false   # the guide asks again after each loss: look, then change
+	_coach_edited = false
 	var res := state.launch(room_id, program)
 	_refresh_archive()
 	_show(res["dive"], res["entry"], res["history"])
@@ -570,30 +580,50 @@ func _restore_program() -> void:
 
 # ---------------------------------------------------------------- per frame
 
-## First visit: point at the one thing to do next, until Robbie 002 has been sent.
+## The guided first room (Albert's note #3): in The Dark, point at the one thing to do
+## next, from the first launch to the survey fleet and on to the next room. It finishes
+## when the player moves on from a certified Dark, and never shows again.
 func _update_coach() -> void:
-	if state.coach_done or wall.visible or station_log.visible or manual.visible or watch_large:
+	if state.coach_done or wall.visible or station_log.visible or manual.visible or watch_large or survey_run != null:
 		coach.point_at(null, "")
 		return
-	if state.next_serial >= 3 or (state.next_serial == 2 and _any_exit()):
-		state.coach_done = true
-		state.save()
+	var first: String = GameState.ROOMS[0]
+	var rs := state.room_state(first)
+	if room_id != first:
+		if rs.certified:
+			state.coach_done = true
+			state.save()
 		coach.point_at(null, "")
-	elif state.next_serial == 1:
+		return
+	var lost: bool = not state.own_dives(first).is_empty() and state.own_dives(first).back()["result"] != "exit"
+	if rs.certified:
+		coach.point_at(room_buttons[GameState.ROOMS[1]], "Certified! The next room is open")
+	elif state.own_dives(first).is_empty():
 		coach.point_at(launch_btn, "Press LAUNCH to send Robbie down")
-	elif not _coach_scrubbed:
-		coach.point_at(timeline, "Robbie is lost. Drag along here to see why")
-	elif not _coach_edited:
-		coach.point_at(editor, "Change a rule, or add one with + New rule")
+	elif state.program_made_it(first, program.to_text()):
+		coach.point_at(survey_btn, "Robbie made it! Now prove it wasn't luck")
+	elif lost and not _coach_scrubbed:
+		coach.point_at(timeline, "Robbie was lost. Drag along here to see why")
+	elif lost and not _coach_edited:
+		coach.point_at(editor, "Robbie can't swim through rock. Change the order, or add a rule")
 	else:
 		coach.point_at(launch_btn, "Send the next Robbie")
 
 
-func _any_exit() -> bool:
-	for id in GameState.ROOMS:
-		if state.program_made_it(id, state.room_state(id).program_text):
-			return true
-	return false
+## "New station" in the manual: erase everything and start again in The Dark, with the guide.
+func _confirm_start_over() -> void:
+	var d := ConfirmationDialog.new()
+	d.title = "New station"
+	d.dialog_text = "Forget every Robbie, every program and every certified room,\nand start again in The Dark with the guide?"
+	d.ok_button_text = "Start again"
+	d.confirmed.connect(func() -> void:
+		state.reset()
+		manual.visible = false
+		_select_room(GameState.ROOMS[0]))
+	d.canceled.connect(d.queue_free)
+	d.confirmed.connect(d.queue_free)
+	add_child(d)
+	d.popup_centered()
 
 
 func _process(_delta: float) -> void:
@@ -769,6 +799,7 @@ func _toggle_watch() -> void:
 		monitor.stretch_shrink = 2
 		monitor.position = Vector2.ZERO
 		monitor.size = Vector2(1280, 720)
+		_monitor_index = monitor.get_index()
 		move_child(monitor, get_child_count() - 1)
 		if watch_hint == null:
 			watch_hint = Label.new()
@@ -784,6 +815,7 @@ func _toggle_watch() -> void:
 	else:
 		monitor.stretch_shrink = 1
 		monitor.position = Vector2(16, 48)
+		move_child(monitor, _monitor_index)   # back under the guide and the overlays
 		monitor.size = Vector2(640, 360)
 		if watch_hint != null:
 			watch_hint.visible = false

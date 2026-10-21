@@ -1,11 +1,11 @@
 # Status
 
-Updated 2026-10-21, after hourly block 20 (15:24 UTC): nothing shows until Robbie finds it (Albert's #11).
+Updated 2026-10-21, after hourly block 21 (16:38 UTC): room goals and a guided first room (Albert's #4 and #3).
 
 ## Where we are
 
 **Hourly blocks resumed** on 21 October, working through Albert's 14 playtest notes first
-(docs/design/feedback-2026-10-17.md). Done: #14 the lurker, #8 CPU budgets, #2 full-screen launch and skip-ahead, #11 hidden until found.
+(docs/design/feedback-2026-10-17.md). Done: #14 the lurker, #8 CPU budgets, #2 full-screen launch and skip-ahead, #11 hidden until found, #4/#3 room goals and a guided first room.
 
 **Albert played it (2026-10-17, evening): "I had FUN... the barest core is good."** The core loop passes his gate. He has many
 changes, suggestions and problems to fix; those come first in the backlog as soon as he sends them.
@@ -31,7 +31,8 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 - Rooms open one after another as each is certified (Ctrl+Shift+U opens all, for testing).
 - The transmission shows only what Robbie sensed; a green tick beside Robbie points at the beacon.
 - Launching goes full screen and skips fast to just before where the previous Robbie was lost (K toggles).
-- A first-visit coach points at LAUNCH, the timeline and the editor until Robbie 002 is sent.
+- Room goals under LAUNCH: reach the exit, prove it (survey fleet, its button glows when it's time), lean (CPU record).
+- A guided first room: in The Dark the guide points at the next thing to do until the room is certified. "New station" in the manual starts over.
 - AUTO playback: skims quiet water at 4x and slows to normal speed around every event.
 - The Wall of Robbies: every Robbie sent, its route on a small map, how it ended and its last words; the per-room
   score. Click to rewatch.
@@ -45,9 +46,9 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 ## Next three tasks
 
-1. Albert's #4 and #3: a big, obvious objectives control; a light guided first room.
-2. Albert's #10: many more last words, by cause and circumstance.
-3. Albert's #5: the beacon opens the next room; optional objectives per room. Needs his answer on the two currencies.
+1. Albert's #10: many more last words, by cause and circumstance.
+2. Albert's #5: the beacon opens the next room; optional objectives per room. Needs his answer on the two currencies.
+3. Verify the web page inside the claude.ai frame (needs Albert's eyes).
 
 ## Known issues and open questions
 
