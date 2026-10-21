@@ -15,7 +15,14 @@ if [[ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]]; then
 fi
 export WRANGLER_SEND_METRICS=false
 cd "$ROOT/tools/cloudflare"
-npx --yes wrangler@4 deploy 2>&1 | grep -E "Uploaded|Deployed|https://|ERROR|✘" || true
+# Wrangler sometimes fails on a transient API error: try twice.
+for attempt in 1 2; do
+  out=$(npx --yes wrangler@4 deploy 2>&1 || true)
+  echo "$out" | grep -E "Uploaded|Deployed|https://|ERROR|✘" || true
+  echo "$out" | grep -q "Deployed robbie-n1" && break
+  echo "deploy attempt $attempt failed; retrying"
+  sleep 5
+done
 code=$(curl -sS -o /dev/null -w "%{http_code}" https://robbie-n1.bauldejuegos.workers.dev/)
 echo "live check: HTTP $code"
 [[ "$code" == "200" ]]
