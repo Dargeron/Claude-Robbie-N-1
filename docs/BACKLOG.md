@@ -19,7 +19,7 @@ Full notes and triage: docs/design/feedback-2026-10-17.md. Order to confirm with
 - [ ] #1/#6 Design with Albert: two currencies, the Lab (Robbie sprite, slots), shop for equipment and instructions.
 - [ ] #6 Three screens: Game, Mission Control, Lab.
 - [~] #7/#9/#13 Art pass: cute, drawn, steampunk-ish, organic and moving walls (needs Vertex AI credentials). Without it so far:
-      full screen at full resolution, a round Robbie with a big eye, pulsing jellyfish with smooth paths (s27).
+      full screen at full resolution, a round Robbie with a big eye, pulsing jellyfish with smooth paths (s27). Rounded rock, anemones, a beacon buoy (s28).
 
 ## Now: P0b, the first playable
 

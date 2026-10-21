@@ -187,27 +187,62 @@ func _lerp_pos(xs: PackedInt32Array, ys: PackedInt32Array, k: int, k2: int, f: f
 	return _p(xs[k], ys[k]).lerp(_p(xs[k2], ys[k2]), f)
 
 
+## What the station knows of the room at tick k: the chart from earlier Robbies (faint)
+## and what this Robbie has seen so far. Rock is drawn rounded (_draw_blobs).
 func _draw_memory(k: int) -> void:
 	var room := dive.room
-	var has_station := station_memory.size() == room.w * room.h
+	var n := room.w * room.h
+	var has_station := station_memory.size() == n
+	var chart_water := PackedByteArray()
+	var chart_rock := PackedByteArray()
+	var chart_exit := PackedByteArray()
+	var rock := PackedByteArray()
+	var exit_seen := PackedByteArray()
+	for arr: PackedByteArray in [chart_water, chart_rock, chart_exit, rock, exit_seen]:
+		arr.resize(n)
 	for ty in room.h:
 		for tx in room.w:
-			if first_seen[ty * room.w + tx] > k:
-				# Not seen by this Robbie yet: the station's chart, very faint.
-				if has_station and station_memory[ty * room.w + tx] == 1:
-					var t2 := room.tile_at(tx, ty)
-					if t2 == Room.Tile.ROCK:
-						draw_rect(Rect2(tx * 16, ty * 16, 16, 16), C_ROCK_CHART)
-					elif room.is_exit(tx, ty):
-						draw_rect(Rect2(tx * 16, ty * 16, 16, 16), Color(0.02, 0.07, 0.035))
-					else:
-						draw_rect(Rect2(tx * 16, ty * 16, 16, 16), C_WATER_CHART)
+			var i := ty * room.w + tx
+			var is_rock := room.tile_at(tx, ty) == Room.Tile.ROCK
+			var is_exit := room.is_exit(tx, ty)
+			if first_seen[i] <= k:
+				if is_rock:
+					rock[i] = 1
+					chart_rock[i] = 1
+				elif is_exit:
+					exit_seen[i] = 1
+			elif has_station and station_memory[i] == 1:
+				if is_rock:
+					chart_rock[i] = 1
+				elif is_exit:
+					chart_exit[i] = 1
+				else:
+					chart_water[i] = 1
+	_draw_blobs(chart_water, C_WATER_CHART)
+	_draw_blobs(chart_exit, Color(0.02, 0.07, 0.035))
+	_draw_blobs(chart_rock, C_ROCK_CHART)
+	_draw_blobs(rock, C_ROCK_MEMORY)
+	_draw_blobs(exit_seen, Color(0.03, 0.1, 0.05))
+
+
+## Tiles drawn as worn shapes instead of squares: a disc per tile, joined to the tiles
+## beside and below it by bands. Where tiles meet in a block they fill solid; outer
+## corners come out round (half a tile), inner corners stay sharp.
+func _draw_blobs(mask: PackedByteArray, col: Color) -> void:
+	var room := dive.room
+	var w := room.w
+	for ty in room.h:
+		for tx in w:
+			var i := ty * w + tx
+			if mask[i] == 0:
 				continue
-			var tile := room.tile_at(tx, ty)
-			if tile == Room.Tile.ROCK:
-				draw_rect(Rect2(tx * 16, ty * 16, 16, 16), C_ROCK_MEMORY)
-			elif room.is_exit(tx, ty):
-				draw_rect(Rect2(tx * 16, ty * 16, 16, 16), Color(0.03, 0.1, 0.05))
+			var cx := tx * 16.0 + 8.0
+			var cy := ty * 16.0 + 8.0
+			draw_circle(Vector2(cx, cy), 8.0, col)
+			if tx + 1 < w and mask[i + 1] == 1:
+				draw_rect(Rect2(cx, cy - 8.0, 16.0, 16.0), col)
+			if ty + 1 < room.h and mask[i + w] == 1:
+				draw_rect(Rect2(cx - 8.0, cy, 16.0, 16.0), col)
 
 
 ## The previous Robbie, swimming its own route alongside this one: its trail so
@@ -256,11 +291,17 @@ func _draw_lamp(k: int, rpos: Vector2) -> void:
 	for i in 12:
 		draw_circle(rpos, 48.0 * (1.0 - i * 0.075), Color(C_LAMP, 0.010 + i * 0.002))
 	draw_arc(rpos, 48.0, 0, TAU, 48, Color(C_LAMP, 0.07), 1.0)
-	# Rock struck by the light.
+	# Rock struck by the light, rounded like the rest of the rock.
 	for tile: Vector2i in lit_tiles:
 		if dive.room.tile_at(tile.x, tile.y) == Room.Tile.ROCK:
 			var reach: float = lit_tiles[tile]
-			draw_rect(Rect2(tile.x * 16, tile.y * 16, 16, 16), C_ROCK_LIT.darkened(reach * 0.6))
+			var col := C_ROCK_LIT.darkened(reach * 0.6)
+			var c := Vector2(tile.x * 16 + 8, tile.y * 16 + 8)
+			draw_circle(c, 8.0, col)
+			for d: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var nb := tile + d
+				if lit_tiles.has(nb) and dive.room.tile_at(nb.x, nb.y) == Room.Tile.ROCK:
+					draw_rect(Rect2(c + Vector2(d) * 8.0 - Vector2(8, 8), Vector2(16, 16)), col)
 
 
 func _glow(pos: Vector2, col: Color, radius: float, strength: float) -> void:
@@ -280,10 +321,24 @@ func _draw_plants(k: int, now: float) -> void:
 			var pulse := 0.75 + 0.25 * sin(now * 1.3 + p.x)
 			var fresh := clampf(float(k - plant_found[i]) / 20.0, 0.0, 1.0)   # brightens as it's found
 			_glow(pos, C_PLANT, 14.0 * pulse * (0.5 + 0.5 * fresh), 0.8)
-			draw_circle(pos, 1.5, C_PLANT)
+			_draw_anemone(pos, now, p.x * 7 + p.y * 3, 0.5 + 0.5 * fresh)
 			_found_ring(pos, k, plant_found[i], C_PLANT, 10.0)
 		elif _in_station_memory(p.x, p.y):
-			draw_circle(pos, 1.2, Color(C_PLANT, 0.25))
+			_draw_anemone(pos, 0.0, p.x * 7 + p.y * 3, 0.25)
+
+
+## A glowing plant seen from above: a little anemone, fronds swaying, a bright bead on
+## each tip.
+func _draw_anemone(pos: Vector2, now: float, seed_v: int, strength: float) -> void:
+	for f in 6:
+		var ang := TAU * f / 6.0 + seed_v * 0.37 + sin(now * 1.2 + seed_v + f * 1.1) * 0.18
+		var reach := 5.5 + float((seed_v + f) % 3)
+		var bend := sin(now * 1.6 + f + seed_v) * 0.35
+		var a := pos + Vector2(cos(ang), sin(ang)) * reach * 0.5
+		var tip := pos + Vector2(cos(ang + bend), sin(ang + bend)) * reach
+		draw_polyline(PackedVector2Array([pos, a, tip]), Color(C_PLANT.darkened(0.35), 0.8 * strength), 1.1)
+		draw_circle(tip, 1.1, Color(C_PLANT, strength))
+	draw_circle(pos, 1.8, Color(C_PLANT.lightened(0.3), strength))
 
 
 ## The exit's beacon: drawn once Robbie has seen the exit (or faintly, if an earlier
@@ -293,8 +348,17 @@ func _draw_beacon(k: int, now: float) -> void:
 	var c := _p(room.exit_cx, room.exit_cy)
 	if exit_found <= k:
 		var ping := fmod(now, 1.6) / 1.6
-		draw_arc(c, 4.0 + ping * 22.0, 0, TAU, 32, Color(C_BEACON, 0.6 * (1.0 - ping)), 1.0)
-		draw_circle(c, 2.0, C_BEACON)
+		draw_arc(c, 5.0 + ping * 22.0, 0, TAU, 32, Color(C_BEACON, 0.6 * (1.0 - ping)), 1.0)
+		var ping2 := fmod(now + 0.8, 1.6) / 1.6
+		draw_arc(c, 5.0 + ping2 * 22.0, 0, TAU, 32, Color(C_BEACON, 0.3 * (1.0 - ping2)), 1.0)
+		# The beacon itself: a little six-sided buoy with a lamp that flashes with each ping.
+		var hexa := PackedVector2Array()
+		for s2 in 7:
+			hexa.append(c + Vector2.from_angle(TAU * s2 / 6.0 + PI / 6.0) * 4.2)
+		draw_colored_polygon(hexa.slice(0, 6), Color(0.1, 0.28, 0.16))
+		draw_polyline(hexa, C_BEACON, 1.0)
+		var flash := ping < 0.15
+		draw_circle(c, 1.8 if flash else 1.3, C_BEACON.lightened(0.5) if flash else C_BEACON.darkened(0.2))
 		_found_ring(c, k, exit_found, C_BEACON, 30.0)
 	elif _in_station_memory(room.exit_cx / Fx.TILE, room.exit_cy / Fx.TILE):
 		draw_arc(c, 5.0, 0, TAU, 24, Color(C_BEACON, 0.22), 1.0)
