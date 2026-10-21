@@ -170,6 +170,7 @@ func _draw() -> void:
 	var lamp_on := (rec.rflags[k] & 1) == 1
 	if lamp_on:
 		_draw_lamp(k, rpos)
+		_draw_snow(k, rpos, now)
 	_draw_plants(k, now)
 	_draw_beacon(k, now)
 	_draw_valve(k, now)
@@ -302,6 +303,32 @@ func _draw_lamp(k: int, rpos: Vector2) -> void:
 				var nb := tile + d
 				if lit_tiles.has(nb) and dive.room.tile_at(nb.x, nb.y) == Room.Tile.ROCK:
 					draw_rect(Rect2(c + Vector2(d) * 8.0 - Vector2(8, 8), Vector2(16, 16)), col)
+
+
+## Marine snow: specks drifting slowly down through the water, seen only where the lamp
+## lights them. Ambience, not part of the sim.
+const SNOW := 160
+
+func _draw_snow(k: int, rpos: Vector2, now: float) -> void:
+	var ang := dive.rec.ra[k] * TAU / 4096.0
+	var fwd := Vector2(sin(ang), -cos(ang))
+	for j in SNOW:
+		var vx := sin(j * 1.7) * 1.5
+		var vy := 2.0 + float(j % 5) * 0.6
+		var p := Vector2(fposmod(float((j * 7919) % 640) + vx * now + sin(now * 0.7 + j) * 2.0, 640.0),
+			fposmod(float((j * 104729) % 360) + vy * now, 360.0))
+		var off := p - rpos
+		if absf(off.x) > 96.0 or absf(off.y) > 96.0:
+			continue
+		var d := off.length()
+		var lit := 0.0
+		if d < 48.0:
+			lit = 1.0 - d / 48.0
+		if d < 96.0 and fwd.dot(off) > 0.82 * d:   # inside the beam
+			lit = maxf(lit, 1.0 - d / 96.0)
+		if lit <= 0.02 or dive.room.tile_at(int(p.x) / 16, int(p.y) / 16) == Room.Tile.ROCK:
+			continue
+		draw_circle(p, 0.55 + float(j % 3) * 0.25, Color(1.0, 0.95, 0.85, 0.55 * lit))
 
 
 func _glow(pos: Vector2, col: Color, radius: float, strength: float) -> void:
@@ -461,10 +488,21 @@ func _draw_lurker(k: int, pos: Vector2, rpos: Vector2, state: int, lamp_on: bool
 		var pulse := 0.5 + 0.5 * sin(now * 18.0)
 		_glow(pos, C_LURKER, 16.0, 1.0)
 		draw_arc(pos, 9.0 + pulse * 3.0, 0, TAU, 24, Color(C_LURKER, 0.7), 1.5)
-		draw_circle(pos + Vector2(-2.2, 0), 1.6, Color(1, 0.9, 1))
-		draw_circle(pos + Vector2(2.2, 0), 1.6, Color(1, 0.9, 1))
-		draw_circle(pos + Vector2(-2.2, 0), 0.6, Color(0.3, 0, 0.2))
-		draw_circle(pos + Vector2(2.2, 0), 0.6, Color(0.3, 0, 0.2))
+		# The rock it was pretending to be, now very much awake.
+		var lump := PackedVector2Array()
+		for s3 in 13:
+			var t3 := s3 * TAU / 12.0
+			lump.append(pos + Vector2(cos(t3), sin(t3)) * (6.8 + sin(t3 * 3.0 + 1.3) * 0.9 + pulse * 0.4))
+		draw_colored_polygon(lump, Color(0.42, 0.26, 0.38))
+		draw_polyline(lump, Color(C_LURKER, 0.9), 1.0)
+		var look := (rpos - pos).normalized() * 0.6   # it looks at Robbie
+		for ex: float in [-2.3, 2.3]:
+			draw_circle(pos + Vector2(ex, -1.0), 1.8, Color(1, 0.92, 1))
+			draw_circle(pos + Vector2(ex, -1.0) + look, 0.8, Color(0.3, 0, 0.2))
+		var teeth := PackedVector2Array()
+		for t4 in 7:
+			teeth.append(pos + Vector2(-3.0 + t4, 2.4 + (0.9 if t4 % 2 == 0 else 0.0)))
+		draw_polyline(teeth, Color(1, 0.9, 1, 0.9), 0.8)
 	elif state == 2:
 		draw_circle(pos, 6.0, Color(0.25, 0.2, 0.26, 0.5))
 		draw_line(pos + Vector2(-3.2, 0), pos + Vector2(-1.2, 0), Color(C_LURKER, 0.6), 1.0)
@@ -560,23 +598,49 @@ func _draw_eel(i: int, k: int, pos: Vector2, state: int, now: float) -> void:
 	dir = dir.normalized()
 	var side := Vector2(-dir.y, dir.x)
 	var col := C_EEL
-	var strength := 0.75
+	var strength := 0.8
 	if state == 1:
 		col = Color(1.0, 0.45, 0.3)
 		strength = 1.0
 	elif state == 2:
-		strength = 0.4
-	_glow(pos, col, 9.0, strength * 0.6)
-	var pts := PackedVector2Array()
-	for s in 7:
-		var wave := sin(now * 7.0 - s * 0.9 + i) * (0.6 + s * 0.35)
-		pts.append(pos - dir * (s * 2.2) + side * wave)
-	draw_polyline(pts, Color(col, 0.85 * strength), 2.5)
-	for s in [1, 3, 5]:
-		draw_circle(pts[s], 1.1, Color(1, 1, 0.85, 0.7 * strength))   # the glowing stripes
-	var eye := Color(1, 0.2, 0.15) if state == 1 else Color(col, strength)
-	draw_circle(pos + dir * 1.5 + side * 1.2, 0.8, eye)
-	draw_circle(pos + dir * 1.5 - side * 1.2, 0.8, eye)
+		strength = 0.45
+	_glow(pos, col, 10.0, strength * 0.55)
+	# A tapering body along a wavy spine, head first.
+	var spine := PackedVector2Array()
+	var speed := 11.0 if state == 1 else 6.0
+	for s2 in 9:
+		var wave := sin(now * speed - s2 * 0.85 + i) * (0.3 + s2 * 0.32)
+		spine.append(pos - dir * (s2 * 2.0) + side * wave)
+	var left := PackedVector2Array()
+	var right := PackedVector2Array()
+	for s2 in spine.size():
+		var a := spine[maxi(s2 - 1, 0)]
+		var b := spine[mini(s2 + 1, spine.size() - 1)]
+		var nrm := (a - b).normalized().orthogonal()
+		var w := lerpf(2.4, 0.4, float(s2) / (spine.size() - 1))
+		left.append(spine[s2] + nrm * w)
+		right.append(spine[s2] - nrm * w)
+	right.reverse()
+	var body := left + right
+	draw_colored_polygon(body, Color(col.darkened(0.35), 0.9 * strength))
+	body.append(body[0])
+	draw_polyline(body, Color(col, 0.9 * strength), 0.8)
+	for s2 in [2, 4, 6]:   # the glowing stripes that give it away
+		var a := spine[s2 - 1]
+		var b := spine[s2 + 1]
+		var nrm := (a - b).normalized().orthogonal()
+		var w := lerpf(2.4, 0.4, float(s2) / (spine.size() - 1))
+		draw_line(spine[s2] + nrm * w, spine[s2] - nrm * w, Color(1, 1, 0.8, 0.85 * strength), 1.0)
+	# Blind: its eyes are closed, two little curves. Lunging, its mouth opens.
+	var eye_c := Color(0.1, 0.18, 0.05, strength)
+	draw_arc(pos + dir * 0.3 + side * 1.0, 0.7, dir.angle() - 0.2, dir.angle() + PI + 0.2, 5, eye_c, 0.7)
+	draw_arc(pos + dir * 0.3 - side * 1.0, 0.7, dir.angle() - 0.2, dir.angle() + PI + 0.2, 5, eye_c, 0.7)
+	if state == 1:
+		draw_colored_polygon(PackedVector2Array([pos + dir * 1.4, pos + dir * 3.0 + side * 1.4, pos + dir * 3.0 - side * 1.4]),
+			Color(0.35, 0.05, 0.05))
+		# Listening: arcs ahead of it, towards the sound.
+		var ping := fmod(now * 3.0, 1.0)
+		draw_arc(pos + dir * 2.0, 4.0 + ping * 5.0, dir.angle() - 0.6, dir.angle() + 0.6, 8, Color(col, 0.6 * (1.0 - ping)), 1.0)
 
 
 func _draw_lasers(k: int) -> void:

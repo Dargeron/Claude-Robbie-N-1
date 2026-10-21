@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-21, after hourly block 26 (22:36 UTC): rounded rock, anemones, a beacon buoy.
+Updated 2026-10-21, after hourly block 27 (23:43 UTC): the eel and the lurker redrawn; marine snow.
 
 ## Where we are
 
@@ -50,7 +50,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 1. Albert's #5: the beacon opens the next room; optional objectives per room. Needs his answer on the two currencies.
 2. Verify the web page inside the claude.ai frame (needs Albert's eyes).
-3. More drawing without the art pipeline: eel, lurker, particles in the water.
+3. Albert's #6 (three screens: Game, Mission Control, Lab) once he says go on the Lab.
 
 ## Known issues and open questions
 
