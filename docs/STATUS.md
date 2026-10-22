@@ -4,7 +4,7 @@ Updated 2026-10-22, after hourly block 32 (05:37 UTC): brass rule cards. Moving 
 
 ## Where we are
 
-**Hourly blocks resumed** on 21 October, working through Albert's 14 playtest notes first
+**Moved to GitHub and Claude Code on 22 October** after 32 hourly blocks in a Cowork session. Albert's 14 playtest notes come first
 (docs/design/feedback-2026-10-17.md). Done: #14 the lurker, #8 CPU budgets, #2 full-screen launch and skip-ahead, #11 hidden until found, #4/#3 room goals and a guided first room, #10 last words.
 
 **Albert played it (2026-10-17, evening): "I had FUN... the barest core is good."** The core loop passes his gate. He has many
@@ -49,14 +49,24 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 ## Next three tasks
 
-1. Albert's #5: the beacon opens the next room; optional objectives per room. Needs his answer on the two currencies.
-2. Verify the web page inside the claude.ai frame (needs Albert's eyes).
-3. Albert's reaction to the Lab sketch (#6).
+1. **Progression, step 1** (Albert's #5 and #1), once he approves `docs/design/progression.md`: reaching the exit
+   opens the next room; room goals pay Data, shown in the header; old saves are paid for rooms already certified.
+   If he hasn't answered, ask him first: it changes how rooms open.
+2. **The Lab** (#6): act on Albert's reaction to the sketch (`game/station/lab.gd`, key B). Then slots and the
+   first purchase (CPU modules) from step 2 of the proposal.
+3. **Art pass** (#7/#9/#13): needs Albert's reference images and Vertex AI access. Until then, the procedural
+   drawing in `game/view/dive_view.gd` and the brass UI (`game/station/brass.gd`, `ui_theme.gd`) are the look.
 
-## Known issues and open questions
+## Known bugs and open questions
 
-- GitHub is parked at Albert's request; backups go to the session outputs folder (tools/save.sh).
-- `keep_distance` and `move_towards beacon` can alternate quickly at the edge of a range (zigzag).
-  The 12 px margin helps but doesn't remove it. Watch whether players find it readable.
-- The plan's open decisions (win condition = survey fleet, success transmission, etc.) are
-  implemented with the recommended defaults, pending Albert's answers.
+- **The Lock's intended program passes 18/20, not 20/20:** twice an eel lingers within range and Robbie waits until
+  its battery runs out. It certifies (16 needed), but a tighter room or a better reference program would help.
+- **Zigzag:** `keep_distance` and `move_towards beacon` can alternate quickly at the edge of a range. The 12 px
+  margin helps but doesn't remove it.
+- **The sim's jellyfish still snap to new headings;** only the picture smooths them (`_smooth_pos` in dive_view.gd).
+- **`tools/bootstrap.sh` doesn't report GDScript parse errors;** run the tests or `tools/smoke.sh` after edits.
+- **Background jobs** (`tools/hunt.sh`, `tools/solve_all.sh`) write to `out/`, which isn't in git. The Lock's hunt
+  stopped at 7,750 programs (none passing the survey); The Nursery's at about 7,150. Restart them to continue.
+- **Not verified:** the web build inside the claude.ai frame; it runs in headless Chromium and on Cloudflare.
+- The plan's open decisions (win condition = survey fleet, success transmission, etc.) are implemented with the
+  recommended defaults, pending Albert's answers.

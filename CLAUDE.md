@@ -20,6 +20,17 @@ tools/test.sh          # must be green before you change anything
 
 Then post a short plan to Albert: the goal, three to six tasks, what he will see at the end.
 
+## Running the game
+
+```bash
+tools/godot.sh --path game                    # opens the station (the game) in a window
+tools/godot.sh -e --path game                 # the Godot editor
+tools/web_artifact.sh && tools/site.sh        # web build in out/site; serve it: (cd out/site && python3 -m http.server 8765)
+```
+
+Main scene: the station (`game/station/station.tscn`): Mission Control, the full-screen transmission (F), the Lab
+(B), the Wall of Robbies (W), the station log (L), the manual (H). Ctrl+Shift+U opens every room for testing.
+
 ## Commands
 
 | Command | What it does |

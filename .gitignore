@@ -16,3 +16,7 @@ service-account*.json
 # Packaged web build (regenerate with tools/web_artifact.sh)
 build/
 .wrangler/
+
+# Python caches
+__pycache__/
+*.pyc
