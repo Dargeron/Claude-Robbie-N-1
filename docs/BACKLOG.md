@@ -17,7 +17,8 @@ Full notes and triage: docs/design/feedback-2026-10-17.md. Order to confirm with
 - [x] #11 Everything hidden until discovered, exit included; a green tick shows the beacon's bearing (s22).
 - [x] #10 340 last words, chosen by cause and circumstance, never repeated while others fit (s24). Keep adding; Albert can edit lines.json.
 - [ ] #1/#6 Design with Albert: two currencies, the Lab (Robbie sprite, slots), shop for equipment and instructions.
-- [ ] #6 Three screens: Game, Mission Control, Lab.
+- [~] #6 Three screens: Game (full-screen launch, s21), Mission Control, and a first sketch of the Lab (s30): Robbie on the
+      bench with a card per part and two empty slots. Waiting on Albert's reaction and the currencies.
 - [~] #7/#9/#13 Art pass: cute, drawn, steampunk-ish, organic and moving walls (needs Vertex AI credentials). Without it so far:
       full screen at full resolution, a round Robbie with a big eye, pulsing jellyfish with smooth paths (s27). Rounded rock, anemones, a beacon buoy (s28). Eel and lurker redrawn, marine snow in the lamp (s29).
 

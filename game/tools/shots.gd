@@ -30,6 +30,7 @@ func _ready() -> void:
 		["seek", 1.0], ["survey_start"], ["wait", 4], ["shot", "06a-survey-out"], ["await_survey"], ["wait", 5], ["shot", "06-dark-certified"],
 		["log"], ["wait", 5], ["shot", "06c-station-log"], ["log_close"],
 		["manual"], ["wait", 5], ["shot", "06d-manual"], ["manual_close"],
+		["lab"], ["wait", 8], ["shot", "06e-lab"], ["lab_close"],
 		["room", "valve"], ["program", "keep_distance 4\nstop if valve_shut\nmove_towards beacon"], ["launch"],
 		["seek_event", "lurker_wakes", -6], ["wait", 5], ["shot", "07a-valve-lurker-asleep"],
 		["seek_event", "lurker_wakes", 8], ["wait", 5], ["shot", "07-valve-lurker"], ["watch"], ["wait", 5], ["shot", "07b-lurker-large"], ["watch"],
@@ -92,6 +93,10 @@ func _process(_d: float) -> void:
 			station._open_manual()
 		"manual_close":
 			station.manual.visible = false
+		"lab":
+			station._open_lab()
+		"lab_close":
+			station.lab.visible = false
 		"log":
 			station._open_log()
 		"log_close":

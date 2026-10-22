@@ -21,6 +21,8 @@ var room_buttons := {}
 var serial_label: Button
 var wall: RobbieWall
 var log_btn: Button
+var lab_btn: Button
+var lab: RobbieLab
 var station_log: StationLog
 var manual: RobbieManual
 var coach: Coach
@@ -120,10 +122,14 @@ func _build() -> void:
 		tabs.add_child(b)
 		room_buttons[id] = b
 	serial_label = _button("", "The Wall of Robbies: every Robbie sent, and its last words (W)", _open_wall)
-	serial_label.position = Vector2(992, 8)
-	serial_label.custom_minimum_size = Vector2(192, 0)
+	serial_label.position = Vector2(976, 8)
+	serial_label.custom_minimum_size = Vector2(124, 0)
 	serial_label.add_theme_color_override("font_color", UiTheme.TEXT_DIM)
 	add_child(serial_label)
+	lab_btn = _button("Lab", "The Lab: Robbie on the bench, and what it carries (B)", _open_lab)
+	lab_btn.position = Vector2(1106, 8)
+	lab_btn.custom_minimum_size = Vector2(78, 0)
+	add_child(lab_btn)
 	log_btn = _button("Log", "The station log (L)", _open_log)
 	log_btn.position = Vector2(1190, 8)
 	log_btn.custom_minimum_size = Vector2(78, 0)
@@ -294,6 +300,11 @@ func _build() -> void:
 	manual.start_over.connect(_confirm_start_over)
 	add_child(manual)
 
+	lab = RobbieLab.new()
+	lab.visible = false
+	lab.closed.connect(func() -> void: lab.visible = false)
+	add_child(lab)
+
 
 ## Room tabs: number and name; certified rooms turn green.
 func _label_room_tab(b: Button, rid: String) -> void:
@@ -395,7 +406,7 @@ func _refresh() -> void:
 	var over := used > budget
 	launch_btn.disabled = over or program.rules.is_empty()
 	launch_btn.text = "LAUNCH ROBBIE %03d" % state.next_serial
-	serial_label.text = "Robbies sent: %d  ·  Wall" % (state.next_serial - 1)
+	serial_label.text = "Wall  ·  %d sent" % (state.next_serial - 1)
 	var unread := StationLog.unread(state)
 	log_btn.text = "Log  +%d" % unread if unread > 0 else "Log"
 	log_btn.add_theme_color_override("font_color", UiTheme.AMBER if unread > 0 else UiTheme.TEXT_DIM)
@@ -586,7 +597,7 @@ func _restore_program() -> void:
 ## next, from the first launch to the survey fleet and on to the next room. It finishes
 ## when the player moves on from a certified Dark, and never shows again.
 func _update_coach() -> void:
-	if state.coach_done or wall.visible or station_log.visible or manual.visible or watch_large or survey_run != null:
+	if state.coach_done or wall.visible or station_log.visible or manual.visible or lab.visible or watch_large or survey_run != null:
 		coach.point_at(null, "")
 		return
 	var first: String = GameState.ROOMS[0]
@@ -748,6 +759,15 @@ func _open_wall() -> void:
 	wall.visible = true
 
 
+func _open_lab() -> void:
+	if watch_large:
+		_toggle_watch()
+	replay.playing = false
+	lab.show_for(state.room_state(room_id).room, state.next_serial)
+	move_child(lab, get_child_count() - 1)
+	lab.visible = true
+
+
 func _open_manual() -> void:
 	if watch_large:
 		_toggle_watch()
@@ -827,7 +847,7 @@ func _toggle_watch() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if wall.visible or station_log.visible or manual.visible:
+	if wall.visible or station_log.visible or manual.visible or lab.visible:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
@@ -839,6 +859,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				accept_event()
 			KEY_H:
 				_open_manual()
+				accept_event()
+			KEY_B:
+				_open_lab()
 				accept_event()
 			KEY_U:
 				if event.ctrl_pressed and event.shift_pressed:   # testers: open every room

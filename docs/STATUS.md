@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-21, after hourly block 27 (23:43 UTC): the eel and the lurker redrawn; marine snow.
+Updated 2026-10-22, after hourly block 28 (00:50 UTC): the Lab, a first sketch.
 
 ## Where we are
 
@@ -32,6 +32,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 - Robbie's manual (H) and tooltips on every order and condition, from one source (Catalogue.HELP).
 - Rooms open one after another as each is certified (Ctrl+Shift+U opens all, for testing).
 - The transmission shows only what Robbie sensed; a green tick beside Robbie points at the beacon.
+- The Lab (B): a first sketch, Robbie on the bench with a card per part; nothing to buy yet.
 - Launching goes full screen and skips fast to just before where the previous Robbie was lost (K toggles).
 - Room goals under LAUNCH: reach the exit, prove it (survey fleet, its button glows when it's time), lean (CPU record).
 - A guided first room: in The Dark the guide points at the next thing to do until the room is certified. "New station" in the manual starts over.
@@ -50,7 +51,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 1. Albert's #5: the beacon opens the next room; optional objectives per room. Needs his answer on the two currencies.
 2. Verify the web page inside the claude.ai frame (needs Albert's eyes).
-3. Albert's #6 (three screens: Game, Mission Control, Lab) once he says go on the Lab.
+3. Albert's reaction to the Lab sketch (#6).
 
 ## Known issues and open questions
 
