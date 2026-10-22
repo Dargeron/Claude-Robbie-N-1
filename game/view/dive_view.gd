@@ -681,7 +681,8 @@ func _draw_robbie(k: int, pos: Vector2, now: float) -> void:
 	var flap := sin(now * 16.0) * 0.9 if moving else 0.0
 	for sgn: float in [-1.0, 1.0]:
 		var root := pos - fwd * 3.2 + side * sgn * 2.6
-		draw_colored_polygon(PackedVector2Array([root, root - fwd * 3.2 + side * sgn * (2.0 + flap), root - fwd * 0.6 + side * sgn * 0.4]),
+		# (A fat triangle whatever the flap: a thin one can't be filled.)
+		draw_colored_polygon(PackedVector2Array([root, root - fwd * 3.0 + side * sgn * (1.8 + flap), root - fwd * 1.6 + side * sgn * 0.2]),
 			body.darkened(0.25))
 	# A round body, a little longer in front.
 	var hull := PackedVector2Array()
