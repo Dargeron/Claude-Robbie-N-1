@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-22, after hourly block 31 (04:33 UTC): tests for the Why? panel's words. Waiting on Albert's yes to the progression proposal.
+Updated 2026-10-22, after hourly block 32 (05:37 UTC): brass rule cards. Waiting on Albert's yes to the progression proposal.
 
 ## Where we are
 

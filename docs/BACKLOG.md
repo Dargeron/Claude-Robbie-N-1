@@ -21,7 +21,7 @@ Full notes and triage: docs/design/feedback-2026-10-17.md. Order to confirm with
 - [~] #6 Three screens: Game (full-screen launch, s21), Mission Control, and a first sketch of the Lab (s30): Robbie on the
       bench with a card per part and two empty slots. Waiting on Albert's reaction and the currencies.
 - [~] #7/#9/#13 Art pass: cute, drawn, steampunk-ish, organic and moving walls (needs Vertex AI credentials). Without it so far:
-      full screen at full resolution, a round Robbie with a big eye, pulsing jellyfish with smooth paths (s27). Rounded rock, anemones, a beacon buoy (s28). Eel and lurker redrawn, marine snow in the lamp (s29). Brass panels, rivets and hull plates for Mission Control (s31).
+      full screen at full resolution, a round Robbie with a big eye, pulsing jellyfish with smooth paths (s27). Rounded rock, anemones, a beacon buoy (s28). Eel and lurker redrawn, marine snow in the lamp (s29). Brass panels, rivets and hull plates for Mission Control (s31). Brass rule cards with number badges (s34).
 
 ## Now: P0b, the first playable
 

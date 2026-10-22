@@ -43,8 +43,28 @@ func set_highlight(i: int) -> void:
 		if c is PanelContainer:
 			var idx: int = c.get_meta("rule", -1)
 			var on := idx == highlight
-			c.add_theme_stylebox_override("panel", UiTheme.box(Color("16202b") if on else UiTheme.PANEL,
-				UiTheme.GREEN if on else UiTheme.PANEL_EDGE, 4, 6))
+			c.add_theme_stylebox_override("panel", _card_box(on))
+
+
+## A rule card: dark plate, brass edge; green edge on the rule that's driving Robbie.
+static func _card_box(on: bool) -> StyleBoxFlat:
+	var b := UiTheme.box(Color("16202b") if on else Color("121820"), UiTheme.GREEN if on else UiTheme.BRASS_EDGE, 6, 6)
+	b.set_border_width_all(2 if on else 1)
+	return b
+
+
+## Two rivets at the bottom corners of a rule card.
+class CardRivets:
+	extends Control
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		resized.connect(queue_redraw)
+
+	func _draw() -> void:
+		for p in [Vector2(0, size.y - 1), Vector2(size.x - 1, size.y - 1)]:
+			draw_circle(p, 2.4, Brass.BRASS_DARK)
+			draw_circle(p + Vector2(-0.5, -0.5), 1.1, Brass.BRASS)
 
 
 func add_rule() -> void:
@@ -57,17 +77,25 @@ func _row(i: int) -> Control:
 	var rule: Dictionary = program.rules[i]
 	var card := PanelContainer.new()
 	card.set_meta("rule", i)
-	card.add_theme_stylebox_override("panel", UiTheme.box(UiTheme.PANEL, UiTheme.PANEL_EDGE, 4, 6))
+	card.add_theme_stylebox_override("panel", _card_box(i == highlight))
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 4)
 	card.add_child(v)
+	card.add_child(CardRivets.new())
 
 	var top := HBoxContainer.new()
 	v.add_child(top)
-	var num := Label.new()
+	var num := Label.new()   # the rule's number on a brass badge
 	num.text = str(i + 1)
-	num.custom_minimum_size = Vector2(20, 0)
-	num.add_theme_color_override("font_color", UiTheme.AMBER)
+	num.custom_minimum_size = Vector2(24, 24)
+	num.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	num.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	num.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var badge := UiTheme.box(Brass.BRASS, Brass.BRASS_DARK, 12, 0)
+	badge.set_border_width_all(2)
+	num.add_theme_stylebox_override("normal", badge)
+	num.add_theme_color_override("font_color", Color(0.16, 0.1, 0.03))
+	num.add_theme_font_size_override("font_size", 13)
 	top.add_child(num)
 	var act := OptionButton.new()
 	for a in ACTION_ORDER:
