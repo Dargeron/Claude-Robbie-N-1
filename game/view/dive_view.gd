@@ -287,7 +287,9 @@ func _draw_lamp(k: int, rpos: Vector2) -> void:
 		var reach := clampf(e.distance_to(rpos) / 96.0, 0.0, 1.0)
 		cols.append(Color(C_LAMP, lerpf(0.30, 0.03, reach)))
 		lit_tiles[Vector2i(ends[i] / Fx.TILE, ends[i + 1] / Fx.TILE)] = reach
-	draw_polygon(pts, cols)
+	# Pressed against rock, the rays all stop at once and the cone folds to nothing: skip it.
+	if not Geometry2D.triangulate_polygon(pts).is_empty():
+		draw_polygon(pts, cols)
 	# The glow all around Robbie (World.LAMP_HALO, 48 px): jellyfish inside it see the lamp too.
 	for i in 12:
 		draw_circle(rpos, 48.0 * (1.0 - i * 0.075), Color(C_LAMP, 0.010 + i * 0.002))
@@ -490,10 +492,11 @@ func _draw_lurker(k: int, pos: Vector2, rpos: Vector2, state: int, lamp_on: bool
 		draw_arc(pos, 9.0 + pulse * 3.0, 0, TAU, 24, Color(C_LURKER, 0.7), 1.5)
 		# The rock it was pretending to be, now very much awake.
 		var lump := PackedVector2Array()
-		for s3 in 13:
+		for s3 in 12:
 			var t3 := s3 * TAU / 12.0
 			lump.append(pos + Vector2(cos(t3), sin(t3)) * (6.8 + sin(t3 * 3.0 + 1.3) * 0.9 + pulse * 0.4))
 		draw_colored_polygon(lump, Color(0.42, 0.26, 0.38))
+		lump.append(lump[0])
 		draw_polyline(lump, Color(C_LURKER, 0.9), 1.0)
 		var look := (rpos - pos).normalized() * 0.6   # it looks at Robbie
 		for ex: float in [-2.3, 2.3]:
@@ -512,11 +515,12 @@ func _draw_lurker(k: int, pos: Vector2, rpos: Vector2, state: int, lamp_on: bool
 		var a := lerpf(0.9, 0.35, reach)
 		# A lump in the rock that isn't quite rock: a bumpy outline and two closed eyes.
 		var pts := PackedVector2Array()
-		for s in 13:
+		for s in 12:
 			var t := s * TAU / 12.0
 			var r := 6.5 + sin(t * 3.0 + 1.3) * 0.9
 			pts.append(pos + Vector2(cos(t), sin(t)) * r)
 		draw_colored_polygon(pts, Color(0.36, 0.3, 0.36, a * 0.8))
+		pts.append(pts[0])
 		draw_polyline(pts, Color(0.62, 0.52, 0.6, a), 1.0)
 		draw_arc(pos + Vector2(-2.3, 0.3), 1.4, 0.2, PI - 0.2, 6, Color(0.95, 0.8, 0.95, a), 1.0)
 		draw_arc(pos + Vector2(2.3, 0.3), 1.4, 0.2, PI - 0.2, 6, Color(0.95, 0.8, 0.95, a), 1.0)
@@ -611,20 +615,14 @@ func _draw_eel(i: int, k: int, pos: Vector2, state: int, now: float) -> void:
 	for s2 in 9:
 		var wave := sin(now * speed - s2 * 0.85 + i) * (0.3 + s2 * 0.32)
 		spine.append(pos - dir * (s2 * 2.0) + side * wave)
-	var left := PackedVector2Array()
-	var right := PackedVector2Array()
-	for s2 in spine.size():
-		var a := spine[maxi(s2 - 1, 0)]
-		var b := spine[mini(s2 + 1, spine.size() - 1)]
-		var nrm := (a - b).normalized().orthogonal()
-		var w := lerpf(2.4, 0.4, float(s2) / (spine.size() - 1))
-		left.append(spine[s2] + nrm * w)
-		right.append(spine[s2] - nrm * w)
-	right.reverse()
-	var body := left + right
-	draw_colored_polygon(body, Color(col.darkened(0.35), 0.9 * strength))
-	body.append(body[0])
-	draw_polyline(body, Color(col, 0.9 * strength), 0.8)
+	# Drawn as overlapping discs, outline first: a body polygon can fold over itself as it waves.
+	for pass_i in 2:
+		for s2 in range(spine.size() - 1, -1, -1):
+			var w := lerpf(2.4, 0.5, float(s2) / (spine.size() - 1))
+			if pass_i == 0:
+				draw_circle(spine[s2], w + 0.6, Color(col, 0.9 * strength))
+			else:
+				draw_circle(spine[s2], w, Color(col.darkened(0.35), strength))
 	for s2 in [2, 4, 6]:   # the glowing stripes that give it away
 		var a := spine[s2 - 1]
 		var b := spine[s2 + 1]

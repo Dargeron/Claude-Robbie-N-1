@@ -134,10 +134,11 @@ func _draw_robbie() -> void:
 		var mid := root + dir * 1.5 * S
 		var perp := dir.orthogonal()
 		var fin := PackedVector2Array()
-		for i in 21:
+		for i in 20:   # no repeated first point: triangulation fails on duplicates
 			var a := TAU * i / 20.0
 			fin.append(mid + dir * cos(a) * 1.7 * S + perp * sin(a) * 0.75 * S)
 		draw_colored_polygon(fin, HULL.darkened(0.25))
+		fin.append(fin[0])
 		draw_polyline(fin, BRASS_DARK, 2.0)
 		draw_line(root, mid + dir * 1.2 * S, BRASS_DARK, 1.5)
 	var hull := PackedVector2Array()

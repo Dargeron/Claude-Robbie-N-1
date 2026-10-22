@@ -8,8 +8,8 @@ OUT="${1:-$ROOT/out/smoke}"
 rm -rf "$OUT"; mkdir -p "$OUT"
 ROBBIE_TIMEOUT=150 xvfb-run -a -s "-screen 0 1280x720x24" "$ROOT/tools/godot.sh" --path "$ROOT/game" \
   --rendering-driver opengl3 --audio-driver Dummy res://tools/shots.tscn -- "$OUT" > "$OUT/log.txt" 2>&1 || true
-if grep -qE "SCRIPT ERROR|Parse Error" "$OUT/log.txt"; then
-  grep -E "SCRIPT ERROR|Parse Error" -A 2 "$OUT/log.txt" | head -20; echo "smoke: script errors"; exit 1
+if grep -qE "SCRIPT ERROR|Parse Error|triangulation failed" "$OUT/log.txt"; then
+  grep -E "SCRIPT ERROR|Parse Error|triangulation failed" -A 2 "$OUT/log.txt" | head -20; echo "smoke: script errors"; exit 1
 fi
 expected=$(grep -o '\["shot", "[^"]*"\]' "$ROOT/game/tools/shots.gd" | wc -l)
 python3 - "$OUT" "$expected" <<'PY'

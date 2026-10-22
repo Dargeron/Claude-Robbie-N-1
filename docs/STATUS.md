@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-22, after hourly block 28 (00:50 UTC): the Lab, a first sketch.
+Updated 2026-10-22, after hourly block 29 (01:59 UTC): browser playtest and a lamp fix; brass for Mission Control.
 
 ## Where we are
 

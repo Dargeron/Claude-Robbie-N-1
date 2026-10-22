@@ -96,10 +96,7 @@ func _benchmark() -> void:
 # ---------------------------------------------------------------- layout
 
 func _build() -> void:
-	var bg := ColorRect.new()
-	bg.color = UiTheme.BG
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(bg)
+	add_child(Brass.make_backdrop())
 
 	var title := Label.new()
 	title.text = "JUPITER ORBITAL STATION  ·  ROBBIE PROGRAMME"
@@ -277,6 +274,10 @@ func _build() -> void:
 	restore_btn = _button("Use this Robbie's program", "Copy the selected Robbie's program into the editor", _restore_program)
 	restore_btn.disabled = true
 	col.add_child(restore_btn)
+
+	var rivets := Brass.new()
+	rivets.panels = [Rect2(12, 44, 648, 368), Rect2(12, 456, 648, 252), Rect2(672, 44, 596, 664)]
+	add_child(rivets)
 
 	coach = Coach.new()
 	add_child(coach)

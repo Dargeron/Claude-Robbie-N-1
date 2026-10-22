@@ -12,6 +12,7 @@ const AMBER := Color("ffc35a")
 const GREEN := Color("7dffa0")
 const RED := Color("ff6a5a")
 const CYAN := Color("7fd8ff")
+const BRASS_EDGE := Color(0.42, 0.30, 0.14)   # panel edges: brass, as in the Lab
 
 
 static func box(bg: Color, edge: Color = PANEL_EDGE, radius: int = 4, margin: int = 8) -> StyleBoxFlat:
@@ -24,11 +25,20 @@ static func box(bg: Color, edge: Color = PANEL_EDGE, radius: int = 4, margin: in
 	return s
 
 
+## A main panel: dark, a brass edge, rounded corners and a soft shadow.
+static func _brass_panel() -> StyleBoxFlat:
+	var s := box(Color(PANEL, 0.96), BRASS_EDGE, 7, 8)
+	s.set_border_width_all(2)
+	s.shadow_color = Color(0, 0, 0, 0.45)
+	s.shadow_size = 6
+	return s
+
+
 static func build() -> Theme:
 	var t := Theme.new()
 	t.default_font_size = 14
-	t.set_stylebox("panel", "PanelContainer", box(PANEL))
-	t.set_stylebox("panel", "Panel", box(PANEL))
+	t.set_stylebox("panel", "PanelContainer", _brass_panel())
+	t.set_stylebox("panel", "Panel", _brass_panel())
 	for type in ["Button", "OptionButton"]:
 		t.set_stylebox("normal", type, box(Color("18212c"), PANEL_EDGE, 3, 6))
 		t.set_stylebox("hover", type, box(Color("223044"), Color("3a4b62"), 3, 6))
