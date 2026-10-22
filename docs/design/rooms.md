@@ -1,14 +1,17 @@
 # The Jellyfish Rooms: prototype room designs
 
-Five one-screen rooms (40 x 22 tiles, 1 tile = 1 m = 16 px) that share one set of orders.
+Six one-screen rooms (40 x 22 tiles, 1 tile = 1 m = 16 px) that share one set of orders.
 Each has an intended solution, naive programs that must fail, and the idea it teaches.
 Programs live in `game/content/programs/<room>/`; `tests/test_reference_programs.gd` checks every claim below.
+
+Budgets went up by about half in block 19 (Albert's note #8). The tables below were measured with the old budgets;
+the programs and their survey results are the same, since a budget only limits what can be launched.
 
 Map key: `#` rock, `.` water, `S` start, `E` exit and beacon, `J` jellyfish, `L` lurker niche, `G` valve, `p` glowing plant.
 
 ## 1. The Dark
 
-CPU budget 6 · energy 4200
+CPU budget 10 (6 until block 19) · energy 4200
 
 ```text
 ########################################
@@ -48,7 +51,7 @@ CPU budget 6 · energy 4200
 
 ## 2. The Jellyfish
 
-CPU budget 8 · energy 6000 · swarm: 8 jellyfish resting by the rock plus 16 scattered fresh on every dive
+CPU budget 12 (8 until block 19) · energy 6000 · swarm: 8 jellyfish resting by the rock plus 16 scattered fresh on every dive
 
 ```text
 ########################################
@@ -102,7 +105,7 @@ swimming past it, so it was dropped.
 
 ## 3. The Nursery
 
-CPU budget 8 · energy 7500 · 8 jellyfish resting in the tunnel plus 6 scattered fresh on every dive
+CPU budget 12 (8 until block 19) · energy 7500 · 8 jellyfish resting in the tunnel plus 6 scattered fresh on every dive
 
 ```text
 ########################################
@@ -150,7 +153,7 @@ narrow, darkness doesn't stop Robbie swimming into a jellyfish that is resting i
 
 ## 4. The Valve
 
-CPU budget 10 · energy 6000 · valve cycle 60/45/150 ticks (open/closing/shut)
+CPU budget 16 (10 until block 19) · energy 6000 · valve cycle 60/45/150 ticks (open/closing/shut)
 
 ```text
 ########################################
@@ -192,7 +195,7 @@ CPU budget 10 · energy 6000 · valve cycle 60/45/150 ticks (open/closing/shut)
 
 ## 5. The Listeners
 
-CPU budget 7 · energy 4000 · four eels, each patrolling its own shaft across the corridor, starting anywhere in it
+CPU budget 12 (7 until block 19) · energy 4000 · four eels, each patrolling its own shaft across the corridor, starting anywhere in it
 
 ```text
 ########################################

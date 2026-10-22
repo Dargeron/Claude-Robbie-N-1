@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-22, after hourly block 30 (03:29 UTC): a progression proposal for Albert (docs/design/progression.md).
+Updated 2026-10-22, after hourly block 31 (04:33 UTC): tests for the Why? panel's words. Waiting on Albert's yes to the progression proposal.
 
 ## Where we are
 
@@ -43,7 +43,7 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
   the room swims alongside the replay as a ghost.
 - Survey fleet (certification: 16 of 20 dives on seeds of its own, sent a few per frame with progress), headless dive runner, PNG path images, golden
   replays, exploit hunt, and a mutation solver that finds the cheapest certifying program per room.
-- 45 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
+- 51 tests, all green: maths, generator, parser, rooms, determinism, lint (no floats in the
   sim), golden replays, reference programs.
 - A dive takes 0.1–0.4 s to simulate natively, a little more in a browser (tools/webcheck.sh prints timings).
 

@@ -79,7 +79,7 @@ Full notes and triage: docs/design/feedback-2026-10-17.md. Order to confirm with
 ## Quality and tooling
 
 - [x] Smoke test: tools/smoke.sh renders the station tour and checks every shot (block 12).
-- [ ] Tests for DiveText explanations.
+- [x] Tests for DiveText explanations (block 31).
 - [x] Profile the sim (block 15): sensing checks distance before line of sight, nearest hostile cached per think.
 - [ ] Custom size-optimised web export template (only if the web build is too big to share).
 
