@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-22, after hourly block 32 (05:37 UTC): brass rule cards. Waiting on Albert's yes to the progression proposal.
+Updated 2026-10-22, after hourly block 32 (05:37 UTC): brass rule cards. Moving to GitHub and Claude Code (see CLAUDE.md, "Where the project lives"). Waiting on Albert's yes to the progression proposal.
 
 ## Where we are
 

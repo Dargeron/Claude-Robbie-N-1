@@ -101,14 +101,24 @@ Rendering works here too: `xvfb-run -a tools/godot.sh --path game --rendering-dr
   gives you (Co-Authored-By and Claude-Session).
 - Tag finished phases: `m0-foundations`, `m1-prototype`, ...
 
-## Hourly work loop
+## Where the project lives
 
-Albert asked for continuous iteration: one work block per hour, woken by a scheduled message.
-Each block: read `docs/BACKLOG.md`, pick the most valuable item, build it, test it, look at it,
-update STATUS/BACKLOG/devlog, commit to main, run `tools/save.sh`, send Albert a short update
-(with a clip, screenshot or new build when there is something to see), then schedule the next block.
-The playable web page is https://claude.ai/artifact/EtAUzrsTr2DVgwN4zAeCuE ; republish it from
-`build/artifact/robbie-play.html` after `tools/web_artifact.sh`.
+Since 2026-10-22 the project lives on GitHub (https://github.com/Dargeron/Claude-Robbie-N-1) and is worked on with
+Claude Code. Blocks 1–32 were done in a Cowork cloud session with hourly scheduled blocks; that loop has ended.
+Each work session still follows the same rhythm: read `docs/BACKLOG.md`, pick the most valuable item, build it, test
+it, look at it, update STATUS/BACKLOG/devlog, commit, and show Albert something he can play.
+
+- **Builds for Albert:** `tools/web_artifact.sh` → `tools/webcheck.sh` → `tools/site.sh` → `tools/deploy_cf.sh`
+  publishes https://robbie-n1.bauldejuegos.workers.dev (needs `CLOUDFLARE_API_TOKEN` in the environment). Desktop
+  zips: `tools/desktop.sh`. The old claude.ai page (https://claude.ai/artifact/EtAUzrsTr2DVgwN4zAeCuE) is no longer
+  updated.
+- **Needs on a new machine:** bash, Python 3 with Pillow, `xvfb-run` and Mesa (for `tools/smoke.sh`), Playwright with
+  Chromium (for `tools/webcheck.sh` and `tools/web/playtest.py`), Node/npx (for wrangler). `tools/bootstrap.sh`
+  fetches Godot and the export templates.
+- **Waiting on Albert** (see docs/STATUS.md): his yes on `docs/design/progression.md` (currencies, goals, the Lab's
+  shop), his reaction to the Lab sketch, and art references plus Vertex AI access for the art pass.
+- **Background searches:** `tools/hunt.sh <room>` and `tools/solve_all.sh <n>` write to `out/` (not in git). The
+  Lock's hunt had checked 7,750 programs with nothing passing the survey; restart it to continue.
 
 ## Talking with Albert
 
