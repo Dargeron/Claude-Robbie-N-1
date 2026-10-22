@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-22, after hourly block 29 (01:59 UTC): browser playtest and a lamp fix; brass for Mission Control.
+Updated 2026-10-22, after hourly block 30 (03:29 UTC): a progression proposal for Albert (docs/design/progression.md).
 
 ## Where we are
 
