@@ -11,6 +11,8 @@ out/
 # Secrets never go in the repo
 *.key
 *.pem
+*.keystore
+*.jks
 service-account*.json
 .env
 # Packaged web build (regenerate with tools/web_artifact.sh)

@@ -1,6 +1,8 @@
 # Status
 
-Updated 2026-10-22, after hourly block 32 (05:37 UTC): brass rule cards. Moving to GitHub and Claude Code (see CLAUDE.md, "Where the project lives"). Waiting on Albert's yes to the progression proposal.
+Updated 2026-10-24, session 35: on GitHub and Claude Code; builds are now a native Android APK and a Windows EXE
+(tools/android.sh, tools/desktop.sh). Next: the art pass, starting with 5 style concepts and 5 Robbie designs for
+Albert to choose from. Still waiting on Albert's yes to the progression proposal.
 
 ## Where we are
 
@@ -49,13 +51,14 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 ## Next three tasks
 
-1. **Progression, step 1** (Albert's #5 and #1), once he approves `docs/design/progression.md`: reaching the exit
+1. **Art pass** (#7/#9/#13), Albert's priority since 2026-10-24: cool backgrounds, a cute Robbie sprite, the whole
+   game and UI looking like a proper game, and a big Robbie in the Lab that changes as it is customised. Made in
+   Blender. First 5 style concepts and 5 very different Robbies (docs/art/); Albert picks a style and a Robbie.
+2. **Progression, step 1** (Albert's #5 and #1), once he approves `docs/design/progression.md`: reaching the exit
    opens the next room; room goals pay Data, shown in the header; old saves are paid for rooms already certified.
    If he hasn't answered, ask him first: it changes how rooms open.
-2. **The Lab** (#6): act on Albert's reaction to the sketch (`game/station/lab.gd`, key B). Then slots and the
-   first purchase (CPU modules) from step 2 of the proposal.
-3. **Art pass** (#7/#9/#13): needs Albert's reference images and Vertex AI access. Until then, the procedural
-   drawing in `game/view/dive_view.gd` and the brass UI (`game/station/brass.gd`, `ui_theme.gd`) are the look.
+3. **The Lab** (#6): act on Albert's reaction to the sketch (`game/station/lab.gd`, key B). Then slots and the
+   first purchase (CPU modules) from step 2 of the proposal. Its Robbie sprite comes from the art pass.
 
 ## Known bugs and open questions
 

@@ -43,6 +43,8 @@ Main scene: the station (`game/station/station.tscn`): Mission Control, the full
 | `tools/movie.sh <room> <prog.rbt> [seed] [out.mp4] [speed] [serial]` | Record the replay as MP4 (GIF=1 for a GIF too) under a virtual display |
 | `xvfb-run -a tools/godot.sh --path game --rendering-driver opengl3 --audio-driver Dummy res://tools/shots.tscn -- <out_dir>` | Scripted tour of the station UI, saving screenshots to look at |
 | `tools/godot.sh --headless --path game --export-release <Linux/Windows/macOS/Web> <path>` | Builds (templates in ~/.local/share/godot/export_templates/4.7.2.stable) |
+| `tools/export_setup.sh [--desktop-only]` | Installs the export templates and the Android build tools (about 2 min the first time) |
+| `tools/android.sh [out.apk]` | The signed Android APK (arm64) in build/android/; needs the release key in the environment (see "Where the project lives") |
 | `tools/web_artifact.sh` | Web build packed for a claude.ai page (engine gzipped inside a script); then publish build/artifact/robbie-play.html with its files |
 | `tools/desktop.sh [out_dir]` | Export Linux/Windows/macOS and zip them into /mnt/user-data/outputs (about 90 s) |
 | `tools/fleet.sh [glob] [n]` | Survey fleet summary for every reference program |
@@ -119,13 +121,21 @@ Claude Code. Blocks 1–32 were done in a Cowork cloud session with hourly sched
 Each work session still follows the same rhythm: read `docs/BACKLOG.md`, pick the most valuable item, build it, test
 it, look at it, update STATUS/BACKLOG/devlog, commit, and show Albert something he can play.
 
-- **Builds for Albert:** `tools/web_artifact.sh` → `tools/webcheck.sh` → `tools/site.sh` → `tools/deploy_cf.sh`
-  publishes https://robbie-n1.bauldejuegos.workers.dev (needs `CLOUDFLARE_API_TOKEN` in the environment). Desktop
-  zips: `tools/desktop.sh`. The old claude.ai page (https://claude.ai/artifact/EtAUzrsTr2DVgwN4zAeCuE) is no longer
-  updated.
-- **Needs on a new machine:** bash, Python 3 with Pillow, `xvfb-run` and Mesa (for `tools/smoke.sh`), Playwright with
-  Chromium (for `tools/webcheck.sh` and `tools/web/playtest.py`), Node/npx (for wrangler). `tools/bootstrap.sh`
-  fetches Godot and the export templates.
+- **Builds for Albert (since 2026-10-24):** native apps, not the browser. An Android APK for his tablet
+  (`tools/android.sh`) and a Windows EXE (`tools/desktop.sh`, or the Windows preset alone). Send him the files.
+  Android installs an update only if it carries the same signature, so always sign with Robbie's release key: it is
+  in Albert's Google Drive as "Robbie N+1 - Android signing key (private).txt"; export its three lines as environment
+  variables before `tools/android.sh`. Never commit it. A build signed with another key can't replace his installed
+  game without an uninstall, which deletes his save.
+- **The web build** (`tools/web_artifact.sh` → `tools/webcheck.sh` → `tools/site.sh` → `tools/deploy_cf.sh`,
+  https://robbie-n1.bauldejuegos.workers.dev, needs `CLOUDFLARE_API_TOKEN`) is no longer the main target. The old
+  claude.ai page (https://claude.ai/artifact/EtAUzrsTr2DVgwN4zAeCuE) is no longer updated.
+- **Needs on a new machine:** bash, Python 3 with Pillow, `xvfb-run` and Mesa (for `tools/smoke.sh`), a JDK (for
+  Android signing), Playwright with Chromium (for `tools/webcheck.sh` and `tools/web/playtest.py`), Node/npx (for
+  wrangler). `tools/bootstrap.sh` fetches Godot; `tools/export_setup.sh` fetches the export templates and the Android
+  build tools.
+- **Art:** Blender (5.2.3 LTS, headless, Cycles on the CPU; no GPU in the cloud machine) for models and rendered
+  sprites. Unity was considered and set aside on 2026-10-24: this game stays on Godot.
 - **Waiting on Albert** (see docs/STATUS.md): his yes on `docs/design/progression.md` (currencies, goals, the Lab's
   shop), his reaction to the Lab sketch, and art references plus Vertex AI access for the art pass.
 - **Background searches:** `tools/hunt.sh <room>` and `tools/solve_all.sh <n>` write to `out/` (not in git). The
