@@ -19,7 +19,8 @@ from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageFo
 FONT_DIR = os.path.expanduser("~/.cache/robbie/fonts")
 FONTS = {"Cinzel": "Cinzel:wght@700", "Alegreya": "Alegreya:ital,wght@1,500", "ChakraPetch": "Chakra+Petch:wght@600",
          "ShareTechMono": "Share+Tech+Mono", "Fredoka": "Fredoka:wght@600", "PatrickHand": "Patrick+Hand",
-         "Bangers": "Bangers", "ComicNeue": "Comic+Neue:wght@700"}
+         "Bangers": "Bangers", "ComicNeue": "Comic+Neue:wght@700", "BigShoulders": "Big+Shoulders+Display:wght@800",
+         "SpecialElite": "Special+Elite", "Limelight": "Limelight", "PoiretOne": "Poiret+One", "VT323": "VT323"}
 NAMES = {1: "Brass & Ink", 2: "Glow Abyss", 3: "Toy Aquarium", 4: "Paper Cut", 5: "Jovian Comic"}
 ROBBIE_PX = (262, 392)  # where the stand-in Robbie sits in the frame
 

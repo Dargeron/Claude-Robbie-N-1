@@ -4,20 +4,26 @@ uses, so we can judge both the character and how it reads at play size.
 Every design faces +x (its lamp at the front) and is built from separate parts (lamp, propulsion, sensor, body), so
 the Lab can later swap one part and redraw Robbie.
 
-Run: blender -b --factory-startup -P tools/art/robbie_designs.py -- <design 1-5> <out_prefix> [samples]
+Designs 1-5 are round 1 (cute). Designs 6-10 are round 2: machines of a steampunk colony, darker and less cute,
+drawn on a dark sheet in the comic style Albert chose ("dark" mode, also usable for Bathy).
+
+Run: blender -b --factory-startup -P tools/art/robbie_designs.py -- <design 1-10> <out_prefix> [samples] [light|dark]
   writes <out_prefix>_lab.png (720x720) and <out_prefix>_top.png (360x360)
 """
 import math
 import os
 import sys
 
+import bmesh
 import bpy
 from mathutils import Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import kit  # noqa: E402
 
-DESIGNS = {1: "Bathy", 2: "Squidge", 3: "Tug", 4: "Puff", 5: "Bell"}
+DESIGNS = {1: "Bathy", 2: "Squidge", 3: "Tug", 4: "Puff", 5: "Bell", 6: "Boiler", 7: "Hardsuit", 8: "Lighthouse",
+           9: "Scaphe", 10: "Phono"}
+TAU = 2 * math.pi
 
 
 def along(v):
@@ -219,14 +225,270 @@ def bell(M):
             "The brain in the dome: CPU"]
 
 
-BUILDERS = {1: bathy, 2: squidge, 3: tug, 4: puff, 5: bell}
+# --- Round 2: machines of the steam colony ------------------------------------------------------------------------
+
+def metals(M):
+    return dict(
+        iron=M("iron", "#3a4046", "#111518", "#6a767e", patches=(1.4, "#6a2e14", 0.63)),
+        brass=M("brass", "#b8862f", "#5a3c12", "#f0c878"),
+        copper=M("copper", "#a0522d", "#4a200c", "#e08a5a"),
+        dark=M("dark", "#101418", "#050708", "#262c32"),
+        wood=M("wood", "#5a3418", "#1e0e04", "#8a5a30", noise=(8.0, 0.25)),
+        cream=M("dial", "#e8dcc0", "#a09070", "#ffffff", ao=0.0),
+        ink=M("ink", "#1a1010", lit=0.0, ao=0.0),
+    )
 
 
-def build(design):
+def paddle_wheel(x, y, z, r, mat_rim, mat_paddle, side):
+    kit.cyl((x, y, z), 0.08, 0.14, mat_rim, rot=(math.pi / 2, 0, 0))
+    kit.torus((x, y + side * 0.04, z), r, 0.025, mat_rim, rot=(math.pi / 2, 0, 0))
+    for k in range(8):
+        a = k * TAU / 8
+        kit.box((x + math.cos(a) * r * 0.72, y + side * 0.04, z + math.sin(a) * r * 0.72), (r * 0.62, 0.16, 0.05),
+                mat_paddle, rot=(0, -a, 0))
+
+
+def propeller(x, y, z, r, mat, blades=3):
+    kit.cone((x, y, z), 0.07, 0.02, 0.16, mat, rot=(0, -math.pi / 2, 0))
+    for k in range(blades):
+        kit.sphere((x - 0.05, y, z), r, mat, scale=(0.07, 0.35, 1.0), rot=(k * TAU / blades, 0, 0), segs=16)
+
+
+def boiler(M):
+    """A riveted steam boiler on paddle wheels; its eye is a pressure gauge, its furnace glows through the grate."""
+    m = metals(M)
+    fire = kit.glow("fire", "#ff6a1a", 2.4)
+    lens = kit.glow("lens", "#ffd77a", 1.6)
+    kit.cyl((0, 0, 1.0), 0.55, 1.3, m["iron"], rot=facing_x())
+    kit.sphere((0.65, 0, 1.0), 0.55, m["iron"], scale=(0.42, 1, 1))
+    kit.sphere((-0.65, 0, 1.0), 0.55, m["iron"], scale=(0.32, 1, 1))
+    for x in (-0.5, 0.0, 0.5):
+        kit.torus((x, 0, 1.0), 0.56, 0.035, m["brass"], rot=facing_x())
+        for k in range(18):
+            a = k * TAU / 18
+            kit.sphere((x + 0.05, 0.575 * math.cos(a), 1.0 + 0.575 * math.sin(a)), 0.02, m["brass"], segs=6)
+    kit.cyl((0.86, 0, 1.12), 0.24, 0.06, m["cream"], rot=facing_x())
+    kit.torus((0.89, 0, 1.12), 0.24, 0.045, m["brass"], rot=facing_x())
+    for k in range(7):
+        a = math.radians(210 - k * 40)
+        kit.box((0.9, math.cos(a) * 0.17, 1.12 + math.sin(a) * 0.17), (0.01, 0.025, 0.05), m["ink"],
+                rot=(a - math.pi / 2, 0, 0))
+    kit.cyl((0.91, 0.06, 1.18), 0.014, 0.19, m["ink"], rot=(math.radians(-45), 0, 0))
+    kit.sphere((0.91, 0, 1.12), 0.03, m["brass"], segs=10)
+    kit.cyl((0.8, 0, 0.66), 0.11, 0.2, m["brass"], rot=(0, math.pi / 2 + 0.3, 0))
+    kit.sphere((0.9, 0, 0.63), 0.09, lens, scale=(0.4, 1, 1), rot=(0, 0.3, 0), segs=24)
+    kit.cyl((0.3, 0, 1.75), 0.11, 0.6, m["iron"])
+    kit.cone((0.3, 0, 2.1), 0.1, 0.2, 0.16, m["iron"])
+    kit.torus((0.3, 0, 2.18), 0.19, 0.03, m["brass"])
+    bub = kit.glass("bubble", "#e8f8ff", "#ffffff", 0.9, 0.03)
+    for i, r in enumerate((0.06, 0.05, 0.04)):
+        kit.no_lines(kit.sphere((0.32 - 0.03 * i, 0.02 * (-1) ** i, 2.42 + 0.22 * i), r, bub, segs=16))
+    for sd in (-1, 1):
+        paddle_wheel(-0.05, sd * 0.62, 0.95, 0.44, m["iron"], m["wood"], sd)
+    kit.torus((-0.82, 0, 0.95), 0.22, 0.03, m["brass"], rot=facing_x())
+    for k in range(4):
+        kit.box((-0.86, 0, 0.83 + k * 0.08), (0.03, 0.3, 0.03), fire)
+    kit.tube([(-0.4, 0.2, 1.5), (-0.55, 0.3, 1.85), (-0.85, 0.25, 1.65), (-0.92, 0.2, 1.25)], 0.04, m["copper"])
+    return ["Carbide lamp under the gauge", "Paddle wheels", "Pressure gauge: its eye and its sensor",
+            "Furnace and boiler: battery and CPU"]
+
+
+def hardsuit(M):
+    """An armoured diving suit with nobody inside: claws, three portholes, two dim lights behind the glass."""
+    m = metals(M)
+    suit = M("suit", "#2c3238", "#0c0f12", "#58626c", patches=(1.6, "#5a2a14", 0.64))
+    eye = kit.glow("eye", "#ff3a2a", 0.9)
+    lens = kit.glow("lens", "#ffd77a", 1.6)
+    kit.sphere((0, 0, 1.0), 0.5, suit, scale=(0.85, 1.0, 1.05))
+    kit.torus((0, 0, 0.78), 0.45, 0.04, m["brass"])
+    kit.box((0.36, 0, 1.08), (0.14, 0.5, 0.42), suit, bevel=0.05)
+    kit.sphere((0.05, 0, 1.62), 0.36, m["copper"])
+    kit.torus((0.05, 0, 1.33), 0.31, 0.07, m["brass"])
+    for k in range(10):
+        a = k * TAU / 10
+        kit.sphere((0.05 + math.cos(a) * 0.33, math.sin(a) * 0.33, 1.38), 0.03, m["iron"], segs=8)
+    kit.sphere((0.34, 0, 1.64), 0.16, m["dark"], scale=(0.3, 1, 1))
+    for sd in (-1, 1):
+        kit.sphere((0.37, sd * 0.05, 1.67), 0.024, eye, segs=10)
+    kit.torus((0.38, 0, 1.64), 0.17, 0.04, m["brass"], rot=facing_x())
+    for y in (-0.08, 0.0, 0.08):
+        kit.cyl((0.41, y, 1.64), 0.012, 0.32, m["brass"])
+    for sd in (-1, 1):
+        kit.torus((0.05, sd * 0.34, 1.66), 0.1, 0.03, m["brass"], rot=(math.pi / 2, 0, 0))
+        kit.sphere((0.05, sd * 0.32, 1.66), 0.09, m["dark"], scale=(1, 0.3, 1), segs=16)
+        sh, el, wr = Vector((0.05, sd * 0.5, 1.22)), Vector((0.22, sd * 0.66, 0.9)), Vector((0.52, sd * 0.6, 0.78))
+        kit.sphere(sh, 0.15, m["brass"], segs=24)
+        kit.tube([sh, (sh + el) / 2, el], 0.09, suit)
+        kit.sphere(el, 0.11, m["brass"], segs=20)
+        kit.tube([el, (el + wr) / 2, wr], 0.075, suit)
+        kit.torus(wr, 0.08, 0.025, m["brass"], rot=along(wr - el))
+        for c in (-1, 1):
+            kit.cone(wr + Vector((0.12, 0, c * 0.05)), 0.04, 0.005, 0.22, m["iron"],
+                     rot=along((1, 0, -c * 0.4)), verts=10)
+    kit.cone((0, 0, 0.5), 0.28, 0.42, 0.3, suit)
+    jet = kit.glow("jet", "#7ae8ff", 1.4)
+    for x, y in ((0.14, 0.14), (0.14, -0.14), (-0.14, 0.14), (-0.14, -0.14)):
+        kit.cone((x, y, 0.3), 0.04, 0.07, 0.14, m["iron"], verts=12)
+        kit.cyl((x, y, 0.22), 0.035, 0.01, jet, verts=12)
+    kit.cyl((0.24, -0.42, 1.45), 0.08, 0.22, m["brass"], rot=facing_x())
+    kit.sphere((0.36, -0.42, 1.45), 0.065, lens, scale=(0.4, 1, 1), segs=20)
+    kit.box((-0.42, 0, 1.05), (0.26, 0.5, 0.56), m["iron"], bevel=0.05)
+    hose = M("hose", "#1a1a1a", "#050505", "#3a3a3a")
+    pts = [(-0.55, 0, 1.25), (-0.8, 0.1, 1.55), (-1.05, 0.2, 1.35), (-1.3, 0.25, 1.7)]
+    kit.tube(pts, 0.05, hose)
+    for p in pts[1:3]:
+        kit.sphere(p, 0.065, m["brass"], scale=(1, 1, 0.5), segs=12)
+    return ["Shoulder lamp", "Thruster skirt", "Claws: grabbers", "Backpack and air hose: battery and CPU"]
+
+
+def lighthouse(M):
+    """A streamlined Art Deco beacon: a lantern room on top, a glowing visor slit for an eye, red fins."""
+    m = metals(M)
+    gun = M("gunmetal", "#2c3238", "#0c0f12", "#5c6872")
+    chrome = M("chrome", "#b8c0c8", "#4a5058", "#ffffff", ao=0.2)
+    red = M("enamel", "#8a1e1e", "#3a0808", "#d05050")
+    visor = kit.glow("visor", "#ffb050", 2.0)
+    lamp = kit.glow("lamp", "#ffe6a0", 2.6)
+    kit.sphere((0, 0, 1.05), 0.42, gun, scale=(1, 1, 1.6))
+    for z in (0.72, 0.8, 0.88):
+        r = 0.42 * math.sqrt(max(0.0, 1 - ((z - 1.05) / 0.672) ** 2))
+        kit.torus((0, 0, z), r + 0.005, 0.012, chrome)
+    zr = 1.3
+    rr = 0.42 * math.sqrt(1 - ((zr - 1.05) / 0.672) ** 2)
+    kit.torus((0, 0, zr + 0.06), rr - 0.01, 0.03, chrome)
+    kit.torus((0, 0, zr), rr + 0.0, 0.03, visor)
+    kit.torus((0, 0, zr - 0.06), rr + 0.01, 0.03, chrome)
+    kit.torus((0, 0, 1.72), 0.3, 0.02, chrome)
+    for k in range(10):
+        a = k * TAU / 10
+        kit.cyl((math.cos(a) * 0.3, math.sin(a) * 0.3, 1.66), 0.01, 0.12, chrome, verts=6)
+    kit.cyl((0, 0, 1.73), 0.31, 0.03, gun)
+    kit.no_lines(kit.cyl((0, 0, 1.9), 0.21, 0.32, kit.glass("lantern", "#fff4d8", "#ffffff", 1.0, 0.08)))
+    kit.sphere((0, 0, 1.9), 0.11, lamp, segs=20)
+    kit.cyl((0.18, 0, 1.9), 0.09, 0.04, lamp, rot=facing_x())
+    kit.sphere((0, 0, 2.08), 0.24, m["brass"], scale=(1, 1, 0.55))
+    kit.cone((0, 0, 2.3), 0.05, 0.0, 0.28, m["brass"], verts=12)
+    for a in (math.radians(120), math.pi, math.radians(240)):
+        kit.box((math.cos(a) * 0.42, math.sin(a) * 0.42, 0.62), (0.42, 0.04, 0.62), red, bevel=0.02,
+                rot=(0, 0, a))
+    kit.cone((0, 0, 0.32), 0.14, 0.22, 0.16, chrome)
+    kit.cyl((0, 0, 0.23), 0.12, 0.02, kit.glow("jet", "#7ae8ff", 1.6))
+    return ["The lantern room: its lamp", "Three fins and a jet", "Visor slit: its eye and sensor",
+            "Hull: battery and CPU"]
+
+
+def scaphe(M):
+    """A little bathyscaphe: a long float, a pressure sphere hanging below with one small window, a guide chain."""
+    m = metals(M)
+    hull = M("hull", "#8a877c", "#2c2a24", "#c8c4b6", patches=(1.2, "#6a3a1a", 0.66))
+    window = kit.glow("window", "#ffb050", 1.2)
+    lens = kit.glow("lens", "#ffd77a", 1.6)
+    kit.sphere((0, 0, 1.38), 0.5, hull, scale=(2.0, 1.0, 0.78))
+    kit.box((0.05, 0, 1.73), (1.0, 0.28, 0.04), m["iron"])
+    kit.box((0.25, 0, 1.95), (0.42, 0.3, 0.34), hull, bevel=0.06)
+    kit.torus((0.25, 0, 2.13), 0.09, 0.025, m["brass"])
+    kit.cyl((0.12, 0, 2.24), 0.012, 0.28, m["iron"], verts=6)
+    kit.sphere((0.12, 0, 2.38), 0.035, kit.glow("tip", "#ff4a2a", 2.0), segs=8)
+    kit.box((-1.0, 0, 1.38), (0.32, 0.03, 0.55), m["iron"], bevel=0.01)
+    kit.box((-1.0, 0, 1.38), (0.32, 0.6, 0.03), m["iron"], bevel=0.01)
+    propeller(-1.12, 0, 1.38, 0.2, m["brass"])
+    kit.sphere((0.2, 0, 0.62), 0.36, m["iron"])
+    kit.torus((0.2, 0, 0.62), 0.355, 0.02, m["brass"], rot=facing_x())
+    kit.torus((0.2, 0, 0.62), 0.355, 0.02, m["brass"])
+    kit.torus((0.54, 0, 0.66), 0.08, 0.025, m["brass"], rot=facing_x())
+    kit.sphere((0.54, 0, 0.66), 0.065, window, scale=(0.3, 1, 1), segs=16)
+    for x, y in ((0.05, 0.15), (0.05, -0.15), (0.35, 0.15), (0.35, -0.15)):
+        kit.cyl((x, y, 0.98), 0.025, 0.36, m["iron"], verts=8)
+    for x in (0.75, -0.5):
+        kit.cyl((x, 0, 1.0), 0.13, 0.36, m["dark"])
+    kit.cyl((0.5, 0, 0.36), 0.07, 0.14, m["brass"], rot=(0, math.pi / 2 + 0.5, 0))
+    kit.sphere((0.56, 0, 0.33), 0.06, lens, scale=(0.4, 1, 1), rot=(0, 0.5, 0), segs=16)
+    for i in range(5):
+        kit.torus((0.18, 0, 0.22 - i * 0.07), 0.035, 0.012, m["iron"], rot=(math.pi / 2 if i % 2 else 0, 0, 0))
+    return ["Lamp under the gondola", "Stern screw and rudders", "Mast: antenna and sensors",
+            "The float: ballast, battery and CPU"]
+
+
+def lathe(path, radii, mat, segs=32, name="horn"):
+    """A surface of revolution along a path, open at both ends (horns, funnels)."""
+    bm = bmesh.new()
+    rings = []
+    for i, (p, r) in enumerate(zip(path, radii)):
+        p = Vector(p)
+        t = (Vector(path[min(i + 1, len(path) - 1)]) - Vector(path[max(i - 1, 0)])).normalized()
+        up = Vector((0, 1, 0)) if abs(t.y) < 0.9 else Vector((1, 0, 0))
+        a = t.cross(up).normalized()
+        b = t.cross(a).normalized()
+        rings.append([bm.verts.new(p + (a * math.cos(k * TAU / segs) + b * math.sin(k * TAU / segs)) * r)
+                      for k in range(segs)])
+    for r0, r1 in zip(rings, rings[1:]):
+        for k in range(segs):
+            bm.faces.new((r0[k], r0[(k + 1) % segs], r1[(k + 1) % segs], r1[k]))
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    o = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(o)
+    for poly in me.polygons:
+        poly.use_smooth = True
+    me.materials.append(mat)
+    o.modifiers.new("rim", "SOLIDIFY").thickness = 0.02
+    return o
+
+
+def phono(M):
+    """A mahogany valve-radio cabinet with a brass gramophone horn that throws the light (and could listen)."""
+    m = metals(M)
+    bak = M("bakelite", "#2a140a", "#0c0402", "#4a2a18")
+    valve = kit.glow("valve", "#ff9a3a", 2.2)
+    lamp = kit.glow("lamp", "#ffe6a0", 2.4)
+    kit.box((-0.1, 0, 0.85), (0.95, 0.8, 0.62), m["wood"], bevel=0.04)
+    for x in (-0.57, 0.37):
+        for y in (-0.4, 0.4):
+            for z in (0.54, 1.16):
+                kit.sphere((x, y, z), 0.05, m["brass"], segs=10)
+    kit.box((0.38, 0, 0.8), (0.02, 0.6, 0.36), bak)
+    for y in (-0.18, 0.0, 0.18):
+        kit.sphere((0.37, y, 0.82), 0.06, valve, scale=(0.5, 0.5, 1.2), segs=12)
+    for y in (-0.24, -0.12, 0.0, 0.12, 0.24):
+        kit.cyl((0.4, y, 0.8), 0.012, 0.34, m["brass"], verts=6)
+    kit.cyl((0.38, 0.3, 1.06), 0.07, 0.02, m["cream"], rot=facing_x())
+    kit.torus((0.39, 0.3, 1.06), 0.07, 0.015, m["brass"], rot=facing_x())
+    path, radii = [], []
+    for i in range(17):
+        t = i / 16
+        p0, p1, p2 = Vector((-0.2, 0, 1.15)), Vector((-0.2, 0, 1.8)), Vector((0.75, 0, 1.78))
+        path.append((1 - t) ** 2 * p0 + 2 * (1 - t) * t * p1 + t * t * p2)
+        radii.append(0.05 + 0.43 * t ** 3)
+    lathe(path, radii, m["brass"])
+    kit.sphere((0.55, 0, 1.76), 0.15, lamp, segs=20)
+    kit.cyl((-0.1, 0.44, 0.9), 0.025, 0.12, m["brass"], rot=(math.pi / 2, 0, 0))
+    kit.box((-0.02, 0.5, 0.82), (0.2, 0.03, 0.05), m["brass"], rot=(0, 0.6, 0))
+    kit.sphere((0.06, 0.5, 0.76), 0.05, m["wood"], segs=12)
+    kit.cyl((-0.5, 0.28, 1.6), 0.012, 0.9, m["iron"], verts=6)
+    kit.sphere((-0.5, 0.28, 2.06), 0.035, kit.glow("tip", "#8cff9a", 2.0), segs=8)
+    for y in (-0.25, 0.25):
+        propeller(-0.62, y, 0.66, 0.14, m["brass"])
+    return ["The horn: lamp, and ears for eels", "Two screws at the back", "Aerial: radio and sensors",
+            "The valves in the cabinet: CPU, the crank: battery"]
+
+
+BUILDERS = {1: bathy, 2: squidge, 3: tug, 4: puff, 5: bell, 6: boiler, 7: hardsuit, 8: lighthouse, 9: scaphe,
+            10: phono}
+
+
+SHEET = {"light": dict(background="#e9eff3", shadow=("#3a4660", 0.22), lines=(2.4, "#1a1f2e")),
+         "dark": dict(background="#12161c", shadow=("#000000", 0.5), lines=(2.8, "#030405"))}
+
+
+def build(design, mode="light"):
     scene = kit.reset()
     cfg = dict(robbie=(0, 0), lamp_angle=0, cone_half=30, cone_soft=10, cone_range=10, radial=(40, 50),
                radial_gain=1.0, ambient=kit.scale_rgb(kit.rgb("#f2ece4"), 0.62), lamp_color=(0.42, 0.42, 0.42),
                glows=[], sun=(0.25, -0.75, 0.65), bands=(0.42, 0.82), band_soft=0.02, sky=None, rim=None)
+    if mode == "dark":  # the chosen comic look: hard bands, darker, a warm rim light
+        cfg.update(ambient=kit.scale_rgb(kit.rgb("#d8d0c8"), 0.5), lamp_color=(0.32, 0.32, 0.32), bands=(0.5, 0.86),
+                   band_soft=0.006, sky=((-0.6, 0.6, 0.35), kit.scale_rgb(kit.rgb("#ff8a2a"), 0.7), 0.5, 0.62, -1.0,
+                                         0.0))
     light = kit.lighting_group(cfg)
 
     def M(name, base, shade=None, high=None, **kw):
@@ -234,8 +496,9 @@ def build(design):
         return kit.toon(name, light, base, shade, high, **kw)
 
     parts = BUILDERS[design](M)
-    floor = kit.no_lines(kit.cyl((0, 0, -0.02), 40.0, 0.04, kit.glow("floor", "#e9eff3", 1.0), verts=96))
-    kit.no_lines(kit.sphere((0.05, -0.15, 0.03), 0.95, kit.shadow("shadow", "#3a4660", 0.22), scale=(1.15, 0.9, 0.03)))
+    sheet = SHEET[mode]
+    floor = kit.no_lines(kit.cyl((0, 0, -0.02), 40.0, 0.04, kit.glow("floor", sheet["background"], 1.0), verts=96))
+    kit.no_lines(kit.sphere((0.05, -0.15, 0.03), 0.95, kit.shadow("shadow", *sheet["shadow"]), scale=(1.15, 0.9, 0.03)))
     return scene, parts, floor
 
 
@@ -243,15 +506,17 @@ def main():
     argv = sys.argv[sys.argv.index("--") + 1:]
     design, prefix = int(argv[0]), argv[1]
     samples = int(argv[2]) if len(argv) > 2 else 40
-    scene, parts, floor = build(design)
-    kit.outlines(2.4, "#1a1f2e")
+    mode = argv[3] if len(argv) > 3 else ("dark" if design > 5 else "light")
+    scene, parts, floor = build(design, mode)
+    bg = SHEET[mode]["background"]
+    kit.outlines(*SHEET[mode]["lines"])
     kit.look_camera((4.4, -2.6, 1.9), (0.1, 0, 0.92), lens=54)
-    kit.render(prefix + "_lab.png", 720, 720, samples=samples, background="#e9eff3")
+    kit.render(prefix + "_lab.png", 720, 720, samples=samples, background=bg)
     bpy.data.objects.remove(scene.camera)
     kit.ortho_camera(target=(0.05, 0.0, 0.9), tilt_deg=24.0, scale=3.2)
     scene.render.line_thickness = 0.6
     floor.hide_render = True
-    kit.render(prefix + "_top.png", 360, 360, samples=samples, background="#e9eff3", transparent=True)
+    kit.render(prefix + "_top.png", 360, 360, samples=samples, background=bg, transparent=True)
     with open(prefix + "_parts.txt", "w") as f:
         f.write("\n".join(parts) + "\n")
 

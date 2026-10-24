@@ -187,10 +187,12 @@ def lighting_group(cfg):
 
 
 def toon(name, group, base, shade=None, high=None, glow=(0, 0, 0), lit=1.0, ao=0.55, noise=None, waves=None,
-         rings=None):
+         rings=None, patches=None, pattern=None):
     """A cartoon material through the Lighting group. Colours are '#hex'. noise=(scale, amount) varies the base;
     waves=(scale, colour2, distortion) paints ripples between base and colour2 (sand); rings=(scale, colour2) paints
-    concentric rings around the object's own centre, seen from above (jellyfish bells)."""
+    concentric rings around the object's own centre, seen from above (jellyfish bells); patches=(scale, colour2,
+    threshold) paints blotches of colour2 (rust, moss); pattern(n, position) -> colour socket replaces the base with
+    any procedural pattern (mosaics, cracks)."""
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     tree = m.node_tree
@@ -201,6 +203,19 @@ def toon(name, group, base, shade=None, high=None, glow=(0, 0, 0), lit=1.0, ao=0
     hi = rgb(high) if high else scale_rgb(b, 1.3)
     gnode = n.add("ShaderNodeGroup", node_tree=group)
     base_sock = b
+    if pattern:
+        base_sock = pattern(n, n.add("ShaderNodeNewGeometry").outputs["Position"])
+        sh = n.vec("SCALE", base_sock, scale=0.45)
+        hi = n.vec("SCALE", base_sock, scale=1.25)
+    if patches:
+        geo = n.add("ShaderNodeNewGeometry")
+        tex = n.add("ShaderNodeTexNoise")
+        n.feed(tex.inputs["Vector"], geo.outputs["Position"])
+        tex.inputs["Scale"].default_value = patches[0]
+        tex.inputs["Detail"].default_value = 6.0
+        f = n.remap(tex.outputs["Factor"], patches[2], patches[2] + 0.06)
+        base_sock = n.lerp(base_sock, rgb(patches[1]), f)
+        sh = n.lerp(sh, scale_rgb(rgb(patches[1]), 0.45), f)
     if waves:
         geo = n.add("ShaderNodeNewGeometry")
         wav = n.add("ShaderNodeTexWave", wave_type="BANDS", bands_direction="DIAGONAL")

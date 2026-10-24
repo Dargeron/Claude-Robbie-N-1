@@ -51,9 +51,11 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 ## Next three tasks
 
-1. **Art pass** (#7/#9/#13), Albert's priority since 2026-10-24: cool backgrounds, a cute Robbie sprite, the whole
-   game and UI looking like a proper game, and a big Robbie in the Lab that changes as it is customised. Made in
-   Blender. First 5 style concepts and 5 very different Robbies (docs/art/); Albert picks a style and a Robbie.
+1. **Art pass** (#7/#9/#13), Albert's priority since 2026-10-24: cool backgrounds, a Robbie sprite, the whole game
+   and UI looking like a proper game, and a big Robbie in the Lab that changes as it is customised. Made in Blender.
+   The setting is now a steampunk space colonisation (Radiance, Outer Wilds), darker. Round 1: 5 styles, 5 cute
+   Robbies (he liked Jovian Comic and Bathy). Round 2: 5 truly different worlds and 5 machine Robbies
+   (docs/art/README.md). Waiting for his final pick.
 2. **Progression, step 1** (Albert's #5 and #1), once he approves `docs/design/progression.md`: reaching the exit
    opens the next room; room goals pay Data, shown in the header; old saves are paid for rooms already certified.
    If he hasn't answered, ask him first: it changes how rooms open.
