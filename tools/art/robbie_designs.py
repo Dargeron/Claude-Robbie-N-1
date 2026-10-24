@@ -476,6 +476,7 @@ BUILDERS = {1: bathy, 2: squidge, 3: tug, 4: puff, 5: bell, 6: boiler, 7: hardsu
             10: phono}
 
 
+YAW = {9: -45.0}
 SHEET = {"light": dict(background="#e9eff3", shadow=("#3a4660", 0.22), lines=(2.4, "#1a1f2e")),
          "dark": dict(background="#12161c", shadow=("#000000", 0.5), lines=(2.8, "#030405"))}
 
@@ -495,7 +496,11 @@ def build(design, mode="light"):
         kw.setdefault("ao", 0.45)
         return kit.toon(name, light, base, shade, high, **kw)
 
+    before = set(bpy.data.objects)
     parts = BUILDERS[design](M)
+    if design in YAW:  # long designs turn a little so the sheet shows their length
+        root = kit.group_under("yaw", [o for o in bpy.data.objects if o not in before and o.parent is None])
+        root.rotation_euler = (0, 0, math.radians(YAW[design]))
     sheet = SHEET[mode]
     floor = kit.no_lines(kit.cyl((0, 0, -0.02), 40.0, 0.04, kit.glow("floor", sheet["background"], 1.0), verts=96))
     kit.no_lines(kit.sphere((0.05, -0.15, 0.03), 0.95, kit.shadow("shadow", *sheet["shadow"]), scale=(1.15, 0.9, 0.03)))
