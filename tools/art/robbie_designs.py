@@ -368,9 +368,9 @@ def lighthouse(M):
     kit.cyl((0.18, 0, 1.9), 0.09, 0.04, lamp, rot=facing_x())
     kit.sphere((0, 0, 2.08), 0.24, m["brass"], scale=(1, 1, 0.55))
     kit.cone((0, 0, 2.3), 0.05, 0.0, 0.28, m["brass"], verts=12)
-    for a in (math.radians(120), math.pi, math.radians(240)):
-        kit.box((math.cos(a) * 0.42, math.sin(a) * 0.42, 0.62), (0.42, 0.04, 0.62), red, bevel=0.02,
-                rot=(0, 0, a))
+    for a in (math.radians(110), math.pi, math.radians(250)):  # swept fins, like a 1930s rocket's
+        kit.sphere((math.cos(a) * 0.46, math.sin(a) * 0.46, 0.58), 1.0, red, scale=(0.3, 0.03, 0.42),
+                   rot=(0, 0.35, a), segs=32)
     kit.cone((0, 0, 0.32), 0.14, 0.22, 0.16, chrome)
     kit.cyl((0, 0, 0.23), 0.12, 0.02, kit.glow("jet", "#7ae8ff", 1.6))
     return ["The lantern room: its lamp", "Three fins and a jet", "Visor slit: its eye and sensor",
