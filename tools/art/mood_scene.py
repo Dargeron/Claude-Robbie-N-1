@@ -590,23 +590,23 @@ def verdigris_reef():
 
     sand = w.toon("sand", "#2f6a62", "#123432", "#4f9488", waves=(1.2, "#3a7a70", 5.0), noise=(0.5, 0.12))
     kit.paper_sheet("plateau", +1, cliff_edge, 0.0, sand, thickness=4.0, far=12.0)
-    abyss = w.toon("abyss", "#06201f", "#020c0c", "#0c3030", ao=0.0)
+    abyss = w.toon("abyss", "#031212", "#010606", "#082020", ao=0.0)
     kit.box((0, -8, -4.2), (60, 14, 0.2), abyss)
 
     # Something enormous swims in the abyss below.
-    whale = w.toon("whale", "#0e3634", "#041414", "#1e5450", ao=0.0, glow=lin("#0c3a38", 0.9))
+    whale = w.toon("whale", "#0e3634", "#041414", "#1e5450", ao=0.0, glow=lin("#1a6a64", 0.75))
     body = []
     for i in range(16):
         t = i / 15
-        body.append((-9 + 19 * t, -6.8 + 1.2 * math.sin(t * 3.0), -3.0, 2.0 * math.sin(math.pi * (0.15 + 0.85 * t))
+        body.append((-9 + 19 * t, -4.6 + 0.9 * math.sin(t * 3.0), -2.8, 2.0 * math.sin(math.pi * (0.15 + 0.85 * t))
                      * (1.25 - 0.6 * t) + 0.3, (1.3, 0.7, 0.5)))
     kit.blobs("callowhale", body, whale, resolution=0.25)
-    kit.blobs("fin", [(-2.0, -4.4, -2.8, 1.4, (1.6, 0.4, 0.2)), (-2.5, -9.2, -2.9, 1.4, (1.6, 0.4, 0.2))], whale,
+    kit.blobs("fin", [(-2.0, -2.6, -2.6, 1.4, (1.6, 0.4, 0.2)), (-2.5, -6.8, -2.7, 1.4, (1.6, 0.4, 0.2))], whale,
               resolution=0.25)
     spot = kit.glow("spots", "#7af0d0", 1.4)
     for i in range(14):
         t = 0.1 + i / 18
-        kit.sphere((-9 + 19 * t, -6.8 + 1.2 * math.sin(t * 3.0) + 1.0, -2.4), 0.09, spot, segs=8)
+        kit.sphere((-9 + 19 * t, -4.6 + 0.9 * math.sin(t * 3.0) + 0.9, -2.2), 0.1, spot, segs=8)
 
     # Reef: coral towers with glowing tips, brain corals, tube worms.
     coral = w.toon("coral", "#3f8a7a", "#123c36", "#7ac0b0", noise=(1.5, 0.15))

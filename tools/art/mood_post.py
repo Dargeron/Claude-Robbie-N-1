@@ -363,15 +363,15 @@ def world_4(im):
     d = ImageDraw.Draw(t)
     fw = font("SpecialElite", 25)
     mw, mh = text_size(d, WORDS, fw)
-    tx0, ty0 = 640 - mw / 2 - 70, 600
-    tx1, ty1 = 640 + mw / 2 + 40, 672
+    tx0, ty0 = 640 - mw / 2 - 70, 104
+    tx1, ty1 = 640 + mw / 2 + 40, 176
     d.polygon([(tx0 + 34, ty0), (tx1, ty0), (tx1, ty1), (tx0 + 34, ty1), (tx0, ty1 - 22), (tx0, ty0 + 22)],
               fill=hexc("#e8d8b0"))
     d.ellipse((tx0 + 12, ty0 + 26, tx0 + 32, ty0 + 46), fill=hexc("#b8862f"))
     d.ellipse((tx0 + 17, ty0 + 31, tx0 + 27, ty0 + 41), fill=(0, 0, 0, 0))
-    d.line([(tx0 + 22, ty0 + 36), (tx0 - 10, ty0 - 10), (tx0 - 40, ty0 - 70)], fill=hexc("#c0a070"), width=3)
+    d.line([(tx0 + 22, ty0 + 36), (tx0 + 6, ty0 - 40), (tx0 + 30, ty0 - 110)], fill=hexc("#c0a070"), width=3)
     d.text((tx0 + 56, ty0 + 20), WORDS, font=fw, fill=hexc("#3a2414"))
-    t = t.rotate(1.2, resample=Image.BICUBIC, center=(640, 636))
+    t = t.rotate(-1.2, resample=Image.BICUBIC, center=(640, 140))
     composite(base, t, shadow=((4, 7), 5, 150))
     sl = layer()
     d = ImageDraw.Draw(sl)
