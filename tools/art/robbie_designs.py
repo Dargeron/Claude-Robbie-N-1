@@ -297,7 +297,7 @@ def hardsuit(M):
     """An armoured diving suit with nobody inside: claws, three portholes, two dim lights behind the glass."""
     m = metals(M)
     suit = M("suit", "#2c3238", "#0c0f12", "#58626c", patches=(1.6, "#5a2a14", 0.64))
-    eye = kit.glow("eye", "#ff3a2a", 0.9)
+    eye = kit.glow("eye", "#ff3a2a", 2.2)
     lens = kit.glow("lens", "#ffd77a", 1.6)
     kit.sphere((0, 0, 1.0), 0.5, suit, scale=(0.85, 1.0, 1.05))
     kit.torus((0, 0, 0.78), 0.45, 0.04, m["brass"])
@@ -309,7 +309,7 @@ def hardsuit(M):
         kit.sphere((0.05 + math.cos(a) * 0.33, math.sin(a) * 0.33, 1.38), 0.03, m["iron"], segs=8)
     kit.sphere((0.34, 0, 1.64), 0.16, m["dark"], scale=(0.3, 1, 1))
     for sd in (-1, 1):
-        kit.sphere((0.37, sd * 0.05, 1.67), 0.024, eye, segs=10)
+        kit.sphere((0.385, sd * 0.045, 1.67), 0.036, eye, segs=12)
     kit.torus((0.38, 0, 1.64), 0.17, 0.04, m["brass"], rot=facing_x())
     for y in (-0.08, 0.0, 0.08):
         kit.cyl((0.41, y, 1.64), 0.012, 0.32, m["brass"])
