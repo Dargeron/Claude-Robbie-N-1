@@ -394,13 +394,13 @@ def world_5(im):
     y, x = np.mgrid[0:h, 0:w].astype(np.float32)
     wob = grain((h, w), 70, 9) * 2.2
     t = math.radians(28)
-    u = (x * math.cos(t) + y * math.sin(t)) / 6.5 + wob
+    u = (x * math.cos(t) + y * math.sin(t)) / 7.0 + wob
     s = np.abs((u % 1.0) - 0.5) * 2
-    dark = np.clip(1.08 - L * 2.4, 0, 1)
+    dark = np.clip(1.32 - L * 2.7, 0, 1)
     key = (s < dark).astype(np.float32)
     t2 = math.radians(-18)
     v = (x * math.cos(t2) + y * math.sin(t2)) / 13.0 + grain((h, w), 40, 11) * 1.5
-    carve = (np.abs((v % 1.0) - 0.5) * 2 > 0.9) & (dark > 0.92)
+    carve = (np.abs((v % 1.0) - 0.5) * 2 > 0.95) & (dark > 0.98) & (grain((h, w), 90, 12) > 0.55)
     key[carve] = 0.0
     redness = np.clip((a[..., 0] - 0.55 * (a[..., 1] + a[..., 2])) * 3.0, 0, 1)
     gold = np.clip((L - 0.5) * 3.0, 0, 1) * np.clip((a[..., 0] - a[..., 2]) * 2 + 0.4, 0, 1)
