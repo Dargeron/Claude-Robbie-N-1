@@ -4,7 +4,8 @@ name: Release
 # Runs whenever RELEASE.md changes (its first heading names the version), or by hand from the Actions tab.
 # Signing needs three repository secrets (Settings > Secrets and variables > Actions), copied from Albert's
 # Drive file "Robbie N+1 - Android signing key (private).txt": ROBBIE_KEYSTORE_B64, ROBBIE_KEYSTORE_PASS,
-# ROBBIE_KEY_ALIAS. Without them the run stops: an APK signed with another key can't update his installed game.
+# ROBBIE_KEY_ALIAS. Without them it still builds everything (with a throwaway key) as a test of the pipeline, keeps
+# the files as a run artifact, publishes nothing, and fails: an APK signed with another key can't update his game.
 
 on:
   push:
@@ -29,11 +30,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check the signing key is set
+      - name: Is the signing key set?
+        id: key
         run: |
-          if [[ -z "$ROBBIE_KEYSTORE_B64" || -z "$ROBBIE_KEYSTORE_PASS" ]]; then
-            echo "::error::The signing key secrets are missing (ROBBIE_KEYSTORE_B64, ROBBIE_KEYSTORE_PASS, ROBBIE_KEY_ALIAS). See docs/RELEASES.md."
-            exit 1
+          if [[ -n "$ROBBIE_KEYSTORE_B64" && -n "$ROBBIE_KEYSTORE_PASS" ]]; then
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::No signing key secrets: building as a test only, nothing will be published. See docs/RELEASES.md."
           fi
 
       - uses: actions/setup-java@v4
@@ -73,7 +77,17 @@ jobs:
           test -s build/windows/RobbieN1.exe
           (cd build/windows && zip -q "../RobbieN1-${{ steps.version.outputs.version }}-windows.zip" *)
 
-      - uses: softprops/action-gh-release@v2
+      - name: Keep the test build (no key)
+        if: steps.key.outputs.signed != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-build-unsigned-key
+          path: build/RobbieN1-*
+          retention-days: 3
+
+      - name: Publish the release
+        if: steps.key.outputs.signed == 'true'
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: Robbie N+1 ${{ steps.version.outputs.version }}
@@ -83,3 +97,9 @@ jobs:
           files: |
             build/RobbieN1-${{ steps.version.outputs.version }}.apk
             build/RobbieN1-${{ steps.version.outputs.version }}-windows.zip
+
+      - name: Stop without the key
+        if: steps.key.outputs.signed != 'true'
+        run: |
+          echo "::error::Built fine, but not published: the signing key secrets (ROBBIE_KEYSTORE_B64, ROBBIE_KEYSTORE_PASS, ROBBIE_KEY_ALIAS) are missing. See docs/RELEASES.md."
+          exit 1

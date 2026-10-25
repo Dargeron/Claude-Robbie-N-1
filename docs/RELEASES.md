@@ -26,4 +26,5 @@ name is the part before `=` and the secret is everything after it:
 - `ROBBIE_KEY_ALIAS`
 
 Secrets are encrypted; nobody can read them back, and they never appear in the repository or the logs. Without
-them the workflow stops with an error instead of building an APK signed with the wrong key.
+them the workflow still builds, as a test, but publishes nothing and ends in an error: an APK signed with another key
+could not update the game on the tablet.
