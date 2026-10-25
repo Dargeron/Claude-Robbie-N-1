@@ -12,7 +12,7 @@ new 0.2.0 desk.
 | Feels | Most real. You are *in* a place | Real, grimy, but still a panel you look at | Most stylised; strongest identity; least "real" |
 | Touch on the tablet | Same gestures; the view can lean or zoom towards a machine when you use it | Exactly as now | Exactly as now |
 | What it costs | The presentation rebuilt in Godot 3D (the sim, the story, the rules and most machine logic stay). Two or three sessions. Lighting baked in Blender so it runs on the tablet | Half a session: the art pipeline already makes it | A session or two: every piece of art redrawn through an ink pass, and the text kept readable |
-| Risks | Performance on the tablet (manageable with baked light); small text at an angle needs the zoom | May still feel like a UI if the clutter is too timid | Legibility of cards and tape; clashes with the soft glow of Dead Air |
+| Risks | Performance on the tablet (manageable with baked light); small text at an angle needs the zoom | May still feel like a UI if the clutter is too timid; in the mock-up the grime eats the thinnest brass plaques (the scope's maker plate, the reader's heading), so those would be kept clean | Legibility of cards and tape; clashes with the soft glow of Dead Air |
 
 **Recommended: A, with B's weathering on its surfaces.** It answers "make it feel real" most directly, and the
 3D mock-up already shows the machine as a place you sit in. B's rust, grime and mismatched panels carry over as its
