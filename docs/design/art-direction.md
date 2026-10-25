@@ -7,7 +7,7 @@ new 0.2.0 desk.
 
 | | A. 3D, from the chair | B. Lived-in 2D | C. Inked |
 |---|---|---|---|
-| Mock-up | `docs/art/direction/a-3d.jpg` | `docs/art/direction/b-lived-in.jpg` | `docs/art/direction/c-inked.jpg` |
+| Mock-up (all three: `docs/art/direction/compare.jpg`) | `docs/art/direction/a-3d.jpg` | `docs/art/direction/b-lived-in.jpg` | `docs/art/direction/c-inked.jpg` |
 | What it is | The console built as a 3D room: you sit at it, the lower machines slope towards you as a desk, a lamp hangs over it, the desk edge has your mug and papers | The same flat, face-on desk as now, re-rendered as forty years old: mismatched replacement panels, rust weeping from rivets, tarnished brass, chipped paint, cables, a pipe run, one lamp with dark beyond it | A graphic-novel look: solid blacks, ink outlines, flat colour in three tones, hatching, paper tooth; only the scope and lamps glow |
 | Feels | Most real. You are *in* a place | Real, grimy, but still a panel you look at | Most stylised; strongest identity; least "real" |
 | Touch on the tablet | Same gestures; the view can lean or zoom towards a machine when you use it | Exactly as now | Exactly as now |
