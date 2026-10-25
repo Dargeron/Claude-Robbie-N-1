@@ -26,6 +26,7 @@ argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 OUT = argv[0] if argv else os.path.join(ROOT, "out/art/console")
 WHAT = argv[1] if len(argv) > 1 else "all"
 PREVIEW = "preview" in argv
+GRIMY = "grimy" in argv      # art-direction variant B: lived-in, patched, rusting, cabled
 os.makedirs(OUT, exist_ok=True)
 
 
@@ -190,6 +191,22 @@ def emission(name, color, strength):
 
 
 def M():
+    if GRIMY:
+        return dict(_m_base(), **{
+            "enamel": material("enamel_g", "#232b26", rough=0.6, wear="#9a8e7a", grime=0.95, streaks=0.95, noise_scale=9,
+                               coat=0.15, spots=1.8, bump=0.35),
+            "enamel_pale": material("enamel_pale", "#3a423b", rough=0.7, wear="#a89c84", grime=0.95, streaks=1.0,
+                                    noise_scale=7, spots=1.4, bump=0.4),
+            "enamel_rust": material("enamel_rust", "#4b2618", rough=0.85, wear="#2a1a10", grime=0.9, streaks=0.8,
+                                    noise_scale=11, spots=2.0, bump=0.6),
+            "brass": material("brass_g", "#7e6136", metal=1.0, rough=0.55, grime=1.0, noise_scale=22, bevel=0.008, spots=1.4),
+            "wall": material("wall_g", "#0b0e0d", rough=0.8, grime=1.0, streaks=1.0, noise_scale=4, bump=0.5),
+            "cloth": material("cloth", "#3c3a33", rough=0.95, grime=0.8, noise_scale=140, bump=0.7),
+        })
+    return _m_base()
+
+
+def _m_base():
     return {
         "enamel": material("enamel", "#1e2623", metal=0.0, rough=0.52, wear="#8a8478", grime=0.75, streaks=0.35,
                            noise_scale=18, coat=0.25, spots=0.6),
@@ -391,7 +408,12 @@ def housing(name, rect, r=8, depth=0.22, rivet_step=46, mats=None):
     """A machine's housing: an enamelled steel slab with a bevelled lip and riveted edges."""
     mats = mats or M()
     x, y, w, h = rect[:4]
-    slab(name, rect, -depth, 0.0, mats["enamel"], r=r, bevel=0.03)
+    mat = mats["enamel"]
+    if GRIMY:
+        # Panels replaced over the years, none quite matching.
+        mat = {"recorder": mats["enamel_pale"], "trials": mats["enamel_pale"], "chute": mats["enamel_rust"],
+               "shift": mats["enamel_pale"]}.get(name, mat)
+    slab(name, rect, -depth, 0.0, mat, r=r, bevel=0.03)
     rivets_around(rect, mats["steel"], step=rivet_step, z=0.0)
 
 
@@ -900,13 +922,89 @@ def reset():
     _mats.clear()
 
 
+def cable(points, r, mat, name="cable"):
+    """A sagging cable through screen-pixel points (x, y, z)."""
+    cu = bpy.data.curves.new(name, "CURVE")
+    cu.dimensions = "3D"
+    cu.bevel_depth = r / 100.0
+    cu.bevel_resolution = 4
+    sp = cu.splines.new("BEZIER")
+    sp.bezier_points.add(len(points) - 1)
+    for bp, (x, y, z) in zip(sp.bezier_points, points):
+        X, Y = P(x, y)
+        bp.co = (X, Y, z)
+        bp.handle_left_type = bp.handle_right_type = "AUTO"
+    o = bpy.data.objects.new(name, cu)
+    bpy.context.scene.collection.objects.link(o)
+    o.data.materials.append(mat)
+    return o
+
+
+def add_clutter():
+    """Variant B: what years of use leave on a console: cables, a pipe run, patches, tape, a tag."""
+    m = M()
+    # Cables: down the left edge, across the gap under the scope, looping over the top row, down the right.
+    cable([(4, -20, 0.1), (5, 200, 0.18), (3, 420, 0.12), (6, 740, 0.1)], 4.5, m["rubber"])
+    cable([(2, 380, 0.12), (160, 404, 0.2), (330, 410, 0.22), (500, 405, 0.2), (648, 396, 0.15)], 3.5, m["cloth"])
+    cable([(2, 390, 0.1), (200, 407, 0.18), (420, 403, 0.2), (650, 400, 0.12)], 2.5, m["red"])
+    cable([(690, -20, 0.2), (720, 6, 0.3), (860, 2, 0.28), (1010, 4, 0.26), (1140, 1, 0.24), (1290, -6, 0.2)], 4.0, m["rubber"])
+    cable([(1277, -20, 0.1), (1275, 260, 0.2), (1278, 480, 0.15), (1276, 740, 0.1)], 5.0, m["cloth"])
+    # A pipe run along the seam under the top row, with flanges and a valve wheel.
+    cylinder_x("pipe_run", 646, 1290, 129, 7, 0.12, m["brass_dark"])
+    for fx in (700, 900, 1100):
+        cylinder_x("pipe_flange", fx, fx + 6, 129, 10, 0.12, m["brass"])
+    ring_obj("valve_wheel", 1004, 129, 13, 10, 0.2, 0.26, m["red"], bevel=0.01)
+    disc("valve_hub", 1004, 129, 4, 0.2, 0.28, m["steel"])
+    # A pressure gauge clamped to the upright pipe.
+    disc("pg_body", 645, 300, 14, 0.1, 0.24, m["brass"], bevel=0.02)
+    disc("pg_face", 645, 300, 11, 0.24, 0.25, m["ivory"])
+    slab("pg_needle", (644, 291, 2, 10), 0.25, 0.255, m["recess"], r=1, bevel=0)
+    # Patches welded over old damage.
+    for (px, py, pw, ph) in ((14, 8, 46, 26), (1236, 690, 32, 20), (12, 452, 18, 36), (612, 700, 26, 14)):
+        slab("patch", (px, py, pw, ph), 0.0, 0.03, m["enamel_rust"], r=2, bevel=0.006)
+        for k in range(int(pw / 7)):
+            uv_sphere("weld", px + 3 + k * 7, py + 1, 0.03, 2.0, m["steel"], 0.4)
+            uv_sphere("weld", px + 3 + k * 7, py + ph - 1, 0.03, 2.0, m["steel"], 0.4)
+    # Cloth tape over a cracked corner, and a tag on a string from the tube.
+    for (tx, ty, tw, th, rot) in ((1128, 6, 30, 9, 0.5), (640, 470, 30, 8, -0.4), (1036, 466, 26, 8, 0.7)):
+        o = slab("tape", (tx, ty, tw, th), 0.05, 0.058, m["cloth"], r=1, bevel=0)
+        o.rotation_euler = (0, 0, rot)
+    cable([(712, 60, 0.12), (718, 90, 0.16), (721, 112, 0.18)], 0.6, m["paper"], "string")
+    slab("tag", (712, 110, 18, 26), 0.17, 0.18, m["paper"], r=2, bevel=0)
+
+
 def do_plate():
     reset()
     build_plate()
+    if GRIMY:
+        add_clutter()
     lights()
+    if GRIMY:
+        # The work lamp is a single bulb up and to the left: a pool of light, and dark beyond it.
+        for o in bpy.data.objects:
+            if o.type == "LIGHT":
+                o.data.energy *= 0.35
+        spot = bpy.data.lights.new("pool", "SPOT")
+        spot.energy = 9000
+        spot.spot_size = math.radians(70)
+        spot.spot_blend = 0.9
+        spot.color = (1.0, 0.78, 0.5)
+        spot.shadow_soft_size = 0.25
+        so = bpy.data.objects.new("pool", spot)
+        bpy.context.scene.collection.objects.link(so)
+        so.location = (8.2, 1.5, 6.5)
+        tgt = bpy.data.objects.new("pool_target", None)
+        bpy.context.scene.collection.objects.link(tgt)
+        tgt.location = (8.0, -4.2, 0.0)
+        tgt.rotation_euler = (math.radians(-90), 0, 0)
+        c = so.constraints.new("TRACK_TO")
+        c.target = tgt
+        c.track_axis = "TRACK_NEGATIVE_Z"
+        c.up_axis = "UP_Y"
+        c.use_target_z = True
     setup_render(1280, 720, 640, 360, 24 if PREVIEW else 96)
     bpy.context.scene.render.film_transparent = False
-    render(os.path.join(OUT, "plate.png"))
+    render(os.path.join(OUT, "plate_grimy.png" if GRIMY else "plate.png"))
 
 
 def do_sprites():
@@ -923,14 +1021,15 @@ def do_sprites():
         render(os.path.join(OUT, name + ".png"))
 
 
-if WHAT in ("plate", "all"):
-    do_plate()
-if WHAT in ("sprites", "all"):
-    do_sprites()
-elif WHAT not in ("plate",):
-    # A single sprite by name.
-    _all = dict(SPRITES)
-    SPRITES.clear()
-    SPRITES.update({k: v for k, v in _all.items() if k in WHAT.split(",")})
-    do_sprites()
-print("console art written to", OUT)
+if __name__ == "__main__":
+    if WHAT in ("plate", "all"):
+        do_plate()
+    if WHAT in ("sprites", "all"):
+        do_sprites()
+    elif WHAT not in ("plate",):
+        # A single sprite by name.
+        _all = dict(SPRITES)
+        SPRITES.clear()
+        SPRITES.update({k: v for k, v in _all.items() if k in WHAT.split(",")})
+        do_sprites()
+    print("console art written to", OUT)

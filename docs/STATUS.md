@@ -1,8 +1,9 @@
 # Status
 
-Updated 2026-10-25, session 36: **the operator's console is the game** (first playable prototype, sectors 1–3,
-three shifts). Albert has the APK and EXE to playtest. Waiting on his notes, and on his reaction to the Lab ideas
-(docs/design/hangar-ideas.md).
+Updated 2026-10-25, session 37: **0.2.0, the card press.** Slots instead of CPU (two per sector), cards printed by a
+press with turning wheels and a split-flap board, a glass lid on the reader, a pulp chute, the Company's debt counter.
+Waiting on Albert: his playtest of 0.2.0, his pick of three art directions (docs/design/art-direction.md), and his
+reaction to the Lab ideas (docs/design/hangar-ideas.md).
 
 ## Where we are
 
@@ -58,17 +59,16 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 ## Next three tasks
 
-1. **Albert's playtest of the console** (session 36 builds): fix what he finds first. Watch for: whether the
-   tutorial notes are enough, the size of things on his tablet, the drums and levers by touch, and the tone.
-2. **The Lab (hangar)**, once he has read `docs/design/hangar-ideas.md` and answered its three questions (the
-   Governor, requisition forms, the mood).
-3. **Sectors 4–6** (The Valve, The Listeners, The Lock) in the console: their plates, memos, notes and letters.
-   The sim and reference programs exist; the console has them sealed.
+1. **Albert's playtest of 0.2.0** (the press, slots, lid, chute): fix what he finds first.
+2. **The art direction he picks** (A: 3D from the chair, recommended; B: lived-in 2D; C: inked). If A: a small
+   Godot 3D test of one machine on his tablet first, with light baked in Blender, then the whole desk.
+3. **The Lab (hangar)**, once he has answered the three questions in `docs/design/hangar-ideas.md`. More reader
+   slots are a natural first part to requisition.
 
 ## Known bugs and open questions
 
-- **The console's prototype doesn't have yet:** the hangar (sealed), sectors 4–6, a sound for every machine state,
-  and a way to copy a deck between sectors.
+- **The console's prototype doesn't have yet:** the hangar (sealed), sectors 4–6, and a way to copy a deck between
+  sectors. The old CPU costs still exist in the sim and the old station; the console ignores them.
 - **Not verified on a device:** the console's touch handling is tested with simulated taps and drags
   (`tools/console_check.sh`), not yet on Albert's tablet.
 

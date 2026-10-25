@@ -1,16 +1,21 @@
-# 0.1.0-console · The operator's console
+# 0.2.0-press · The card press
 
-The first playable prototype of the console: the whole game on one dark desk, sectors 1 to 3, three shifts.
+Your playtest notes, built in:
 
-**Install:** on the tablet, download `RobbieN1-0.1.0-console.apk` below and open it. On Windows, download the zip,
-unzip it and run `RobbieN1.exe`. The console keeps its own save, so it starts at Shift 1.
+- **Slots, not CPU.** Every card costs the same. The reader holds **two cards**; the rest of its slots are sealed
+  (the hangar will open more, later). Two are enough for all three sectors.
+- **Making a card is working a machine.** Turn the **ORDER** wheel by its grip (or tap either side of it), and the
+  **CONDITION** wheel; the split-flap board clatters to show the card. Set the value wheel and NOT. Pull **PRINT**:
+  the press stamps, vents steam, and the card slides into the **tray**.
+- **The glass lid.** Lift it (the handle on the right of the reader), drag cards from the tray into the slots, or
+  between slots to reorder, then **shut it**: the reader won't read with the lid open.
+- **Throwing cards away.** Drag a card into the **PULP** chute and it gets shredded. Dropped anywhere else, a card
+  slides back where it was, so nothing gets lost by accident.
+- **The Company's counter** rolls up your debt with a clatter every time a hull is lost.
+- **The station breathes:** steam, leaking pipes, condensation running down the seams, a lamp that stutters.
 
-**Try:**
-- Tap the Company tube's capsule to read your orders; follow Op. 5's yellow notes.
-- Lift the red cover and pull the dispatch lever. Watch the sonar, the lamps beside the cards and the teleprinter.
-- Roll the keypunch drums, pull PUNCH, drag cards to reorder or into SPOILED.
-- Drag the recorder's reels to scrub; tap a teleprinter line to jump there; tap the scope to magnify it.
-- When a deck reaches the beacon, crank the sea trials. Sixteen of twenty certifies the sector.
-- The binder (orders, regulations, Op. 5's letters; the CONTRACT page starts over) and the Wall behind you.
+Install as before: the `.apk` on the tablet (it updates the copy you have), or unzip the Windows build and run
+`RobbieN1.exe`. Your progress from 0.1.0 is kept; the deck in each sector carries over into its slots.
 
-Not in yet: the hangar (sealed for audit), sectors 4 to 6.
+Not in yet: the hangar, sectors 4 to 6. Separately, three mock-ups of how the whole desk could look (3D, lived-in,
+or inked) are waiting for your pick.

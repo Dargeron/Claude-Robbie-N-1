@@ -62,7 +62,11 @@ static func font(kind: String) -> Font:
 
 static func tex(name: String) -> Texture2D:
 	if not _textures.has(name):
-		var path := "res://art/console/%s.png" % name
+		var file := name
+		# Art-direction tests: ROBBIE_PLATE=plate_weathered swaps the desk plate for a variant.
+		if name == "plate" and OS.get_environment("ROBBIE_PLATE") != "":
+			file = OS.get_environment("ROBBIE_PLATE")
+		var path := "res://art/console/%s.png" % file
 		_textures[name] = load(path) if ResourceLoader.exists(path) else null
 	return _textures[name]
 

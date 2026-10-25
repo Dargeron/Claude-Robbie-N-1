@@ -333,7 +333,6 @@ func _draw() -> void:
 			draw_rect(r.grow(2), Color(0, 0, 0, 0.35), false, 1.0)
 			for side: float in [r.position.x - 3.0, r.end.x + 1.0]:
 				draw_rect(Rect2(side, r.position.y + 6, 2, r.size.y - 12), Color(0.7, 0.55, 0.3, 0.7))
-			draw_string(f, Vector2(r.position.x - 22, r.get_center().y + 7), str(i + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(Desk.STENCIL, 0.55))
 		else:
 			_draw_sealed(r)
 	# Pilot lamps.
@@ -427,7 +426,8 @@ func _draw_lamp(p: Vector2, st: String, now: float) -> void:
 ## lamp's reflection in it; open, it stands up towards the operator, foreshortened to a sliver.
 func _draw_lid(now: float) -> void:
 	var lr := _lid_rect()
-	var ang := _lid * deg_to_rad(84.0)
+	# Past upright when fully open, so it leans back out of the way above the hinge.
+	var ang := _lid * deg_to_rad(97.0)
 	var s := cos(ang)
 	var hinge := Vector2(lr.get_center().x, lr.position.y)
 	var base := Transform2D(0.0, Vector2(1.0, s), 0.0, hinge)
