@@ -13,6 +13,8 @@ var next_serial := 1
 var log_read: Array = []      # station log entries the player has opened
 var coach_done := false   # the first-visit guidance has been walked through
 var persist := true   # tests turn this off so they never touch the player's save
+var save_path := SAVE_PATH   # the console keeps its own save, so it starts fresh beside the old station's
+var extra := {}           # the console's own records (memos read, notes done, shift), saved as they are
 var rooms := {}   # id -> RoomState
 
 
@@ -244,26 +246,28 @@ func _remember(rs: RoomState, dive: Dive) -> void:
 func save() -> void:
 	if not persist:
 		return
-	var data := {"version": 1, "next_serial": next_serial, "coach_done": coach_done, "log_read": log_read, "rooms": {}}
+	var data := {"version": 1, "next_serial": next_serial, "coach_done": coach_done, "log_read": log_read, "rooms": {}, "extra": extra}
 	for id in ROOMS:
 		var rs := room_state(id)
 		data["rooms"][id] = {"program": rs.program_text, "dives": rs.dives, "certified": rs.certified, "best_cpu": rs.best_cpu,
 			"survey": rs.survey, "memory": Marshalls.raw_to_base64(rs.memory)}
-	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var f := FileAccess.open(save_path, FileAccess.WRITE)
 	if f != null:
 		f.store_string(JSON.stringify(data))
 
 
 func load_save() -> void:
-	if not FileAccess.file_exists(SAVE_PATH):
+	if not FileAccess.file_exists(save_path):
 		return
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(SAVE_PATH))
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(save_path))
 	if typeof(parsed) != TYPE_DICTIONARY:
 		return
 	next_serial = int(parsed.get("next_serial", 1))
 	# Saves from before the coach existed: anyone who already sent Robbies doesn't need it.
 	coach_done = bool(parsed.get("coach_done", next_serial > 1))
 	log_read = parsed.get("log_read", [])
+	var ex: Variant = parsed.get("extra", {})
+	extra = ex if typeof(ex) == TYPE_DICTIONARY else {}
 	var saved: Dictionary = parsed.get("rooms", {})
 	for id in ROOMS:
 		if not saved.has(id):
@@ -287,6 +291,7 @@ func reset() -> void:
 	next_serial = 1
 	coach_done = false
 	log_read = []
+	extra = {}
 	for id in ROOMS:
 		var rs := room_state(id)
 		rs.program_text = STARTER

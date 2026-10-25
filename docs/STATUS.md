@@ -1,8 +1,8 @@
 # Status
 
-Updated 2026-10-24, session 35: on GitHub and Claude Code; builds are now a native Android APK and a Windows EXE
-(tools/android.sh, tools/desktop.sh). Next: the art pass, starting with 5 style concepts and 5 Robbie designs for
-Albert to choose from. Still waiting on Albert's yes to the progression proposal.
+Updated 2026-10-25, session 36: **the operator's console is the game** (first playable prototype, sectors 1–3,
+three shifts). Albert has the APK and EXE to playtest. Waiting on his notes, and on his reaction to the Lab ideas
+(docs/design/hangar-ideas.md).
 
 ## Where we are
 
@@ -18,6 +18,13 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 ## What works
 
+- **The operator's console** (session 36): the game on one desk in the Bathy + Dead Air look. Live sonar with Bathy's
+  amber glyph and dead air on a loss; card rack with pilot lamps and stamped reasons; keypunch (drums, value wheel,
+  NOT, PUNCH); reader load gauge; dispatch lever under a safety cover; sea trials on the analytical engine; wire
+  recorder and teleprinter linked to the dive; Company tube with memos and tallies; sector dial; shift nixies; Bathy's
+  mood porthole; the binder; the Wall as a corkboard of torn tapes. Three shifts with type plates issued shift by
+  shift, Op. 5's notes as the tutorial and his letters as the plot. Everything works by touch (tested by a
+  play-through that only taps and drags). See docs/devlog/2026-10-25-s36.md.
 - Deterministic simulation in integer maths: Robbie, walls, the lamp and its line of sight,
   jellyfish, lurkers, eels, a valve, energy, crashes, an explored-tiles map. Same inputs give the
   same dive, checked by hash every second of dive time.
@@ -51,18 +58,19 @@ write rules, launch, watch, understand, fix, survey. Builds exist for Linux, Win
 
 ## Next three tasks
 
-1. **Art pass** (#7/#9/#13), Albert's priority since 2026-10-24: cool backgrounds, a Robbie sprite, the whole game
-   and UI looking like a proper game, and a big Robbie in the Lab that changes as it is customised. Made in Blender.
-   The setting is now a steampunk space colonisation (Radiance, Outer Wilds), darker. Round 1: 5 styles, 5 cute
-   Robbies (he liked Jovian Comic and Bathy). Round 2: 5 truly different worlds and 5 machine Robbies
-   (docs/art/README.md). Waiting for his final pick.
-2. **Progression, step 1** (Albert's #5 and #1), once he approves `docs/design/progression.md`: reaching the exit
-   opens the next room; room goals pay Data, shown in the header; old saves are paid for rooms already certified.
-   If he hasn't answered, ask him first: it changes how rooms open.
-3. **The Lab** (#6): act on Albert's reaction to the sketch (`game/station/lab.gd`, key B). Then slots and the
-   first purchase (CPU modules) from step 2 of the proposal. Its Robbie sprite comes from the art pass.
+1. **Albert's playtest of the console** (session 36 builds): fix what he finds first. Watch for: whether the
+   tutorial notes are enough, the size of things on his tablet, the drums and levers by touch, and the tone.
+2. **The Lab (hangar)**, once he has read `docs/design/hangar-ideas.md` and answered its three questions (the
+   Governor, requisition forms, the mood).
+3. **Sectors 4–6** (The Valve, The Listeners, The Lock) in the console: their plates, memos, notes and letters.
+   The sim and reference programs exist; the console has them sealed.
 
 ## Known bugs and open questions
+
+- **The console's prototype doesn't have yet:** the hangar (sealed), sectors 4–6, a sound for every machine state,
+  and a way to copy a deck between sectors.
+- **Not verified on a device:** the console's touch handling is tested with simulated taps and drags
+  (`tools/console_check.sh`), not yet on Albert's tablet.
 
 - **The Lock's intended program passes 18/20, not 20/20:** twice an eel lingers within range and Robbie waits until
   its battery runs out. It certifies (16 needed), but a tighter room or a better reference program would help.

@@ -230,6 +230,110 @@ def blip():
     return lowpass(sq, 3500)
 
 
+# --- the console's machines (added after the others so their random draws come last) -------
+
+def _knock(f, dur, decay, noise=0.4, hp=200):
+    n = int(SR * dur)
+    tt = t(dur)
+    body = np.sin(2 * np.pi * f * tt) * env(n, 0.0008, decay)
+    click = highpass(rng.standard_normal(n), hp) * env(n, 0.0003, decay * 0.25) * noise
+    return body + click
+
+
+def drum():
+    return _knock(900, 0.06, 0.012, 0.8, 2500)
+
+
+def punch():
+    n = int(SR * 0.42)
+    out = np.zeros(n)
+    a = _knock(120, 0.2, 0.05, 0.9, 400)
+    b = _knock(260, 0.18, 0.03, 1.2, 1500)
+    out[:len(a)] += a
+    s = int(0.11 * SR)
+    out[s:s + len(b)] += b * 0.9
+    rattle = highpass(rng.standard_normal(n), 3000) * env(n, 0.002, 0.04) * 0.25
+    return out + rattle
+
+
+def lever():
+    n = int(SR * 1.3)
+    out = np.zeros(n)
+    k = _knock(90, 0.3, 0.08, 1.0, 300)
+    out[:len(k)] += k
+    hiss = bandpass(rng.standard_normal(n), 800, 6000) * np.clip(t(1.3) / 0.15, 0, 1) * np.exp(-t(1.3) * 2.2) * 0.5
+    clank = _knock(180, 0.4, 0.12, 0.8, 600)
+    s = int(0.55 * SR)
+    out[s:s + len(clank)] += clank * 0.8
+    return out + hiss
+
+
+def thump():
+    n = int(SR * 0.5)
+    tt = t(0.5)
+    low = np.sin(2 * np.pi * (70 + 40 * np.exp(-tt * 30)) * tt) * env(n, 0.002, 0.09)
+    rattle = bandpass(rng.standard_normal(n), 1500, 5000) * env(n, 0.001, 0.03) * 0.4
+    return low + rattle
+
+
+def tear():
+    n = int(SR * 0.45)
+    tt = t(0.45)
+    grain = (rng.random(n) < 0.05 + 0.25 * np.sin(np.pi * tt / 0.45)) * rng.standard_normal(n)
+    return bandpass(grain, 1200, 7000) * np.sin(np.pi * tt / 0.45) ** 0.5
+
+
+def paper():
+    n = int(SR * 0.28)
+    tt = t(0.28)
+    return bandpass(rng.standard_normal(n), 900, 5000) * np.sin(np.pi * tt / 0.28) ** 2 * 0.6
+
+
+def type_burst():
+    n = int(SR * 0.32)
+    out = np.zeros(n)
+    for i in range(9):
+        s = int((i * 0.034 + rng.random() * 0.006) * SR)
+        k = _knock(1400 + rng.random() * 500, 0.03, 0.006, 1.0, 2000)
+        out[s:s + len(k)] += k[: max(0, n - s)] * (0.6 + rng.random() * 0.4)
+    return out
+
+
+def switch():
+    return _knock(1500, 0.05, 0.006, 1.2, 3000)
+
+
+def crank():
+    n = int(SR * 0.12)
+    out = np.zeros(n)
+    for i in range(3):
+        s = int(i * 0.035 * SR)
+        k = _knock(2200, 0.03, 0.004, 1.0, 3500)
+        out[s:s + len(k)] += k[: max(0, n - s)]
+    return out
+
+
+def stamp():
+    n = int(SR * 0.4)
+    tt = t(0.4)
+    return np.sin(2 * np.pi * (60 + 30 * np.exp(-tt * 40)) * tt) * env(n, 0.001, 0.07) + _knock(300, 0.4, 0.02, 0.6, 500)
+
+
+def relay():
+    return _knock(2600, 0.04, 0.003, 1.0, 4000)
+
+
+def cover():
+    n = int(SR * 0.3)
+    out = np.zeros(n)
+    k = _knock(500, 0.12, 0.02, 0.9, 1500)
+    out[:len(k)] += k
+    k2 = _knock(350, 0.12, 0.03, 0.7, 900)
+    s = int(0.09 * SR)
+    out[s:s + len(k2)] += k2 * 0.7
+    return out
+
+
 if __name__ == "__main__":
     write("amb_dive", amb_dive(), 0.6)
     write("amb_station", amb_station(), 0.5)
@@ -246,3 +350,15 @@ if __name__ == "__main__":
     write("ui_click", ui_click(), 0.4)
     write("ui_launch", ui_launch(), 0.6)
     write("blip", blip(), 0.35)
+    write("drum", drum(), 0.4)
+    write("punch", punch(), 0.8)
+    write("lever", lever(), 0.7)
+    write("thump", thump(), 0.7)
+    write("tear", tear(), 0.6)
+    write("paper", paper(), 0.4)
+    write("type", type_burst(), 0.4)
+    write("switch", switch(), 0.45)
+    write("crank", crank(), 0.4)
+    write("stamp", stamp(), 0.8)
+    write("relay", relay(), 0.35)
+    write("cover", cover(), 0.6)

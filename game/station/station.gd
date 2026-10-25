@@ -370,7 +370,8 @@ func _select_room(id: String) -> void:
 func _clear_monitor() -> void:
 	if replay.view != null:
 		replay.view.queue_free()
-		replay.hud.queue_free()
+		if replay.hud != null:
+			replay.hud.queue_free()
 		replay.view = null
 	timeline.set_dive(null)
 	monitor_hint.text = "NO TRANSMISSIONS FROM %s YET\nWrite a program and launch a Robbie." % _room_name(room_id).to_upper()

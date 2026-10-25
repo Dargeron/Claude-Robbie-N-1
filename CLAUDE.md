@@ -23,13 +23,17 @@ Then post a short plan to Albert: the goal, three to six tasks, what he will see
 ## Running the game
 
 ```bash
-tools/godot.sh --path game                    # opens the station (the game) in a window
+tools/godot.sh --path game                    # opens the console (the game) in a window
 tools/godot.sh -e --path game                 # the Godot editor
 tools/web_artifact.sh && tools/site.sh        # web build in out/site; serve it: (cd out/site && python3 -m http.server 8765)
 ```
 
-Main scene: the station (`game/station/station.tscn`): Mission Control, the full-screen transmission (F), the Lab
-(B), the Wall of Robbies (W), the station log (L), the manual (H). Ctrl+Shift+U opens every room for testing.
+Main scene since 2026-10-25: **the operator's console** (`game/console/console.tscn`, design in
+`docs/design/station-ui.md`): the whole game on one desk, the first three sectors only. Its own save
+(`user://console_save.json`), so it starts fresh. Keys: Space play/pause, F magnify, M sound, W the Wall, H the binder,
+Ctrl+Shift+U opens every sector. The layout (screen rects for every machine) is `game/content/console_layout.json`,
+shared by the Godot code and the Blender art (`tools/art/console_scene.py`); change it there, then re-render.
+The old station (`game/station/station.tscn`) still runs: Mission Control, the Lab (B), the log (L), the manual (H).
 
 ## Commands
 

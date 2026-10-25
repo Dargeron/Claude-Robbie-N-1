@@ -17,6 +17,8 @@ const AUTO_RAMP := 0.06         # speed change per tick of dive time (about 1.7 
 
 var view: DiveView
 var hud: Hud
+var view_factory: Callable      # makes the view (a DiveView subclass); the station's own picture if unset
+var show_hud := true            # the console draws its own readouts
 var speed_i := 1
 var auto := true                # AUTO speed: fast through quiet water, normal speed around events
 var skip_until := -1            # skip ahead at SKIP_SPEED until this tick (just before the last Robbie was lost)
@@ -66,16 +68,19 @@ func _ready() -> void:
 func play(dive: Dive, serial_number: int, caption_list: Array = []) -> void:
 	if view != null:
 		view.queue_free()
+	if hud != null:
 		hud.queue_free()
+		hud = null
 	serial = serial_number
 	captions = caption_list
-	view = DiveView.new()
+	view = view_factory.call() if view_factory.is_valid() else DiveView.new()
 	add_child(view)
 	view.setup(dive)
 	auto_speeds = ReplayPlayer.plan_auto_speeds(dive, captions)
-	hud = Hud.new()
-	hud.replay = self
-	add_child(hud)
+	if show_hud:
+		hud = Hud.new()
+		hud.replay = self
+		add_child(hud)
 	playing = true
 	rewinding = false
 	_ended = false

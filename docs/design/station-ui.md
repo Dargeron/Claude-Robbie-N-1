@@ -1,6 +1,6 @@
 # The operator's console: the game as one dark station desk (proposal for Albert)
 
-Status: **proposal**, 2026-10-25. Albert chose the art (Bathy + Dead Air) and asked for a UI where everything lives
+Status: **accepted and built as the first prototype** (session 36, `game/console/`), 2026-10-25. Proposal text below. Albert chose the art (Bathy + Dead Air) and asked for a UI where everything lives
 inside the game world: the player is the operator in a station, clicking through its systems, with Robbie's sonar
 taking about a third of the screen and the rest being systems; launching never hides them; a button magnifies the
 sonar to full screen. Dark steampunk, the mood of Peter Watts' *Starfish*; everything dark except Bathy, who stays

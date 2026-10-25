@@ -7,8 +7,8 @@ config_version=5
 
 config/name="Robbie N+1"
 config/description="Program Robbie, send it into Jupiter's dark ocean, watch it die, send the next one."
-config/version="0.0.2-p0b"
-run/main_scene="res://station/station.tscn"
+config/version="0.1.0-console"
+run/main_scene="res://console/console.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
