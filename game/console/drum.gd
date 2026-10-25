@@ -144,7 +144,8 @@ func _draw() -> void:
 		draw_string(f, Vector2((w - tw) * 0.5, size_now * 0.36), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, size_now, col)
 		if fresh.has(txt) and now - float(fresh[txt]) < 30.0 and absf(a) < 0.8:
 			var g := 0.5 + 0.5 * sin(now * 5.0)
-			draw_string(Desk.font("plate"), Vector2(w - 34, size_now * 0.36 - 1), "NEW", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(Desk.RED_INK, 0.5 + 0.4 * g))
+			# A new type plate glints on the drum.
+			draw_rect(Rect2(Vector2(4, -size_now * 0.5), Vector2(w - 8, size_now)), Color(Desk.AMBER, 0.18 * g))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	# The index line and the glass.
 	draw_line(Vector2(0, cy - 15), Vector2(w, cy - 15), Color(0.5, 0.08, 0.05, 0.45), 1.0)

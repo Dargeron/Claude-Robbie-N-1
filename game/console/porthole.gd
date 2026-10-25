@@ -101,4 +101,4 @@ func _draw() -> void:
 
 func _label() -> void:
 	var pr := Desk.plaque_rect("porthole")
-	Desk.engraved(self, Rect2(pr.position - position, pr.size), "ROBBIE %03d" % serial if serial > 0 else "NO HULL OUT", 12)
+	Desk.engraved(self, Rect2(pr.position - position, pr.size), "HULL IN THE WATER", 12)

@@ -37,9 +37,8 @@ func _ready() -> void:
 		["scrubbed"], ["wait", 4], ["shot", "c07-notes-deck"],
 		["dial_order", "follow_wall", "left"], ["wait", 30], ["shot", "c08a-drums"],
 		["print"], ["wait", 8], ["shot", "c08b-printing"], ["wait", 40], ["shot", "c08c-printed"],
-		["lid", true], ["wait", 20], ["shot", "c08d-lid-open"],
 		["insert", 0, 1], ["wait", 20], ["pulp_slot", 0], ["wait", 8], ["shot", "c08e-pulping"], ["wait", 10], ["shot", "c08f-tossed"],
-		["lid", false], ["wait", 20], ["program", "follow_wall left"], ["dispatch"], ["seek", 0.35], ["wait", 8], ["shot", "c09-dark-follow"],
+		["program", "follow_wall left"], ["dispatch"], ["seek", 0.35], ["wait", 8], ["shot", "c09-dark-follow"],
 		["seek", 1.0], ["wait", 8], ["trials"], ["wait", 6], ["shot", "c10-trials-running"], ["await_trials"], ["wait", 10], ["shot", "c11-certified"],
 		["memo"], ["wait", 12], ["shot", "c12-tally"], ["close"], ["memo"], ["wait", 12], ["shot", "c13-letter"], ["close"],
 		["memo"], ["wait", 12], ["close"],
@@ -104,8 +103,6 @@ func _process(_d: float) -> void:
 		"print":
 			console.press._pulled = false
 			console.press._pull()
-		"lid":
-			console.table.set_lid(s[1])
 		"insert":
 			var t: CardTable = console.table
 			for c: Dictionary in t.cards:

@@ -3,19 +3,21 @@ extends Control
 ## Every dive is recorded on wire. Drag a reel (or the wire itself) to scrub; the marks on
 ## the wire are what happened (red: hits; green: contacts; amber: card changes). Keys:
 ## back five seconds, play/pause, forward five seconds, and to the last loss. The knob sets
-## the speed: AUTO skims quiet water and slows down for anything that happens.
+## the speed: ½, 1 or 2 (1 is normal speed, and every dive plays at what the knob says), or
+## AUTO, which skims quiet water at 2 and slows to 1 for anything that happens.
 
 signal scrubbed
 
 const KEYS := ["◂◂", "PLAY", "▸▸", "TO THE LOSS"]
-const SPEEDS := ["AUTO", "½", "1", "2", "4", "8"]
+const SPEEDS := ["½", "1", "2", "AUTO"]
+const RATE := [1.0, 2.0, 4.0]      # ticks played per tick of dive time, at each marked speed (1 is normal)
 
 var replay: ReplayPlayer
 var marks: Array = []            # [{t, kind}] from the tape
 var _press_key := -1
 var _drag := ""                  # "track" or "reel"
 var _drag_a := 0.0
-var _speed_i := 0
+var _speed_i := 1
 
 
 func _init() -> void:
@@ -122,11 +124,23 @@ func _apply_speed() -> void:
 	if replay == null:
 		return
 	replay.skip_until = -1
-	if _speed_i == 0:
-		replay.auto = true
-	else:
-		replay.auto = false
-		replay.speed_i = _speed_i - 1
+	replay.auto = _speed_i == SPEEDS.size() - 1
+	if not replay.auto:
+		replay.speed_i = ReplayPlayer.SPEEDS.find(RATE[_speed_i])
+
+
+## Turn the knob one mark (the arrow keys), stopping at ½ and at AUTO.
+func step_speed(d: int) -> void:
+	var i := clampi(_speed_i + d, 0, SPEEDS.size() - 1)
+	if i != _speed_i:
+		_speed_i = i
+		Sfx.play("switch", -10.0, 0.8)
+		_apply_speed()
+
+
+## The speed as the knob marks it (1 is normal), for the scope's readout.
+static func marked(rate: float) -> String:
+	return str(rate / 2.0).trim_suffix(".0").replace("0.5", "½")
 
 
 func _process(_delta: float) -> void:
@@ -183,10 +197,10 @@ func _draw() -> void:
 	var kn := _r("speed_knob")
 	var kc := kn.get_center()
 	for i in SPEEDS.size():
-		var ang := deg_to_rad(-210.0 + 48.0 * i)
+		var ang := deg_to_rad(-210.0 + 60.0 * i)
 		var p := kc + Vector2.from_angle(ang) * 34.0
-		Desk.centred(self, Rect2(p - Vector2(14, 7), Vector2(28, 14)), SPEEDS[i], font, 10 if i == 0 else 12,
+		Desk.centred(self, Rect2(p - Vector2(14, 7), Vector2(28, 14)), SPEEDS[i], font, 10 if i == SPEEDS.size() - 1 else 12,
 			Desk.AMBER_HOT if i == _speed_i else Color(0.85, 0.78, 0.6, 0.6))
-	Desk.draw_sprite(self, "knob_speed", kc, deg_to_rad(-210.0 + 48.0 * _speed_i + 90.0), Color.WHITE, 0.62)
+	Desk.draw_sprite(self, "knob_speed", kc, deg_to_rad(-210.0 + 60.0 * _speed_i + 90.0), Color.WHITE, 0.62)
 	var pr := Desk.plaque_rect("recorder")
 	Desk.engraved(self, Rect2(pr.position - position, pr.size), Desk.plaque("recorder")[4], 13)

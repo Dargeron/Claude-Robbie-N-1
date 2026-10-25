@@ -37,18 +37,16 @@ func _ready() -> void:
 		["tap", _wheel_left], ["check", "tapping left of the hub turns it back one", func() -> bool: return c.press.order_wheel.index == 1],
 		["check", "the board reads FOLLOW WALL LEFT", func() -> bool: return c.press.rule()["action"] == "follow_wall" and c.press.rule()["param"] == "left"],
 		["drag", _print_knob, Vector2(0, 170)], ["wait", 40], ["check", "pulling PRINT drops a card in the tray", func() -> bool: return c.table.tray_rules().size() == 1],
-		["drag", _tray_card, _to_slot1], ["check", "with the lid shut, a card won't go in", func() -> bool: return c.table.tray_rules().size() == 1],
-		["tap", _lid_handle], ["wait", 20], ["check", "the lid lifts", func() -> bool: return c.table.lid_open],
 		["drag", _slot_card0, _to_chute], ["wait", 40], ["check", "a card dropped in the PULP chute is gone", func() -> bool: return c.table.deck().is_empty()],
 		["drag", _tray_card, _to_slot1], ["wait", 20], ["check", "the printed card goes into slot 1", func() -> bool: return c.table.deck().size() == 1 and c.table.deck()[0]["action"] == "follow_wall"],
-		["drag", _lever, Vector2(110, 0)], ["check", "the reader refuses while the lid is open", func() -> bool: return c.state.next_serial == 2],
-		["tap", _lid_handle], ["wait", 20], ["check", "the lid shuts", func() -> bool: return not c.table.lid_open],
 		["drag", _lever, Vector2(110, 0)], ["check", "a second dispatch: Robbie 002", func() -> bool: return c.state.next_serial == 3],
 		["check", "Robbie 002 reaches the beacon", func() -> bool: return c.current_entry.get("result", "") == "exit"],
 		["drag", _reel, Vector2(0, 40)], ["check", "turning a reel scrubs the wire", func() -> bool: return not c.scope.replay.playing and c._scrubbed],
 		["tap", _tape_line], ["check", "tapping a tape line winds the wire there", func() -> bool: return c.scope.replay.view.t < c.current_dive.rec.ticks - 1],
 		["tap", _key_loss], ["check", "TO THE LOSS winds to the last seconds", func() -> bool: return c.scope.replay.view.t >= c.current_dive.rec.ticks - 95],
-		["tap", _speed_knob], ["check", "the speed knob turns off AUTO", func() -> bool: return not c.scope.replay.auto],
+		["check", "the recorder starts at speed 1 (normal), not AUTO", func() -> bool: return not c.scope.replay.auto and c.scope.replay.speed() == 2.0],
+		["tap", _speed_knob], ["check", "tapping the speed knob turns it to 2", func() -> bool: return not c.scope.replay.auto and c.scope.replay.speed() == 4.0],
+		["tap", _speed_knob], ["check", "and once more to AUTO", func() -> bool: return c.scope.replay.auto],
 		["tap", _crank], ["check", "cranking sends the sea trials", func() -> bool: return c.survey_run != null],
 		["await_trials"], ["check", "The Dark is certified", func() -> bool: return c.state.room_state("dark").certified],
 		["wait", 30], ["tap", _tube], ["check", "the tally arrives by tube", func() -> bool: return c.memo.visible and c.memo.memo.get("kind", "") == "tally"],
@@ -79,9 +77,6 @@ func _wheel_left() -> Vector2:
 
 func _print_knob() -> Vector2:
 	return c.press._knob_pos() + c.press.position
-
-func _lid_handle() -> Vector2:
-	return Desk.r("lid_handle").get_center()
 
 func _tray_card() -> Vector2:
 	return Desk.r("tray").position + Vector2(60, 20)

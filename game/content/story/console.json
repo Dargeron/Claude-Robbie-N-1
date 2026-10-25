@@ -77,7 +77,7 @@
     "stamp": "SEALED"
   },
   "tally": "Operator 6,\n\n[b]{sector} is certified.[/b] The Analytical Engine passed your deck in [b]{passed} of 20[/b] trials.\n\nUnits dispatched this shift: {sent}\nUnits written off: {lost}  (at {hull_cost} scrip each, charged against your contract)\nCertification credit: {credit} scrip\nCards in the deck: {cards}\n\nBalance owing: [b]{debt} scrip[/b]\n\nCommendations: none.\n\nNOTICE: {notice}",
-  "regulations": "[b]STATION 9  ·  STANDING REGULATIONS[/b]\n\n1. Units are Company property. Damage to units is charged to the dispatching operator.\n\n2. Units do not feel. Operators who believe otherwise are to report to Welfare.\n\n3. Decks are to be composed only from issued type plates.\n\n4. The red safety cover is to be lowered after every dispatch. The reader's lid is to be shut.  [i]nobody checks. — 5[/i]\n\n5. Last words are telemetry artefacts and are not to be transcribed, collected, or repeated.\n\n6. The Wall is not a memorial. It is a record.\n\n7. Operators will not descend.\n\n8. Signals originating below survey depth are to be logged as NOISE.\n\n9. The hangar is closed for audit.\n\n10. Spoiled cards are pulped, not kept. Card stock is charged to the operator.",
+  "regulations": "[b]STATION 9  ·  STANDING REGULATIONS[/b]\n\n1. Units are Company property. Damage to units is charged to the dispatching operator.\n\n2. Units do not feel. Operators who believe otherwise are to report to Welfare.\n\n3. Decks are to be composed only from issued type plates.\n\n4. The red safety cover is to be lowered after every dispatch.  [i]nobody checks. — 5[/i]\n\n5. Last words are telemetry artefacts and are not to be transcribed, collected, or repeated.\n\n6. The Wall is not a memorial. It is a record.\n\n7. Operators will not descend.\n\n8. Signals originating below survey depth are to be logged as NOISE.\n\n9. The hangar is closed for audit.\n\n10. Spoiled cards are pulped, not kept. Card stock is charged to the operator.",
   "hangar": {
     "ref": "DA-9/0099",
     "subject": "HANGAR: INVENTORY AUDIT",
@@ -101,10 +101,8 @@
     "hangar": "Hangar's sealed till the audit's done. It's never done.",
     "cover": "Cover first. The red one, by the lever.",
     "print": "Turn the ORDER wheel by its grip; the drum above it rolls. What sits between the marks is the card you get. Pull PRINT.",
-    "insert": "Lift the glass (the handle on the right). Drag the card into a slot, shut the lid: the reader won't read with it open. Spoiled cards go down the PULP chute.",
+    "insert": "Drag the card out of the tray and into a slot. Spoiled cards go down the PULP chute.",
     "tray_full": "Tray's full. Put a card in a slot or feed one to the PULP chute.",
-    "lid": "The lid's shut. Lift it first: the handle on the right.",
-    "lid_open": "Shut the glass lid. The reader won't read an open deck.",
     "empty": "No cards in the reader. He needs at least one."
   }
 }

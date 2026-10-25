@@ -1,16 +1,14 @@
 class_name CardTable
 extends Control
-## The cards and where they lie: in the press's tray as they come out, in the reader's slots
-## under the glass lid, or on their way down the pulp chute. Every card fills one slot; the
-## reader has as many as the sector allows (two at first) and the rest are sealed.
+## The cards and where they lie: in the press's tray as they come out, in the reader's slots,
+## or on their way down the pulp chute. Every card fills one slot; the reader has as many as
+## the sector allows (two at first) and the rest are sealed.
 ##
-## Lift the lid (tap it, or its handle), drag a card from the tray into a slot, drag cards
-## between slots to reorder, and shut the lid: the reader won't read with it open. Drop a
-## card in the PULP chute to destroy it. Dropped anywhere else, a card goes back where it was.
-## This control covers the screen but only catches a touch on a card or on the lid.
+## Drag a card from the tray into a slot, or drag cards between slots to reorder. Drop a card
+## in the PULP chute to destroy it. Dropped anywhere else, a card goes back where it was.
+## This control covers the screen but only catches a touch on a card.
 
 signal changed                   # the cards in the slots changed
-signal lid_moved(open: bool)
 signal pulped
 signal refused(why: String)
 
@@ -22,14 +20,11 @@ const DRAG_START := 6.0
 var slot_count := 2
 var cards: Array = []            # {rule, where: "slot"|"tray", i, pos: Vector2, born: float}
 var lamps: Array = []            # per slot: {state, reason}
-var lid_open := false
-var _lid := 0.0                  # 0 shut .. 1 open
 var _press := -1                 # card index under the finger
 var _press_pos := Vector2.ZERO
 var _grab := Vector2.ZERO
 var _dragging := false
 var _drag_pos := Vector2.ZERO
-var _lid_press := false
 var _pulp: Array = []            # {rule, from: Vector2, t0}: a spoiled card being crumpled and fed to the chute
 const CRUMPLE := 0.32
 const TOSS := 0.34
@@ -78,10 +73,6 @@ func tray_pos(k: int) -> Vector2:
 
 func _target(c: Dictionary) -> Vector2:
 	return slot_rect(c["i"]).position if c["where"] == "slot" else tray_pos(c["i"])
-
-
-func _lid_rect() -> Rect2:
-	return Desk.r("lid")
 
 
 # ------------------------------------------------------------------ the deck
@@ -149,16 +140,6 @@ func add_printed(rule: Dictionary) -> void:
 	queue_redraw()
 
 
-func set_lid(open: bool) -> void:
-	if open == lid_open:
-		return
-	lid_open = open
-	Sfx.play("cover", -4.0, 1.1 if open else 0.9)
-	if not open:
-		get_tree().create_timer(0.22).timeout.connect(func() -> void: Sfx.play("switch", -4.0, 0.8))
-	lid_moved.emit(open)
-
-
 func flash(slot: int) -> void:
 	_flash[slot] = Time.get_ticks_msec() / 1000.0
 
@@ -185,8 +166,6 @@ func _card_at(p: Vector2) -> int:
 	for j in range(order.size() - 1, -1, -1):
 		var k: int = order[j]
 		var c: Dictionary = cards[k]
-		if c["where"] == "slot" and _lid < 0.9:
-			continue
 		var r := _card_rect(k)
 		if c["where"] == "tray":
 			# A card under another shows only its top strip.
@@ -198,17 +177,8 @@ func _card_at(p: Vector2) -> int:
 	return -1
 
 
-func _lid_hit(p: Vector2) -> bool:
-	if Desk.r("lid_handle").has_point(p):
-		return true
-	var lr := _lid_rect()
-	if not lid_open:
-		return lr.has_point(p)
-	return Rect2(lr.position + Vector2(0, -16), Vector2(lr.size.x, 34)).has_point(p)
-
-
 func _has_point(p: Vector2) -> bool:
-	return _dragging or _press >= 0 or _lid_press or _card_at(p) >= 0 or _lid_hit(p)
+	return _dragging or _press >= 0 or _card_at(p) >= 0
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -217,18 +187,14 @@ func _gui_input(event: InputEvent) -> void:
 			_press = _card_at(event.position)
 			_press_pos = event.position
 			_dragging = false
-			_lid_press = _press < 0 and _lid_hit(event.position)
 			if _press >= 0:
 				_grab = event.position - cards[_press]["pos"]
 			accept_event()
 		else:
 			if _press >= 0 and _dragging:
 				_drop(_press, event.position)
-			elif _lid_press:
-				set_lid(not lid_open)
 			_press = -1
 			_dragging = false
-			_lid_press = false
 			queue_redraw()
 	elif event is InputEventMouseMotion and _press >= 0:
 		if not _dragging and event.position.distance_to(_press_pos) > DRAG_START:
@@ -255,9 +221,6 @@ func _drop(k: int, p: Vector2) -> void:
 		return
 	for j in slot_count:
 		if slot_rect(j).grow(10).has_point(p):
-			if not lid_open:
-				refused.emit("lid")
-				return
 			var other := _in_slot(j)
 			if other >= 0 and other != k:
 				# Swap: the card already there goes where this one came from.
@@ -284,7 +247,6 @@ func _drop(k: int, p: Vector2) -> void:
 # ------------------------------------------------------------------ animation and drawing
 
 func _process(delta: float) -> void:
-	_lid = move_toward(_lid, 1.0 if lid_open else 0.0, delta * 4.0)
 	for k in cards.size():
 		if _dragging and k == _press:
 			continue
@@ -364,7 +326,6 @@ func _draw() -> void:
 			var lamp: Dictionary = lamps[c["i"]] if int(c["i"]) < lamps.size() else {}
 			var lit := clampf(1.0 - (now - float(_flash.get(c["i"], -10.0))) / 0.6, 0.0, 1.0)
 			CardArt.draw(self, Rect2(c["pos"], cs), c["rule"], lamp, lit)
-	_draw_lid(now)
 	# Cards in the tray (above the reader's glass, below the dragged card).
 	for k in _draw_order():
 		var c: Dictionary = cards[k]
@@ -381,10 +342,9 @@ func _draw() -> void:
 		var m := Desk.r("chute_mouth")
 		var over_chute := m.grow(16).has_point(_drag_pos) or Desk.r("chute").has_point(_drag_pos)
 		Desk.draw_glow(self, m.get_center(), 60.0, Color(Desk.RED_LAMP, 0.35 if over_chute else 0.12))
-		if lid_open:
-			for j in slot_count:
-				if slot_rect(j).grow(10).has_point(_drag_pos):
-					draw_rect(slot_rect(j).grow(4), Color(Desk.AMBER, 0.6), false, 2.0)
+		for j in slot_count:
+			if slot_rect(j).grow(10).has_point(_drag_pos):
+				draw_rect(slot_rect(j).grow(4), Color(Desk.AMBER, 0.6), false, 2.0)
 	# The chute: its flap swings in as a card goes down; the card sinks out of sight.
 	_draw_chute(now)
 	# The dragged card, lifted.
@@ -429,44 +389,6 @@ func _draw_lamp(p: Vector2, st: String, now: float) -> void:
 		_:
 			draw_circle(p, 6.0, Color(0.09, 0.07, 0.05))
 			draw_circle(p + Vector2(-1.5, -1.5), 1.6, Color(1, 1, 1, 0.08))
-
-
-## The glass lid on its hinge along the top: shut, it lies over the cards with the work
-## lamp's reflection in it; open, it stands up towards the operator, foreshortened to a sliver.
-func _draw_lid(now: float) -> void:
-	var lr := _lid_rect()
-	# Past upright when fully open, so it leans back out of the way above the hinge.
-	var ang := _lid * deg_to_rad(97.0)
-	var s := cos(ang)
-	var hinge := Vector2(lr.get_center().x, lr.position.y)
-	var base := Transform2D(0.0, Vector2(1.0, s), 0.0, hinge)
-	draw_set_transform_matrix(base)
-	var local := Rect2(Vector2(-lr.size.x * 0.5, 0), lr.size)
-	# Glass.
-	var g := local.grow(-9)
-	draw_rect(g, Color(0.55, 0.75, 0.7, 0.07 + 0.08 * _lid))
-	# The work lamp's reflection: two streaks across the glass.
-	var sh := 0.08 + 0.1 * (1.0 - s)
-	draw_line(g.position + Vector2(84, 2), g.position + Vector2(2, 150), Color(1, 1, 1, sh), 26.0)
-	draw_line(g.position + Vector2(160, 2), g.position + Vector2(2, 290), Color(1, 1, 1, sh * 0.5), 8.0)
-	var tex := Desk.tex("lid")
-	if tex != null:
-		var tsz := tex.get_size() * 0.5
-		draw_texture_rect(tex, Rect2(Vector2(-tsz.x * 0.5 + 13.0, lr.size.y * 0.5 - tsz.y * 0.5), tsz), false,
-			Color(1, 1, 1).darkened(0.35 * _lid))
-	else:
-		draw_rect(local, Color(0.6, 0.46, 0.22), false, 8.0)
-	draw_set_transform_matrix(Transform2D.IDENTITY)
-	# Condensation on the glass, beading when it's shut.
-	if _lid < 0.05:
-		for i in 26:
-			var h := hash(i * 7919)
-			var p := Vector2(lr.position.x + 14 + float(h % 250), lr.position.y + 14 + float((h >> 9) % 290))
-			draw_circle(p, 1.0 + float((h >> 3) % 3) * 0.5, Color(0.8, 0.95, 0.9, 0.12))
-	# The latch handle: label it.
-	var hr := Desk.r("lid_handle")
-	Desk.centred(self, Rect2(hr.position + Vector2(0, hr.size.y + 2), Vector2(hr.size.x, 14)), "OPEN" if not lid_open else "SHUT",
-		Desk.font("plate"), 12, Color(Desk.STENCIL, 0.75))
 
 
 func _draw_chute(now: float) -> void:

@@ -1,7 +1,8 @@
 class_name DispatchLever
 extends Control
-## Dispatch: lift the red safety cover to arm it, then pull the lever across. The lamp
-## says whether the reader will take the deck. The plate names the next Robbie.
+## Dispatch: lift the red safety cover to arm it, then pull the lever across. Two lamps: SAFE
+## while the cover is down, READY when it is up and the reader will take the deck. The next
+## Robbie's number is on a counter in the plate.
 
 signal dispatched
 signal refused(why: String)
@@ -13,6 +14,7 @@ var armed := false
 var refuse_reason := ""          # "" when the deck is fine
 var busy := false                # sea trials are out
 var serial := 1
+var _serial_shown := -1.0
 var _angle := REST
 var _drag := false
 var _fired := false
@@ -98,33 +100,25 @@ func _fire() -> void:
 func _process(delta: float) -> void:
 	if not _drag and _angle > REST:
 		_angle = maxf(REST, _angle - delta * 160.0)
+	_serial_shown = float(serial) if _serial_shown < 0.0 else move_toward(_serial_shown, float(serial), delta * 2.5)
 	queue_redraw()
 
 
 func _draw() -> void:
 	var now := Time.get_ticks_msec() / 1000.0
-	# Lamp: green ready, red refused, amber blinking while the trials are out, dark when disarmed.
+	# Lamps: SAFE (amber) with the cover down, READY (green) with it up and a deck the reader
+	# will take; while the sea trials are out, SAFE blinks.
 	var rl := Desk.v("ready_lamp")
 	var lp := Vector2(float(rl[0]), float(rl[1])) - position
-	var col := Color(0.08, 0.07, 0.06)
-	var glow := Color(0, 0, 0, 0)
+	var safe := 0.0
 	if busy:
-		if fmod(now, 0.8) < 0.45:
-			col = Desk.AMBER
-			glow = Color(Desk.AMBER, 0.6)
-	elif armed and refuse_reason == "":
-		col = Desk.GREEN_LAMP
-		glow = Color(Desk.GREEN_LAMP, 0.6)
-	elif armed:
-		col = Desk.RED_LAMP
-		glow = Color(Desk.RED_LAMP, 0.6)
-	if glow.a > 0.0:
-		Desk.draw_glow(self, lp, 26.0, glow)
-	draw_circle(lp, float(rl[2]), col)
-	draw_circle(lp + Vector2(-2, -2), 2.5, Color(1, 1, 1, 0.25))
+		safe = 1.0 if fmod(now, 0.8) < 0.45 else 0.0
+	elif not armed:
+		safe = 1.0
+	var ready := 1.0 if armed and not busy and refuse_reason == "" else 0.0
+	Desk.draw_lamp(self, lp + Vector2(-66, 0), "SAFE", Desk.AMBER, safe, 5.5)
+	Desk.draw_lamp(self, lp, "READY", Desk.GREEN_LAMP, ready, 5.5)
 	var f := Desk.font("plate")
-	var state := "TRIALS OUT" if busy else ("READY" if armed and refuse_reason == "" else (refuse_reason if armed else "SAFE"))
-	draw_string(f, lp + Vector2(-96, 4), state, HORIZONTAL_ALIGNMENT_RIGHT, 82, 11, Color(1, 0.85, 0.55, 0.6))
 	# Under the cover, when it's up.
 	var c := Desk.v("cover")
 	var hinge := Vector2(float(c[0]) + float(c[2]) * 0.5, float(c[1]) + 1.0) - position
@@ -134,4 +128,5 @@ func _draw() -> void:
 	# The lever.
 	Desk.draw_sprite(self, "lever_dispatch", _pivot(), deg_to_rad(_angle))
 	var pr := Desk.plaque_rect("dispatch")
-	Desk.engraved(self, Rect2(pr.position - position, pr.size), "DISPATCH  ·  ROBBIE %03d" % serial, 13)
+	Desk.engraved(self, Rect2(pr.position - position, Vector2(pr.size.x - 52, pr.size.y)), "DISPATCH  ·  ROBBIE", 13)
+	Desk.draw_odometer(self, Rect2(pr.end - position - Vector2(50, pr.size.y + 2), Vector2(42, pr.size.y + 4)), _serial_shown, 3, 13)

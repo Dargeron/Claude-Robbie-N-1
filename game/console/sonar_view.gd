@@ -8,7 +8,8 @@ extends DiveView
 ## charted, the drop point, and a cross where each one was lost.
 ## Uses DiveView's record of what was sensed when, so it never shows what Robbie couldn't know.
 
-const GLYPH_STEPS := 16
+var _ang_shown := INF          # the heading Bathy is drawn at, easing after the real one
+var _ang_time := 0.0
 const SWEEP_PERIOD := 2.6     # seconds per turn of the sweep
 
 var terrain: Sprite2D
@@ -210,7 +211,7 @@ func _draw() -> void:
 	var k := clampi(int(t), 0, last_tick())
 	var k2 := mini(k + 1, last_tick())
 	var f := t - float(k)
-	var rpos := _robbie_pos()
+	var rpos := _robbie_pos() + _hover(k, now)
 	var lamp_on := (rec.rflags[k] & 1) == 1
 	_draw_ghost_trail()
 	if lamp_on and rec.rhp[k] > 0:
@@ -385,25 +386,50 @@ func _draw_contacts(k: int, k2: int, f: float, now: float) -> void:
 				Color(Desk.PHOSPHOR, 1.0 - (k - e["t"]) / 8.0), 2.0)
 
 
-## Bathy on the scope: a round amber hull with a porthole and two eye dots, pods behind,
-## turned in sixteen steps like a transponder glyph. Hurt, he flickers; lost, he breaks into static.
+## How Bathy is drawn, not where he is: he never quite holds still. A slow hover, and while he
+## swims a little side-to-side sway, like something paddling. Under a pixel or so; his course
+## is the dive's own.
+func _hover(k: int, now: float) -> Vector2:
+	var h := Vector2(sin(now * 1.7) * 0.6, sin(now * 1.1 + 0.6) * 0.9)
+	if (dive.rec.rflags[k] & 2) != 0:
+		var a := _ang_shown if _ang_shown < INF else dive.rec.ra[k] * TAU / 4096.0
+		h += Vector2(cos(a), sin(a)) * sin(now * 5.2) * 0.8
+	return h
+
+
+## Bathy on the scope: a round amber hull with a porthole and two eye dots, pods behind. He turns
+## smoothly, a moment behind his heading, and his pods paddle as he swims, leaving a faint wake.
+## Hurt, he flickers; lost, he breaks into static.
 func _draw_glyph(k: int, pos: Vector2, now: float) -> void:
 	var rec := dive.rec
 	if rec.rhp[k] <= 0 or (dive.world.result != World.Result.EXIT and k >= last_tick()):
 		_draw_dead_air(pos, now)
 		return
-	var step := TAU / GLYPH_STEPS
-	var ang := roundf(rec.ra[k] * TAU / 4096.0 / step) * step
+	var target := rec.ra[k] * TAU / 4096.0
+	var dt := now - _ang_time if _ang_time > 0.0 else 0.0
+	_ang_time = now
+	if _ang_shown == INF or dt > 0.5:
+		_ang_shown = target
+	else:
+		_ang_shown += wrapf(target - _ang_shown, -PI, PI) * minf(1.0, dt * 7.0)
+	var ang := _ang_shown
 	var fwd := Vector2(sin(ang), -cos(ang))
 	var side := Vector2(-fwd.y, fwd.x)
+	var moving := (rec.rflags[k] & 2) != 0
+	if moving:
+		for b in 3:
+			var off := fmod(now * 1.6 + b * 0.33, 1.0)
+			draw_circle(pos - fwd * (9.0 + off * 10.0) + side * sin(now * 6.0 + b * 2.0) * 1.2, 0.7 + off * 0.6,
+				Color(Desk.AMBER, 0.28 * (1.0 - off)))
 	var hurt := (rec.rflags[k] & 8) != 0
 	if hurt and int(now * 14.0) % 2 == 0:
 		return
 	var col := Desk.AMBER
 	Desk.draw_glow(self, pos, 24.0, Color(Desk.AMBER, 0.45))
-	# Pods behind, one each side.
+	# Pods behind, one each side, paddling in turn while he swims.
 	for sgn: float in [-1.0, 1.0]:
-		draw_circle(pos - fwd * 5.0 + side * sgn * 6.4, 2.6, col.darkened(0.12))
+		var paddle := sin(now * 9.0 + sgn * 1.6) * 0.9 if moving else 0.0
+		draw_circle(pos - fwd * (5.0 + paddle) + side * sgn * 6.4, 2.6, col.darkened(0.12))
 	draw_circle(pos, 7.4, col)
 	draw_arc(pos, 7.4, 0, TAU, 24, Desk.AMBER_HOT, 1.0)
 	# The porthole, and in it two eyes looking where he swims.

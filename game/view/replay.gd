@@ -12,7 +12,7 @@ signal reached_end
 
 const SPEEDS := [0.5, 1.0, 2.0, 4.0, 8.0]
 const AUTO_FAST := 4.0          # AUTO plays quiet stretches this fast...
-const AUTO_SLOW := 1.0          # ...and slows to this around anything that happens
+const AUTO_SLOW := 2.0          # ...and slows to this around anything that happens (the console's normal speed)
 const AUTO_RAMP := 0.06         # speed change per tick of dive time (about 1.7 s from slow to fast)
 
 var view: DiveView
@@ -156,7 +156,7 @@ static func plan_auto_speeds(dive: Dive, caption_list: Array) -> PackedFloat32Ar
 				if e["state"] == "closing":
 					spans.append([int(e["t"]) - 20, int(e["t"]) + 20, AUTO_SLOW])
 	for c in caption_list:
-		spans.append([int(c[0]), int(c[0]) + 60, 1.5])
+		spans.append([int(c[0]), int(c[0]) + 60, AUTO_SLOW])
 	spans.append([n - 75, n, AUTO_SLOW])
 	spans.append([0, 45, AUTO_SLOW])
 	for sp in spans:

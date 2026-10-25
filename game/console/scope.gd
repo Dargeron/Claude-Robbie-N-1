@@ -169,9 +169,8 @@ class ScopeHud:
 			draw_string(f, Vector2(640 - w / 2, 638), cap, HORIZONTAL_ALIGNMENT_LEFT, -1, 36, Desk.AMBER_HOT)
 		# Transport state.
 		var spd: float = rp.speed()
-		var mode := "PAUSED" if not rp.playing else ("REWIND" if rp.rewinding else ("AUTO ×%s" % ("%.1f" % spd) if rp.auto else "PLAY ×%s" % str(spd).trim_suffix(".0")))
-		if rp.skip_until > 0 and k < rp.skip_until and rp.playing:
-			mode = "SKIPPING TO THE TROUBLE"
+		# Speeds as the recorder's knob marks them: 1 is normal.
+		var mode := "PAUSED" if not rp.playing else ("REWIND" if rp.rewinding else ("AUTO ×%s" % ("%.1f" % (spd / 2.0)) if rp.auto else "PLAY ×%s" % WireRecorder.marked(spd)))
 		draw_string(f, Vector2(46, 686), mode, HORIZONTAL_ALIGNMENT_LEFT, -1, 28, gd)
 		if k >= v.last_tick():
 			var ok := d.world.result == World.Result.EXIT

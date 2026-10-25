@@ -567,19 +567,10 @@ def build_plate():
     recess("hangar_well", L["hangar_view"], r=4, depth=0.1)
     plaque(L["plaques"]["hangar"][:4])
 
-    # The card reader: slots behind a hinged glass lid; the lid's latch handle on the right.
+    # The card reader: a felt bed with the slots' rails, and the pilot lamps down its left.
     ra = L["rack"]
     housing("rack", ra, r=10)
     recess("card_bed", L["card_bed"], r=4, depth=0.04, mat=mats["felt"])
-    cx0, cy0, cw0, ch0 = L["card_bed"]
-    lx0, ly0, lw0, lh0 = L["lid"]
-    frame("lid_seat", (lx0 - 4, ly0 - 4, lw0 + 8, lh0 + 8), (lx0 + 2, ly0 + 2, lw0 - 4, lh0 - 4), 0.0, 0.02,
-          mats["steel"], r_out=8, r_in=5, bevel=0.004)
-    cylinder_x("lid_hinge", lx0 + 10, lx0 + lw0 - 10, ly0 - 2, 4, 0.03, mats["chrome"])
-    hx, hy, hw, hh = L["lid_handle"]
-    slab("latch_plate", (hx + 6, hy, hw - 12, hh), 0.0, 0.03, mats["brass_dark"], r=5, bevel=0.006)
-    for sy2 in (hy + 8, hy + hh - 8):
-        screw(hx + hw / 2, sy2, mats["brass"], r=2.4, z=0.03, angle=0.3)
     lr = L["lamp_rail"]
     slab("lamp_rail", lr, 0.0, 0.03, mats["brass_dark"], r=4, bevel=0.006)
     lamps = L["lamps"]
@@ -651,9 +642,6 @@ def build_plate():
     slab("cover_base", (cvx - 3, cvy - 3, cvw + 6, cvh + 6), 0.0, 0.02, mats["steel"], r=5, bevel=0.005)
     recess("cover_well", (cvx + 6, cvy + 8, cvw - 12, cvh - 14), r=4, depth=0.03)
     cylinder_x("cover_hinge", cvx + 4, cvx + cvw - 4, cvy + 1, 3.5, 0.03, mats["chrome"])
-    rlx, rly, rlr = L["ready_lamp"]
-    ring_obj("ready_socket", rlx, rly, rlr + 4, rlr, 0.0, 0.03, mats["chrome"])
-    disc("ready_glass", rlx, rly, rlr, -0.01, 0.015, mats["recess"])
     plaque(L["plaques"]["dispatch"][:4])
 
     # The press: a split-flap readout, two selector wheels, the NOT switch and value wheel, the tray the
@@ -825,18 +813,6 @@ def build_wheel(c, r, spokes, knob=True):
     slab("wheel_mark", (-2, r - 7, 4, 7), 0.1, 0.105, m["ivory"], r=1, bevel=0, coll=c)
 
 
-def build_lid(c):
-    """The reader's glass lid, closed: a brass frame with a latch tab; the glass itself is drawn by the game."""
-    m = M()
-    w, h = L["lid"][2], L["lid"][3]
-    frame("lid_frame", (-w / 2, -h / 2, w, h), (-w / 2 + 9, -h / 2 + 9, w - 18, h - 18), 0.0, 0.07, m["brass"],
-          r_out=8, r_in=4, bevel=0.012, coll=c)
-    for (sx2, sy2) in ((-w / 2 + 5, -h / 2 + 5), (w / 2 - 5, -h / 2 + 5), (-w / 2 + 5, h / 2 - 5), (w / 2 - 5, h / 2 - 5)):
-        uv_sphere("lid_rivet", sx2, sy2, 0.07, 2.4, m["brass_dark"], 0.5, coll=c)
-    slab("lid_tab", (w / 2 - 2, -14, 22, 28), 0.02, 0.08, m["brass"], r=6, bevel=0.01, coll=c)
-    disc("lid_tab_knob", w / 2 + 12, 0, 7.5, 0.08, 0.18, m["red_bakelite"], bevel=0.02, coll=c)
-
-
 def build_chute_flap(c):
     m = M()
     w, h = L["chute_mouth"][2], L["chute_mouth"][3]
@@ -849,7 +825,6 @@ def build_chute_flap(c):
 SPRITES = {
     "wheel_order": (lambda c: build_wheel(c, L["order_wheel"][2], 6), (L["order_wheel"][2] + 10, L["order_wheel"][2] + 10)),
     "wheel_cond": (lambda c: build_wheel(c, L["cond_wheel"][2], 5), (L["cond_wheel"][2] + 10, L["cond_wheel"][2] + 10)),
-    "lid": (build_lid, (L["lid"][2] / 2 + 26, L["lid"][3] / 2 + 6)),
     "chute_flap": (build_chute_flap, (L["chute_mouth"][2] / 2 + 4, L["chute_mouth"][3] * 0.6 + 4)),
     # name: (builder, half-size in screen pixels (w, h), origin offset)
     "reel": (build_reel, (46, 46)),

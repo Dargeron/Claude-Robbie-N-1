@@ -1,7 +1,7 @@
 extends Control
 ## The operator's console: the whole game on one dark desk (docs/design/station-ui.md).
 ## The sonar receiver, the wire recorder and the teleprinter on the left; the card reader
-## under its glass lid, the pulp chute, the Company's counter, the sea trials, the dispatch
+## with its slots, the pulp chute, the Company's counter, the sea trials, the dispatch
 ## lever and the card press on the right; the Company tube, the sector selector, the shift counter, Bathy's porthole and
 ## the hangar window along the top. Nothing floats over it except paper.
 ## Prototype: the first three sectors, three shifts.
@@ -87,6 +87,7 @@ func _build() -> void:
 	recorder = WireRecorder.new()
 	_place(recorder, Desk.r("recorder"))
 	recorder.replay = scope.replay
+	recorder._apply_speed()
 	recorder.scrubbed.connect(func() -> void: _scrubbed = true)
 	add_child(recorder)
 
@@ -165,10 +166,6 @@ func _build() -> void:
 	table = CardTable.new()
 	table.changed.connect(_on_deck_changed)
 	table.refused.connect(_on_plate_missing)
-	table.lid_moved.connect(func(open: bool) -> void:
-		if open:
-			_mark("lid_opened")
-		_refresh())
 	table.pulped.connect(func() -> void:
 		_mark("pulped")
 		_save_deck())
@@ -491,7 +488,6 @@ func _load_deck(id: String) -> void:
 		for r: Dictionary in Program.parse(rs.program_text).rules:
 			slot_rules.append(r)
 	table.setup(rs.room.slots, slot_rules, tray_rules)
-	table.set_lid(false)
 	press.slots = rs.room.slots
 	program = _program_from_table()
 
@@ -551,8 +547,6 @@ func _refresh() -> void:
 	dispatch.serial = state.next_serial
 	if program.rules.is_empty():
 		dispatch.refuse_reason = "NO CARDS"
-	elif table.lid_open:
-		dispatch.refuse_reason = "LID OPEN"
 	else:
 		dispatch.refuse_reason = ""
 	trials.enabled = state.program_made_it(room_id, program.to_text())
@@ -591,8 +585,6 @@ func _on_plate_missing(what: String) -> void:
 			_flash_note("not_locked", "NOT switch is locked till they issue the plate. Next shift.", _ring("not_switch", 26))
 		"tray_full":
 			_flash_note("tray_full", N["tray_full"], _ring("chute_mouth", 50))
-		"lid":
-			_flash_note("lid_shut", N["lid"], _ring("lid_handle", 30))
 
 
 func _on_refused(why: String) -> void:
@@ -600,8 +592,6 @@ func _on_refused(why: String) -> void:
 	match why:
 		"cover":
 			_flash_note("cover", N["cover"], _ring("cover", 40))
-		"LID OPEN":
-			_flash_note("lid_open", N["lid_open"], _ring("lid_handle", 30))
 		"NO CARDS":
 			_flash_note("empty", N["empty"], null)
 
@@ -609,16 +599,12 @@ func _on_refused(why: String) -> void:
 # ---------------------------------------------------------------- dispatching and watching
 
 func _dispatch() -> void:
-	if program.rules.is_empty() or table.lid_open:
+	if program.rules.is_empty():
 		return
 	Sfx.play("ui_launch", -6.0)
 	_scrubbed = false
 	var res := state.launch(room_id, program)
 	_show(res["dive"], res["entry"], res["history"])
-	var g: Dictionary = scope.sonar().ghost
-	if g.get("lost", false):
-		var path: PackedVector2Array = g["path"]
-		scope.replay.skip_until = maxi(0, (path.size() - 1) * GameState.PATH_STEP - 3 * TICKS)
 	scope.warm_up()
 	_mark("dispatched")
 	_refresh()
@@ -753,8 +739,7 @@ func _open_from_wall(id: String, entry: Dictionary) -> void:
 
 
 func _paint_wall_count(h: Hotspot) -> void:
-	var n := state.next_serial - 1
-	Desk.centred(h, Rect2(Vector2(0, h.size.y - 20), Vector2(h.size.x, 16)), "THE WALL  ·  %d" % n, Desk.font("plate"), 12, Color(0.9, 0.8, 0.6, 0.85))
+	Desk.centred(h, Rect2(Vector2(0, h.size.y - 20), Vector2(h.size.x, 16)), "THE WALL", Desk.font("plate"), 12, Color(0.9, 0.8, 0.6, 0.85))
 
 
 func _paint_gain(h: Hotspot) -> void:
@@ -762,11 +747,14 @@ func _paint_gain(h: Hotspot) -> void:
 		h.draw_line(Vector2(4, 4), Vector2(h.size.x - 4, h.size.y - 4), Color(Desk.RED_LAMP, 0.8), 2.0)
 
 
+## A brass pull with its name stamped on it, always there; its lamp is lit when the deck in the
+## slots isn't the one the Robbie on the scope swam with, so pulling it would put his back.
 func _paint_deck_tab(h: Hotspot) -> void:
-	if current_entry.is_empty() or str(current_entry.get("text", "")) == program.to_text():
-		return
-	h.draw_rect(Rect2(Vector2.ZERO, h.size), Color(0.55, 0.42, 0.2, 0.9))
-	Desk.centred(h, Rect2(Vector2.ZERO, h.size), "DECK CHANGED  ·  LOAD HIS DECK", Desk.font("plate"), 11, Color(0.08, 0.05, 0.02))
+	var differs := not current_entry.is_empty() and str(current_entry.get("text", "")) != program.to_text()
+	h.draw_rect(Rect2(Vector2(14, 1), h.size - Vector2(14, 2)), Color(0.42, 0.32, 0.15))
+	h.draw_rect(Rect2(Vector2(14, 1), h.size - Vector2(14, 2)), Color(0.12, 0.08, 0.03), false, 1.0)
+	Desk.centred(h, Rect2(Vector2(14, 0), h.size - Vector2(14, 0)), "PUT BACK HIS DECK", Desk.font("plate"), 11, Color(0.1, 0.07, 0.03))
+	Desk.draw_lamp(h, Vector2(6, h.size.y * 0.5), "", Desk.AMBER, 1.0 if differs else 0.0, 3.5)
 
 
 func _toggle_mute() -> void:
@@ -809,11 +797,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_H:
 				_open_binder()
 			KEY_LEFT:
-				rp.skip_until = -1
-				rp.step_speed(-1)
+				recorder.step_speed(-1)
 			KEY_RIGHT:
-				rp.skip_until = -1
-				rp.step_speed(1)
+				recorder.step_speed(1)
 			KEY_COMMA:
 				if rp.has_dive():
 					rp.seek(rp.view.t - TICKS)
@@ -994,8 +980,8 @@ func _wanted_notes() -> Array:
 			else:
 				glass.call("print", 240.0, [wheel, knob])
 		elif _did("printed") and not _did("inserted"):
-			var lh := Desk.r("lid_handle").get_center()
-			glass.call("insert", 240.0, [Vector3(lh.x, lh.y, 30)])
+			var s0 := table.slot_rect(0).get_center()
+			glass.call("insert", 240.0, [Vector3(s0.x, s0.y, 40)])
 		elif made_it and rs.survey.is_empty():
 			glass.call("trials", 230.0, [Vector3(float(Desk.v("crank")[0]), float(Desk.v("crank")[1]), 28)])
 	if not rs.certified and not rs.survey.is_empty() and not rs.survey.get("certified", false) and not _did("trial_lamp"):
@@ -1131,7 +1117,7 @@ class Lights:
 		if playing:
 			Desk.draw_glow(self, lp, 12.0, Color(Desk.RED_LAMP, 0.7))
 		draw_circle(lp, 3.5, Desk.RED_LAMP if playing else Color(0.2, 0.05, 0.03))
-		draw_string(Desk.font("plate"), lp + Vector2(9, 5), "LIVE" if playing else "HELD", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(Desk.STENCIL, 0.7))
+		draw_string(Desk.font("plate"), lp + Vector2(9, 5), "LIVE", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(Desk.STENCIL, 0.7))
 		draw_string(Desk.font("plate"), Vector2(523, 395), "GAIN", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(Desk.STENCIL, 0.7))
 		Desk.engraved(self, Desk.plaque_rect("rack"), Desk.plaque("rack")[4], 13)
 

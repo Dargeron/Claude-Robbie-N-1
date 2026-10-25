@@ -98,17 +98,14 @@ func _draw() -> void:
 			draw_circle(p, 3.8, Color(Desk.AMBER, 0.4 + 0.4 * sin(now * 20.0)))
 		else:
 			draw_circle(p, 3.8, Color(0.07, 0.06, 0.05))
-	var f := Desk.font("plate")
-	var passed := 0
-	for r in results:
-		if r == "exit":
-			passed += 1
-	var txt := "%d / %d  ·  %d NEEDED" % [passed, fleet, needed] if not results.is_empty() else ("CRANK TO RUN THE DECK" if enabled else "NO BEACON ON RECORD")
-	if certified:
-		txt = "CERTIFIED  ·  %d / %d" % [passed, fleet] if not results.is_empty() else "CERTIFIED"
+	# Painted under the lamps, never changing: what it takes. Two lamps say where the deck stands.
 	var tl: Dictionary = Desk.layout()["trial_lamps"]
-	draw_string(f, Vector2(float(tl["x"]) - 6.0, float(tl["y"]) + float(tl["dy"]) * 2.0 + 4.0) - position, txt,
-		HORIZONTAL_ALIGNMENT_LEFT, 170, 11, Color(Desk.GREEN_LAMP, 0.8) if certified else Color(1, 0.85, 0.55, 0.6 if enabled else 0.35))
+	var y := float(tl["y"]) + float(tl["dy"]) * 2.0 - position.y
+	var x0 := float(tl["x"]) - 6.0 - position.x
+	var f := Desk.font("plate")
+	draw_string(f, Vector2(x0, y + 4.0), "%d OF %d TO PASS" % [needed, fleet], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(Desk.STENCIL, 0.7))
+	Desk.draw_lamp(self, Vector2(x0 + 92.0, y), "BEACON", Desk.AMBER, 1.0 if enabled else 0.0, 3.8, 1, 10)
+	Desk.draw_lamp(self, Vector2(x0 + 140.0, y), "CERTIFIED", Desk.GREEN_LAMP, 1.0 if certified else 0.0, 3.8, 1, 10)
 	Desk.draw_sprite(self, "crank", _crank_c(), _crank, Color.WHITE if enabled else Color(0.6, 0.6, 0.6))
 	var pr := Desk.plaque_rect("trials")
 	Desk.engraved(self, Rect2(pr.position - position, pr.size), Desk.plaque("trials")[4], 12)

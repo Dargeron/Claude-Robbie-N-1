@@ -117,8 +117,6 @@ def build():
     place(cs.build_punch_knob, ps[0] + ps[2] / 2, ps[1] + 18)
     cr = L["crank"]
     place(cs.build_crank, cr[0], cr[1], 60)
-    lid = L["lid"]
-    place(cs.build_lid, lid[0] + lid[2] / 2, lid[1] + lid[3] / 2)
     pl = L["platen"]
     place(cs.build_platen, pl[0] + pl[2] / 2, pl[1] + pl[3] / 2)
     km = L["keys"]

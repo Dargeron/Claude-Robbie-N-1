@@ -75,7 +75,7 @@ for name in housings:
 for (px, py, ln) in ((1004, 136, 120), (760, 136, 70), (900, 136, 160), (645, 320, 200), (690, 40, 60)):
     rust += np.exp(-((xs - px * S) ** 2) / (2 * (6 * S) ** 2)) * np.clip(1 - (ys - py * S) / (ln * S), 0, 1) * (ys > py * S) * 0.9
 # Hands: the metal round what gets touched is rubbed bright and greasy.
-for key, rad in (("order_wheel", None), ("cond_wheel", None), ("print_lever", 40), ("dispatch", 70), ("lid_handle", 40),
+for key, rad in (("order_wheel", None), ("cond_wheel", None), ("print_lever", 40), ("dispatch", 70),
                  ("crank", None), ("speed_knob", 40), ("keys", 60), ("sector_knob", 46)):
     v = L[key]
     if len(v) == 3:

@@ -1,11 +1,11 @@
 # Status
 
-Updated 2026-10-25, session 38: **0.3.0, two views.** Albert narrowed the art direction to A (3D) or B (lived-in
-2D), so the build plays both, with a switch (top left, or V): A puts the same console in a 3D room seen from the chair
-(console/chair.gd), B is flat. Both on the weathered desk. From his 0.2.0 playtest: red on everything touchable, the
-ORDER/CONDITION drums back (wheels roll them; previous and next entries visible), Op. 5's notes in grease pencil on
-the machine instead of post-its, and a crumple-and-toss pulp animation. Waiting on Albert: A or B, and how A runs on
-his tablet; his reaction to the Lab ideas (docs/design/hangar-ideas.md).
+Updated 2026-10-26, session 39: **0.4.0, back to the flat desk.** Albert found the 3D view clunky: the game opens
+flat again (the chair view stays in the code for the tools, ROBBIE_VIEW=chair). From his 0.3.0 playtest: the speed
+knob is ½ / 1 / 2 / AUTO (old 1, 2, 4), starts on 1, and reruns no longer skip ahead; no text on the machine changes
+by itself (lamps with fixed labels, number wheels); the glass lid is gone; Bathy hovers and paddles on the scope.
+Waiting on Albert: his pick of five handle styles (docs/art/handles/), which decides the next art pass; his
+reaction to the Lab ideas (docs/design/hangar-ideas.md).
 
 ## Where we are
 

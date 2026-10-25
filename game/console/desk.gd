@@ -132,6 +132,55 @@ static func draw_sprite(ci: CanvasItem, name: String, at: Vector2, angle: float 
 	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
+## A row of number wheels behind a window (an odometer): numbers on the machine turn, they
+## never just change. `value` may be fractional while it rolls: each wheel turns with the one
+## to its right as that passes 9.
+static func draw_odometer(ci: CanvasItem, win: Rect2, value: float, digits: int, size: int = 24,
+		face := Color(0.9, 0.87, 0.78), ink := Color(0.08, 0.06, 0.05)) -> void:
+	var f := font("plate")
+	var cw := win.size.x / digits
+	value = maxf(value, 0.0)
+	for i in digits:
+		var place := pow(10.0, digits - 1 - i)
+		var v := fmod(value / place, 10.0)
+		var below := fmod(value, place)
+		var turning := clampf(below - (place - 1.0), 0.0, 1.0) if place > 1.0 else 0.0
+		var d := floorf(v)
+		var frac := (v - d) if place == 1.0 else turning
+		var r := Rect2(win.position + Vector2(i * cw + 1, 0), Vector2(cw - 2, win.size.y))
+		ci.draw_rect(r, face)
+		for k in 2:
+			var n := int(d + k) % 10
+			var cy := r.get_center().y + (k - frac) * r.size.y
+			if cy < r.position.y - size * 0.25 or cy > r.end.y + size * 0.25:
+				continue
+			centred(ci, Rect2(Vector2(r.position.x, cy - size * 0.55), Vector2(r.size.x, size * 1.1)), str(n), f, size, ink)
+		var bands := 6
+		var bh := r.size.y / 18.0
+		for b in bands:
+			var a := 0.09 * (bands - b)
+			ci.draw_rect(Rect2(r.position + Vector2(0, b * bh), Vector2(r.size.x, bh)), Color(0, 0, 0, a))
+			ci.draw_rect(Rect2(Vector2(r.position.x, r.end.y - (b + 1) * bh), Vector2(r.size.x, bh)), Color(0, 0, 0, a))
+	ci.draw_rect(win, Color(0, 0, 0, 0.6), false, 1.0)
+
+
+## A pilot lamp in its chrome socket with its name painted beside it (the name never changes;
+## whether it is lit says the state). `side` is where the label goes: 1 right, -1 left.
+static func draw_lamp(ci: CanvasItem, at: Vector2, label: String, col: Color, lit: float, r: float = 5.0, side: int = 1, size: int = 11) -> void:
+	ci.draw_circle(at, r + 2.5, Color(0.55, 0.56, 0.55))
+	ci.draw_circle(at, r + 1.0, Color(0.12, 0.12, 0.11))
+	if lit > 0.0:
+		draw_glow(ci, at, r * 4.0, Color(col, 0.6 * lit))
+	ci.draw_circle(at, r, Color(0.08, 0.07, 0.06).lerp(col, lit))
+	ci.draw_circle(at + Vector2(-r * 0.35, -r * 0.35), r * 0.35, Color(1, 1, 1, 0.18 + 0.2 * lit))
+	if label != "":
+		var f := font("plate")
+		var w := f.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+		var x := at.x + r + 5.0 if side > 0 else at.x - r - 5.0 - w
+		ci.draw_string(f, Vector2(x + 1, at.y + size * 0.36 + 1), label, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color(0, 0, 0, 0.7))
+		ci.draw_string(f, Vector2(x, at.y + size * 0.36), label, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color(STENCIL, 0.8))
+
+
 ## A sheet of paper: a flat colour with fibres and a darker edge, deterministic per seed.
 static func draw_paper(ci: CanvasItem, rect: Rect2, base: Color, seed_v: int = 1, shadow: bool = true) -> void:
 	if shadow:

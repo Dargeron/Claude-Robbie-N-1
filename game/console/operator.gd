@@ -1,23 +1,18 @@
 extends Node
-## The game's root: the operator's console, seen one of two ways, switchable while playing
-## (2026-10-26: Albert is choosing between them).
-##   B, flat: the console face on, filling the screen.
-##   A, from the chair: the same console in its room (ChairView). The console draws into an
-##      offscreen viewport; touches are traced from the screen onto its faces and handed to
-##      it as if they had landed there. Paper (memos, the binder, the Wall) is brought up flat
-##      to read. Pinch, or the mouse wheel, leans in towards the machine under your fingers.
-## The choice is kept in user://view.cfg; ROBBIE_VIEW=flat|chair overrides it (for the tools).
-
-const CFG := "user://view.cfg"
-const SWITCH := Rect2(6, 4, 132, 24)
+## The game's root: the operator's console, face on, filling the screen.
+## The 3D view from the chair (ChairView) that 0.3.0 offered beside it is set aside for now
+## (Albert, 2026-10-26: "clunky"; we keep upgrading the 2D desk) but still works, for the
+## tools only: ROBBIE_VIEW=chair. There the console draws into an offscreen viewport laid on
+## the faces of a 3D console; touches are traced from the screen onto those faces and handed to
+## it as if they had landed there; paper (memos, the binder, the Wall) comes up flat to read;
+## pinch, or the mouse wheel, leans in.
 
 var console: Control
 var chair: ChairView
-var view := "chair"
+var view := "flat"
 var _sub: SubViewport
 var _ui: CanvasLayer
 var _paper: TextureRect          # chair view: memos and the Wall brought up flat
-var _switch: Control
 var _paper_up := 0.0
 var _touches := {}               # finger index -> position, for the pinch
 var _pinch_d := 0.0
@@ -31,9 +26,11 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	view = _saved_view()
-	if OS.get_environment("ROBBIE_VIEW") in ["flat", "chair"]:
-		view = OS.get_environment("ROBBIE_VIEW")
+	if OS.get_environment("ROBBIE_VIEW") == "chair":
+		view = "chair"
+	if view == "flat":
+		add_child(console)
+		return
 	_sub = SubViewport.new()
 	var win := DisplayServer.window_get_size()
 	var w := clampi(int(win.x * 1.2), 1280, 2560)
@@ -57,50 +54,9 @@ func _ready() -> void:
 	_paper.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_paper.modulate.a = 0.0
 	_ui.add_child(_paper)
-	_switch = ViewSwitch.new()
-	_switch.op = self
-	_switch.position = SWITCH.position
-	_switch.size = SWITCH.size
-	_switch.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_ui.add_child(_switch)
-	_apply()
-
-
-func _saved_view() -> String:
-	var cf := ConfigFile.new()
-	if cf.load(CFG) == OK:
-		return str(cf.get_value("view", "mode", "chair"))
-	return "chair"
-
-
-func toggle() -> void:
-	view = "flat" if view == "chair" else "chair"
-	var cf := ConfigFile.new()
-	cf.set_value("view", "mode", view)
-	cf.save(CFG)
-	Sfx.play("switch", -6.0)
-	_apply()
-
-
-func _apply() -> void:
-	if console.get_parent() != null:
-		console.get_parent().remove_child(console)
-	if view == "chair":
-		_sub.add_child(console)
-		_sub.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-		chair.visible = true
-		chair.process_mode = Node.PROCESS_MODE_INHERIT
-		chair.camera.make_current()
-	else:
-		add_child(console)
-		move_child(console, 0)
-		_sub.render_target_update_mode = SubViewport.UPDATE_DISABLED
-		chair.visible = false
-		chair.process_mode = Node.PROCESS_MODE_DISABLED
-		chair.camera.clear_current()
-		_paper_up = 0.0
-		_paper.modulate.a = 0.0
-	_switch.queue_redraw()
+	_sub.add_child(console)
+	_sub.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	chair.camera.make_current()
 
 
 ## Is paper up in front of the console (read flat even in the chair view)?
@@ -130,14 +86,6 @@ func to_screen(p: Vector2) -> Vector2:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_V:
-		toggle()
-		get_viewport().set_input_as_handled()
-		return
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and SWITCH.has_point(event.position):
-		toggle()
-		get_viewport().set_input_as_handled()
-		return
 	if view != "chair":
 		return
 	get_viewport().set_input_as_handled()
@@ -198,21 +146,3 @@ func _pinch(event: InputEvent) -> void:
 		chair.lean(_pinch_zoom + (d / _pinch_d - 1.0) * 1.2, chair.console_point(mid) if _pinch_zoom == 0.0 else _focus_console())
 	elif _touches.is_empty():
 		_pinching = false
-
-
-## The little switch in the corner: which view, and a tap to change it.
-class ViewSwitch:
-	extends Control
-	var op: Node
-
-	func _draw() -> void:
-		var r := Rect2(Vector2.ZERO, size)
-		draw_rect(r, Color(0.02, 0.02, 0.02, 0.72))
-		draw_rect(r, Color(Desk.RED_LAMP, 0.55), false, 1.0)
-		var f := Desk.font("plate")
-		var chair: bool = op.view == "chair"
-		Desk.centred(self, Rect2(Vector2(2, 0), Vector2(size.x * 0.5 - 2, size.y)), "A · 3D", f, 14,
-			Desk.AMBER_HOT if chair else Color(Desk.STENCIL, 0.45))
-		Desk.centred(self, Rect2(Vector2(size.x * 0.5, 0), Vector2(size.x * 0.5 - 2, size.y)), "B · FLAT", f, 14,
-			Desk.AMBER_HOT if not chair else Color(Desk.STENCIL, 0.45))
-		draw_line(Vector2(size.x * 0.5, 4), Vector2(size.x * 0.5, size.y - 4), Color(Desk.STENCIL, 0.3), 1.0)
