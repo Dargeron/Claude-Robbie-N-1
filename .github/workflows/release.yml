@@ -9,7 +9,7 @@ name: Release
 
 on:
   push:
-    paths: ["RELEASE.md"]
+    paths: ["RELEASE.md", ".github/workflows/release.yml"]
   workflow_dispatch:
 
 permissions:
