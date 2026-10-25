@@ -45,7 +45,10 @@ The old station (`game/station/station.tscn`) still runs: Mission Control, the L
 | `tools/bless.sh` | Re-record golden replays after a deliberate sim change |
 | `tools/godot.sh --headless --path game --script res://tools/hunt.gd -- <room> [seeds]` | Exploit hunt over all 1-rule and most 2-rule programs (slow) |
 | `tools/movie.sh <room> <prog.rbt> [seed] [out.mp4] [speed] [serial]` | Record the replay as MP4 (GIF=1 for a GIF too) under a virtual display |
-| `xvfb-run -a tools/godot.sh --path game --rendering-driver opengl3 --audio-driver Dummy res://tools/shots.tscn -- <out_dir>` | Scripted tour of the station UI, saving screenshots to look at |
+| `xvfb-run -a tools/godot.sh --path game --rendering-driver opengl3 --audio-driver Dummy res://tools/shots.tscn -- <out_dir>` | Scripted tour of the old station UI, saving screenshots to look at |
+| `tools/console_check.sh [out_dir]` | The console's smoke test: the scripted tour (screenshots, none blank) and the touch play-through (taps and drags only; every machine must answer) |
+| `~/.cache/blender/blender-5.2.3-linux-x64/blender -b --factory-startup -P tools/art/console_scene.py -- game/art/console [plate\|sprites\|all] [preview]` | Render the console's desk plate (about 12 min) and its moving parts |
+| `python3 tools/art/console_paper.py` | The tiling paper grain for cards, tape, memos and notes |
 | `tools/godot.sh --headless --path game --export-release <Linux/Windows/macOS/Web> <path>` | Builds (templates in ~/.local/share/godot/export_templates/4.7.2.stable) |
 | `tools/export_setup.sh [--desktop-only]` | Installs the export templates and the Android build tools (about 2 min the first time) |
 | `tools/android.sh [out.apk]` | The signed Android APK (arm64) in build/android/; needs the release key in the environment (see "Where the project lives") |
@@ -126,7 +129,11 @@ Each work session still follows the same rhythm: read `docs/BACKLOG.md`, pick th
 it, look at it, update STATUS/BACKLOG/devlog, commit, and show Albert something he can play.
 
 - **Builds for Albert (since 2026-10-24):** native apps, not the browser. An Android APK for his tablet
-  (`tools/android.sh`) and a Windows EXE (`tools/desktop.sh`, or the Windows preset alone). Send him the files.
+  (`tools/android.sh`) and a Windows EXE (`tools/desktop.sh`, or the Windows preset alone).
+  **Since 2026-10-25 he downloads them from the GitHub Releases page:** to publish a test build, rewrite
+  `RELEASE.md` (first line `# <new version> · <title>`, then what's new and what to try, in plain words) and push;
+  `.github/workflows/release.yml` builds and signs both on GitHub and publishes the release. Check the run with the
+  GitHub tools and give him the link. See `docs/RELEASES.md`. Bump `version/code` in `export_presets.cfg` too.
   Android installs an update only if it carries the same signature, so always sign with Robbie's release key: it is
   in Albert's Google Drive as "Robbie N+1 - Android signing key (private).txt"; export its three lines as environment
   variables before `tools/android.sh`. Never commit it. A build signed with another key can't replace his installed

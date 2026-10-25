@@ -1,0 +1,85 @@
+name: Release
+
+# A build for Albert to download from the Releases page: the signed Android APK and the Windows zip.
+# Runs whenever RELEASE.md changes (its first heading names the version), or by hand from the Actions tab.
+# Signing needs three repository secrets (Settings > Secrets and variables > Actions), copied from Albert's
+# Drive file "Robbie N+1 - Android signing key (private).txt": ROBBIE_KEYSTORE_B64, ROBBIE_KEYSTORE_PASS,
+# ROBBIE_KEY_ALIAS. Without them the run stops: an APK signed with another key can't update his installed game.
+
+on:
+  push:
+    paths: ["RELEASE.md"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ROBBIE_KEYSTORE_B64: ${{ secrets.ROBBIE_KEYSTORE_B64 }}
+      ROBBIE_KEYSTORE_PASS: ${{ secrets.ROBBIE_KEYSTORE_PASS }}
+      ROBBIE_KEY_ALIAS: ${{ secrets.ROBBIE_KEY_ALIAS }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the signing key is set
+        run: |
+          if [[ -z "$ROBBIE_KEYSTORE_B64" || -z "$ROBBIE_KEYSTORE_PASS" ]]; then
+            echo "::error::The signing key secrets are missing (ROBBIE_KEYSTORE_B64, ROBBIE_KEYSTORE_PASS, ROBBIE_KEY_ALIAS). See docs/RELEASES.md."
+            exit 1
+          fi
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/robbie
+          key: godot-4.7.2-stable-linux-x86_64
+      - uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates
+          key: export-templates-4.7.2-stable
+
+      - name: Install pinned Godot
+        run: tools/bootstrap.sh
+
+      - name: Version
+        id: version
+        run: |
+          v=$(grep -m1 -oE '^# [0-9][^ ]*' RELEASE.md | cut -c3-)
+          [[ -n "$v" ]] || { echo "::error::RELEASE.md must start with '# <version> ...'"; exit 1; }
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "Building $v"
+
+      - name: Android APK
+        run: |
+          mkdir -p build
+          tools/android.sh "$PWD/build/RobbieN1-${{ steps.version.outputs.version }}.apk"
+
+      - name: Windows
+        run: |
+          mkdir -p build/windows
+          tools/godot.sh --headless --path game --export-release Windows "$PWD/build/windows/RobbieN1.exe"
+          test -s build/windows/RobbieN1.exe
+          (cd build/windows && zip -q "../RobbieN1-${{ steps.version.outputs.version }}-windows.zip" *)
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Robbie N+1 ${{ steps.version.outputs.version }}
+          body_path: RELEASE.md
+          target_commitish: ${{ github.sha }}
+          prerelease: true
+          files: |
+            build/RobbieN1-${{ steps.version.outputs.version }}.apk
+            build/RobbieN1-${{ steps.version.outputs.version }}-windows.zip
