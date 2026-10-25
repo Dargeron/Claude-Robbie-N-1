@@ -11,6 +11,8 @@ var entries: Array[String] = []
 var index := 0
 var font_size := 17
 var locked := false      # greyed and still (the plate isn't fitted)
+var wrap := false        # a full drum: the last entry sits just above the first
+var shade := 1.0         # how dark the drum turns away from the window's middle
 var fresh := {}          # entry label -> time it arrived (a new type plate glints)
 var _roll := 0.0         # fractional index shown
 var _press := false
@@ -34,8 +36,21 @@ func set_entries(e: Array[String], keep := "") -> void:
 
 
 func select(i: int) -> void:
-	index = clampi(i, 0, maxi(entries.size() - 1, 0))
+	index = _fit(i)
+	_near()
 	queue_redraw()
+
+
+func _fit(i: int) -> int:
+	if wrap and entries.size() > 0:
+		return posmod(i, entries.size())
+	return clampi(i, 0, maxi(entries.size() - 1, 0))
+
+
+## On a full drum, roll the short way round to the new entry.
+func _near() -> void:
+	if wrap and entries.size() > 0:
+		_roll = index + wrapf(_roll - index, -entries.size() * 0.5, entries.size() * 0.5)
 
 
 func current() -> String:
@@ -65,8 +80,10 @@ func _gui_input(event: InputEvent) -> void:
 		if absf(dy) > 4.0:
 			_moved = true
 		if _moved:
-			_roll = clampf(_press_roll - dy / 30.0, -0.4, entries.size() - 0.6)
-			var d := clampi(int(roundf(_roll)), 0, entries.size() - 1)
+			_roll = _press_roll - dy / 30.0
+			if not wrap:
+				_roll = clampf(_roll, -0.4, entries.size() - 0.6)
+			var d := _fit(int(roundf(_roll)))
 			if d != _last_detent:
 				_last_detent = d
 				Sfx.play("drum", -12.0, 1.0 + randf() * 0.1)
@@ -74,10 +91,11 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _set_index(i: int) -> void:
-	var n := clampi(i, 0, entries.size() - 1)
+	var n := _fit(i)
 	if n != index:
 		Sfx.play("drum", -8.0)
 	index = n
+	_near()
 	turned.emit(index)
 	queue_redraw()
 
@@ -106,12 +124,15 @@ func _draw() -> void:
 	var f := Desk.font("type")
 	var now := Time.get_ticks_msec() / 1000.0
 	for i in entries.size():
-		var a := (float(i) - _roll) * ROW
+		var di := float(i) - _roll
+		if wrap:
+			di = wrapf(di, -entries.size() * 0.5, entries.size() * 0.5)
+		var a := di * ROW
 		if absf(a) > 1.35:
 			continue
 		var y := cy + sin(a) * radius
 		var sy := cos(a)
-		var col := Color(Desk.INK, clampf(sy * 1.1 - 0.15, 0.0, 1.0))
+		var col := Color(Desk.INK, clampf(sy * 1.1 - 0.15, 0.0, 1.0) * (1.0 - 0.35 * (1.0 - shade) * absf(a)))
 		if locked:
 			col = Color(0.2, 0.2, 0.2, 0.6 * sy)
 		draw_set_transform(Vector2(0, y), 0.0, Vector2(1.0, sy))
@@ -132,6 +153,6 @@ func _draw() -> void:
 	draw_colored_polygon(PackedVector2Array([Vector2(w, cy - 6), Vector2(w - 7, cy), Vector2(w, cy + 6)]), Color(0.75, 0.55, 0.25))
 	for i in 10:
 		var a2 := 0.022 * (10 - i)
-		draw_rect(Rect2(0, i * 1.6, w, 1.6), Color(0, 0, 0, a2 * 9.0))
-		draw_rect(Rect2(0, h - (i + 1) * 1.6, w, 1.6), Color(0, 0, 0, a2 * 9.0))
+		draw_rect(Rect2(0, i * 1.6, w, 1.6), Color(0, 0, 0, a2 * 9.0 * shade))
+		draw_rect(Rect2(0, h - (i + 1) * 1.6, w, 1.6), Color(0, 0, 0, a2 * 9.0 * shade))
 	draw_rect(Rect2(0, 3, w, h * 0.22), Color(1, 1, 1, 0.05))

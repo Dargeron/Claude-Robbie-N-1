@@ -7,6 +7,7 @@ extends Node
 var out_dir := "/tmp/console_shots"
 var console: Control
 var steps: Array = []
+var op: Node = null               # the game root, when playing through a view
 var wait := 0
 
 
@@ -15,10 +16,15 @@ func _ready() -> void:
 	if args.size() > 0:
 		out_dir = args[0]
 	DirAccess.make_dir_recursive_absolute(out_dir)
-	console = load("res://console/console.tscn").instantiate()
+	# ROBBIE_VIEW=chair: the same, played through the 3D chair view (positions traced onto its faces).
+	if OS.get_environment("ROBBIE_VIEW") == "chair":
+		op = load("res://console/operator.tscn").instantiate()
+		console = op.console
+	else:
+		console = load("res://console/console.tscn").instantiate()
 	console.state.save_path = "user://console_shots.json"
 	console.state.persist = false
-	add_child(console)
+	add_child(op if op != null else console)
 	console.state.reset()
 	console._select_sector("dark")
 	steps = [
@@ -29,10 +35,10 @@ func _ready() -> void:
 		["seek", 1.0], ["wait", 30], ["shot", "c05-lost"],
 		["magnify"], ["wait", 20], ["shot", "c06-magnified"], ["magnify"], ["wait", 20],
 		["scrubbed"], ["wait", 4], ["shot", "c07-notes-deck"],
-		["dial_order", "follow_wall", "left"], ["wait", 30], ["shot", "c08a-flaps"],
+		["dial_order", "follow_wall", "left"], ["wait", 30], ["shot", "c08a-drums"],
 		["print"], ["wait", 8], ["shot", "c08b-printing"], ["wait", 40], ["shot", "c08c-printed"],
 		["lid", true], ["wait", 20], ["shot", "c08d-lid-open"],
-		["insert", 0, 1], ["wait", 20], ["pulp_slot", 0], ["wait", 12], ["shot", "c08e-pulping"],
+		["insert", 0, 1], ["wait", 20], ["pulp_slot", 0], ["wait", 8], ["shot", "c08e-pulping"], ["wait", 10], ["shot", "c08f-tossed"],
 		["lid", false], ["wait", 20], ["program", "follow_wall left"], ["dispatch"], ["seek", 0.35], ["wait", 8], ["shot", "c09-dark-follow"],
 		["seek", 1.0], ["wait", 8], ["trials"], ["wait", 6], ["shot", "c10-trials-running"], ["await_trials"], ["wait", 10], ["shot", "c11-certified"],
 		["memo"], ["wait", 12], ["shot", "c12-tally"], ["close"], ["memo"], ["wait", 12], ["shot", "c13-letter"], ["close"],

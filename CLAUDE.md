@@ -29,7 +29,10 @@ tools/web_artifact.sh && tools/site.sh        # web build in out/site; serve it:
 ```
 
 Main scene since 2026-10-25: **the operator's console** (`game/console/console.tscn`, design in
-`docs/design/station-ui.md`): the whole game on one desk, the first three sectors only. Its own save
+`docs/design/station-ui.md`): the whole game on one desk, the first three sectors only. Since 0.3.0 the game's root is
+`game/console/operator.tscn`, which shows that console one of two ways (switch at the top left, or V; kept in
+`user://view.cfg`, `ROBBIE_VIEW=flat|chair` overrides): flat, or from the chair in a 3D room (`console/chair.gd`: the
+console draws into a SubViewport mapped onto two faces, and touches are traced back onto it). Its own save
 (`user://console_save.json`), so it starts fresh. Keys: Space play/pause, F magnify, M sound, W the Wall, H the binder,
 Ctrl+Shift+U opens every sector. The layout (screen rects for every machine) is `game/content/console_layout.json`,
 shared by the Godot code and the Blender art (`tools/art/console_scene.py`); change it there, then re-render.
@@ -46,8 +49,8 @@ The old station (`game/station/station.tscn`) still runs: Mission Control, the L
 | `tools/godot.sh --headless --path game --script res://tools/hunt.gd -- <room> [seeds]` | Exploit hunt over all 1-rule and most 2-rule programs (slow) |
 | `tools/movie.sh <room> <prog.rbt> [seed] [out.mp4] [speed] [serial]` | Record the replay as MP4 (GIF=1 for a GIF too) under a virtual display |
 | `xvfb-run -a tools/godot.sh --path game --rendering-driver opengl3 --audio-driver Dummy res://tools/shots.tscn -- <out_dir>` | Scripted tour of the old station UI, saving screenshots to look at |
-| `tools/console_check.sh [out_dir]` | The console's smoke test: the scripted tour (screenshots, none blank) and the touch play-through (taps and drags only; every machine must answer) |
-| `~/.cache/blender/blender-5.2.3-linux-x64/blender -b --factory-startup -P tools/art/console_scene.py -- game/art/console [plate\|sprites\|all] [preview]` | Render the console's desk plate (about 12 min) and its moving parts |
+| `tools/console_check.sh [out_dir]` | The console's smoke test: the scripted tour (screenshots, none blank) and the touch play-through (taps and drags only; every machine must answer), flat and again through the 3D chair view (out_dir/chair) |
+| `~/.cache/blender/blender-5.2.3-linux-x64/blender -b --factory-startup -P tools/art/console_scene.py -- game/art/console [plate\|sprites\|all] grimy [preview]` | Render the console's desk plate (about 12 min) and its moving parts. Since 0.3.0 the game uses the lived-in look: render with `grimy` (the plate to out/art/console), then `python3 tools/art/weather.py out/art/console/plate_grimy.png game/art/console/plate.png` |
 | `python3 tools/art/console_paper.py` | The tiling paper grain for cards, tape, memos and notes |
 | `tools/godot.sh --headless --path game --export-release <Linux/Windows/macOS/Web> <path>` | Builds (templates in ~/.local/share/godot/export_templates/4.7.2.stable) |
 | `tools/export_setup.sh [--desktop-only]` | Installs the export templates and the Android build tools (about 2 min the first time) |

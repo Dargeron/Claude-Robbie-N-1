@@ -225,6 +225,11 @@ def _m_base():
         "felt": material("felt", "#16211b", rough=0.98, grime=0.9, noise_scale=120, bump=0.6),
         "red": material("red", "#8e1f16", rough=0.35, wear="#b9b2a6", grime=0.6, noise_scale=20, coat=0.4),
         "red_ball": material("red_ball", "#a2251b", rough=0.22, grime=0.3, noise_scale=20, coat=0.8, bevel=0.004),
+        # Red marks everything the hand works: rims, grips, knobs, key tops. Worn to the brass where it's held.
+        "red_enamel": material("red_enamel", "#9a2418", rough=0.4, wear="#b08a4e", grime=0.55, noise_scale=26, coat=0.35,
+                               bevel=0.012),
+        "red_bakelite": material("red_bakelite", "#8a1e14", rough=0.26, grime=0.35, noise_scale=25, coat=0.7, bevel=0.01,
+                                 bump=0.05),
         "ivory": material("ivory", "#cfc4a8", rough=0.45, grime=0.6, noise_scale=30, bevel=0.004),
         "cork": material("cork", "#6a4a2c", rough=0.9, grime=0.6, noise_scale=160, bump=0.8),
         "leather": material("leather", "#3b2417", rough=0.6, wear="#6e4a30", grime=0.7, noise_scale=90, bump=0.4),
@@ -461,9 +466,11 @@ def build_plate():
     disc("live_lamp", 44, 390, 3.5, -0.01, 0.01, mats["recess"])
     for i, kx in enumerate((566, 600)):
         disc("rim_knob_skirt", kx, 390, 8, 0.0, 0.03, mats["brass_dark"])
-        disc("rim_knob", kx, 390, 6, 0.03, 0.09, mats["bakelite"], bevel=0.02)
+        disc("rim_knob", kx, 390, 6, 0.03, 0.09, mats["red_bakelite" if kx == 566 else "bakelite"], bevel=0.02)
     # The magnify toggle's bed.
     recess("magnify_bed", L["magnify"], r=4, depth=0.02)
+    mgx, mgy, mgw, mgh = L["magnify"]
+    slab("magnify_paint", (mgx + 2, mgy + 2, mgw - 4, mgh - 4), -0.02, -0.012, mats["red_enamel"], r=3, bevel=0.003)
 
     # Wire recorder.
     rc = L["recorder"]
@@ -495,6 +502,8 @@ def build_plate():
         cylinder_x("binder_ring", bx + 4, bx + 12, by + 16 + i * 25, 3, 0.05, mats["brass"])
     slab("binder_label", (bx + 26, by + 22, bw - 40, 30), 0.05, 0.065, mats["brass"], r=2, bevel=0.003)
     slab("binder_label_card", (bx + 29, by + 25, bw - 46, 24), 0.065, 0.068, mats["paper"], r=1, bevel=0)
+    # A red ribbon marker hanging out of the binder, to pull it open by.
+    slab("binder_ribbon", (bx + bw - 26, by + bh - 10, 9, 24), 0.03, 0.04, mats["red_enamel"], r=1, bevel=0.002)
     wx, wy, ww, wh = L["wall"]
     slab("wall_frame", (wx, wy, ww, wh), -0.03, 0.03, mats["wood"], r=3, bevel=0.008)
     slab("wall_cork", (wx + 6, wy + 6, ww - 12, wh - 12), -0.02, 0.032, mats["cork"], r=1, bevel=0)
@@ -651,9 +660,12 @@ def build_plate():
     # printed cards fall into, and the PRINT lever.
     pr = L["press"]
     housing("press", pr, r=12, rivet_step=60)
-    fx, fy, fw, fh = L["flaps"]
-    frame("flap_bezel", (fx - 6, fy - 6, fw + 12, fh + 12), (fx, fy, fw, fh), 0.0, 0.05, mats["brass"], r_out=8, r_in=4, bevel=0.008)
-    recess("flap_well", (fx, fy, fw, fh), r=4, depth=0.1)
+    # The two printed drums the wheels turn, behind one glass: ORDER on the left, CONDITION on the right.
+    fx, fy, fw, fh = L["drum_window"]
+    prism("drum_bezel", rr_outline(fx - 6, fy - 6, fw + 12, fh + 12, 8), 0.0, 0.05, mats["brass"], 0.008,
+          holes=[rr_outline(*L[k], 4) for k in ("order_drum", "cond_drum")])
+    for key in ("order_drum", "cond_drum"):
+        recess(key + "_well", L[key], r=3, depth=0.12)
     ex, ey, ew, eh = L["card_exit"]
     recess("card_exit", (ex + 6, ey + 4, ew - 12, 5), r=2, depth=0.08)
     nx2, ny2, nw2, nh2 = L["not_switch"]
@@ -706,11 +718,11 @@ def build_reel(c):
             pts.append(P(14 * math.cos(a), 14 * math.sin(a)))
         holes.append(pts)
     prism("reel_face", outer, 0.02, 0.04, m["steel"], 0.004, holes=holes, coll=c)
-    disc("reel_hub", 0, 0, 9, 0.04, 0.07, m["chrome"], bevel=0.008, coll=c)
+    disc("reel_hub", 0, 0, 9, 0.04, 0.07, m["red_enamel"], bevel=0.008, coll=c)
     slab("reel_key", (-1.5, -7, 3, 14), 0.07, 0.075, m["recess"], r=1, bevel=0, coll=c)
 
 
-def build_knob(c, r, pointer="line", mat="bakelite"):
+def build_knob(c, r, pointer="line", mat="red_bakelite"):
     m = M()
     disc("knob_skirt", 0, 0, r, 0.0, 0.04, m["brass_dark"], bevel=0.01, coll=c)
     n = 36
@@ -759,14 +771,14 @@ def build_toggle(c, up):
     disc("tg_nut", 0, 0, 8, 0.0, 0.04, m["chrome"], n=6, coll=c)
     d = -1 if up else 1
     cylinder_y("tg_bat", min(0, d * 24), max(0, d * 24), 0, 3, 0.07, m["chrome"], coll=c)
-    uv_sphere("tg_tip", 0, d * 24, 0.08, 4.2, m["chrome"], 1.0, coll=c)
+    uv_sphere("tg_tip", 0, d * 24, 0.08, 4.6, m["red_ball"], 1.0, coll=c)
 
 
 def build_capsule(c):
     m = M()
     slab("cap_body", (-15, -26, 30, 52), 0.0, 0.2, m["brass"], r=14, bevel=0.06, coll=c)
     for y in (-12, 12):
-        slab("cap_band", (-16, y - 2, 32, 4), 0.0, 0.21, m["rubber"], r=2, bevel=0.01, coll=c)
+        slab("cap_band", (-16, y - 3, 32, 6), 0.0, 0.21, m["red_enamel"], r=2, bevel=0.01, coll=c)
 
 
 def build_crank(c):
@@ -774,14 +786,14 @@ def build_crank(c):
     r = L["crank"][2]
     disc("crank_hub", 0, 0, 9, 0.03, 0.08, m["brass"], bevel=0.01, coll=c)
     slab("crank_arm", (-4, -r + 2, 8, r), 0.06, 0.1, m["steel"], r=4, bevel=0.01, coll=c)
-    disc("crank_grip", 0, -r + 6, 6.5, 0.1, 0.22, m["bakelite"], bevel=0.02, coll=c)
+    disc("crank_grip", 0, -r + 6, 6.5, 0.1, 0.22, m["red_bakelite"], bevel=0.02, coll=c)
 
 
 def build_key(c, down):
     m = M()
     z = 0.02 if down else 0.07
     slab("key_skirt", (-30, -16, 60, 32), 0.0, z, m["bakelite_black"], r=6, bevel=0.012, coll=c)
-    slab("key_top", (-27, -13, 54, 26), z, z + 0.02, m["bakelite_black"], r=5, bevel=0.012, coll=c)
+    slab("key_top", (-27, -13, 54, 26), z, z + 0.02, m["red_bakelite"], r=5, bevel=0.012, coll=c)
 
 
 def build_platen(c):
@@ -791,14 +803,14 @@ def build_platen(c):
     cylinder_x("platen_roll", -w / 2 + 6, w / 2 - 6, -h / 2 + 7, 7, 0.02, m["rubber"], coll=c)
     slab("platen_cover", (-w / 2, -h / 2 + 8, w, h - 8), 0.0, 0.12, m["enamel_dark"], r=6, bevel=0.02, coll=c)
     for kx in (-w / 2 + 14, w / 2 - 14):
-        disc("platen_knob", kx, -h / 2 + 7, 9, 0.02, 0.12, m["bakelite"], bevel=0.02, coll=c)
+        disc("platen_knob", kx, -h / 2 + 7, 9, 0.02, 0.12, m["red_bakelite"], bevel=0.02, coll=c)
     slab("tear_bar", (-w / 2 + 20, -h / 2 + 4, w - 40, 4), 0.06, 0.09, m["chrome"], r=1, bevel=0.003, coll=c)
 
 
 def build_wheel(c, r, spokes, knob=True):
     """A selector wheel seen face on: a rim, spokes, a hub, and a bakelite grip on the rim to turn it by."""
     m = M()
-    ring_obj("wheel_rim", 0, 0, r, r - 7, 0.0, 0.1, m["brass"], bevel=0.02, coll=c)
+    ring_obj("wheel_rim", 0, 0, r, r - 7, 0.0, 0.1, m["red_enamel"], bevel=0.02, coll=c)
     for k in range(spokes):
         a = 2 * math.pi * k / spokes
         sp = slab("spoke", (-2.6, -(r - 5), 5.2, r - 10), 0.03, 0.08, m["brass_dark"], r=2, bevel=0.01, coll=c)
@@ -807,8 +819,8 @@ def build_wheel(c, r, spokes, knob=True):
     disc("wheel_cap", 0, 0, r * 0.13, 0.13, 0.16, m["bakelite_black"], bevel=0.01, coll=c)
     if knob:
         disc("grip_base", 0, -(r - 3.5), 6, 0.1, 0.13, m["chrome"], coll=c)
-        cylinder_y("grip", -(r - 3.5) - 1, -(r - 3.5) + 1, 0, 5, 0.22, m["bakelite"], coll=c)
-        uv_sphere("grip_top", 0, -(r - 3.5), 0.26, 5.6, m["bakelite"], 0.9, coll=c)
+        cylinder_y("grip", -(r - 3.5) - 1, -(r - 3.5) + 1, 0, 5, 0.22, m["red_bakelite"], coll=c)
+        uv_sphere("grip_top", 0, -(r - 3.5), 0.26, 5.6, m["red_bakelite"], 0.9, coll=c)
     # A pointer notch on the rim, so you can see it turn.
     slab("wheel_mark", (-2, r - 7, 4, 7), 0.1, 0.105, m["ivory"], r=1, bevel=0, coll=c)
 
@@ -822,7 +834,7 @@ def build_lid(c):
     for (sx2, sy2) in ((-w / 2 + 5, -h / 2 + 5), (w / 2 - 5, -h / 2 + 5), (-w / 2 + 5, h / 2 - 5), (w / 2 - 5, h / 2 - 5)):
         uv_sphere("lid_rivet", sx2, sy2, 0.07, 2.4, m["brass_dark"], 0.5, coll=c)
     slab("lid_tab", (w / 2 - 2, -14, 22, 28), 0.02, 0.08, m["brass"], r=6, bevel=0.01, coll=c)
-    disc("lid_tab_knob", w / 2 + 12, 0, 6, 0.08, 0.16, m["bakelite"], bevel=0.02, coll=c)
+    disc("lid_tab_knob", w / 2 + 12, 0, 7.5, 0.08, 0.18, m["red_bakelite"], bevel=0.02, coll=c)
 
 
 def build_chute_flap(c):

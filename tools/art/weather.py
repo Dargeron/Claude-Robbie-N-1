@@ -104,5 +104,12 @@ out = out * (1 - 0.75 * verd[..., None]) + np.array([0.16, 0.24, 0.18], np.float
 out = out * (1 - 0.35 * brassy[..., None] * (1 - rub[..., None]))
 # Dust over everything, a little.
 out = out * (0.94 + 0.08 * grain[..., None]) + 0.012 * blotch[..., None]
+# The brass name plaques are kept polished: the grime would eat their thin lettering.
+keep = np.zeros((H, W), np.float32)
+for v in L["plaques"].values():
+    x, y, w, h = [q * S for q in v[:4]]
+    keep[int(y - 3 * S):int(y + h + 3 * S), int(x - 3 * S):int(x + w + 3 * S)] = 1.0
+keep = blur(keep, 2) * 0.85
+out = out * (1 - keep[..., None]) + im * keep[..., None]
 Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8)).save(sys.argv[2])
 print("weathered:", sys.argv[2])

@@ -1,9 +1,11 @@
 # Status
 
-Updated 2026-10-25, session 37: **0.2.0, the card press.** Slots instead of CPU (two per sector), cards printed by a
-press with turning wheels and a split-flap board, a glass lid on the reader, a pulp chute, the Company's debt counter.
-Waiting on Albert: his playtest of 0.2.0, his pick of three art directions (docs/design/art-direction.md), and his
-reaction to the Lab ideas (docs/design/hangar-ideas.md).
+Updated 2026-10-25, session 38: **0.3.0, two views.** Albert narrowed the art direction to A (3D) or B (lived-in
+2D), so the build plays both, with a switch (top left, or V): A puts the same console in a 3D room seen from the chair
+(console/chair.gd), B is flat. Both on the weathered desk. From his 0.2.0 playtest: red on everything touchable, the
+ORDER/CONDITION drums back (wheels roll them; previous and next entries visible), Op. 5's notes in grease pencil on
+the machine instead of post-its, and a crumple-and-toss pulp animation. Waiting on Albert: A or B, and how A runs on
+his tablet; his reaction to the Lab ideas (docs/design/hangar-ideas.md).
 
 ## Where we are
 

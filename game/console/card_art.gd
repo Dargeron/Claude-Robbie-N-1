@@ -92,6 +92,9 @@ static func draw(ci: CanvasItem, r: Rect2, rule: Dictionary, lamp: Dictionary = 
 	# A faint printed grid, as on real cards.
 	for gx in range(int(r.position.x) + 12, int(r.end.x) - 6, 7):
 		ci.draw_line(Vector2(gx, r.position.y + 4), Vector2(gx, r.end.y - 4), Color(0.6, 0.35, 0.25, 0.07), 1.0)
+	# The red band along the top: red is what the hand moves.
+	ci.draw_colored_polygon(PackedVector2Array([r.position + Vector2(cut, 0), Vector2(r.end.x, r.position.y),
+		Vector2(r.end.x, r.position.y + 3.5), r.position + Vector2(cut - 3.5, 3.5)]), Color(Desk.RED_INK, 0.85))
 	pts.append(pts[0])
 	ci.draw_polyline(pts, Color(0.35, 0.28, 0.18, 0.6), 1.0)
 	var f := Desk.font("type")

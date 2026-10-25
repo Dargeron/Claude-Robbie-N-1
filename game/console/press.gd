@@ -2,7 +2,8 @@ class_name CardPress
 extends Control
 ## The press that makes order cards. Turn the ORDER wheel and the CONDITION wheel (drag them
 ## round by the grip, or tap either side to click one notch), set the value wheel and the
-## NOT switch, and read the result on the split-flap board. Pull PRINT: the press stamps the
+## NOT switch; each wheel rolls a printed drum behind the glass above it, so the operator sees the
+## choice at the index line and the ones either side. Pull PRINT: the press stamps the
 ## card and it slides out into the tray, where the operator picks it up.
 ## Which orders the wheels carry depends on the type plates the Company has issued.
 
@@ -18,7 +19,8 @@ var plates: Array = []
 var order_wheel: Wheel
 var cond_wheel: Wheel
 var value: Drum
-var flaps: SplitFlap
+var order_drum: Drum
+var cond_drum: Drum
 var negate := false
 var tray_full := false
 var slots := 2
@@ -38,15 +40,32 @@ func _init() -> void:
 
 
 func setup() -> void:
-	flaps = SplitFlap.new()
-	_put(flaps, Desk.r("flaps"))
-	flaps.setup(2, 28)
+	order_drum = Drum.new()
+	order_drum.font_size = 16
+	_put(order_drum, Desk.r("order_drum"))
+	cond_drum = Drum.new()
+	cond_drum.font_size = 16
+	for d: Drum in [order_drum, cond_drum]:
+		d.wrap = true
+		d.shade = 0.3
+	_put(cond_drum, Desk.r("cond_drum"))
 	order_wheel = Wheel.new()
 	_put_wheel(order_wheel, "order_wheel", "wheel_order")
 	cond_wheel = Wheel.new()
 	_put_wheel(cond_wheel, "cond_wheel", "wheel_cond")
-	order_wheel.turned.connect(func(_i: int) -> void: _show())
-	cond_wheel.turned.connect(func(_i: int) -> void:
+	# The wheels roll the drums; the drums can be rolled by hand too, and turn their wheel.
+	order_wheel.turned.connect(func(i: int) -> void:
+		order_drum.select(i)
+		_show())
+	cond_wheel.turned.connect(func(i: int) -> void:
+		cond_drum.select(i)
+		_refresh_value()
+		_show())
+	order_drum.turned.connect(func(i: int) -> void:
+		order_wheel.turn_to(i)
+		_show())
+	cond_drum.turned.connect(func(i: int) -> void:
+		cond_wheel.turn_to(i)
 		_refresh_value()
 		_show())
 	value = Drum.new()
@@ -87,11 +106,35 @@ func set_plates(p: Array, fresh: Array = []) -> void:
 	cond_wheel.count = _conds.size()
 	if not old_order.is_empty():
 		order_wheel.index = maxi(0, _orders.find(old_order))
+	cond_wheel.index = mini(cond_wheel.index, maxi(0, _conds.size() - 1))
 	var now := Time.get_ticks_msec() / 1000.0
 	for f: String in fresh:
 		_fresh[f] = now
+	_label_drums()
+	order_drum.select(order_wheel.index)
+	cond_drum.select(cond_wheel.index)
 	_refresh_value()
 	_show()
+
+
+## What the drums have printed on them: one entry per notch of their wheel.
+func _label_drums() -> void:
+	var o_labels: Array[String] = []
+	order_drum.fresh = {}
+	for o: Array in _orders:
+		var l := CardArt.order_label(o[0], o[1])
+		o_labels.append(l)
+		if _fresh.has(o[2]):
+			order_drum.fresh[l] = _fresh[o[2]]
+	order_drum.set_entries(o_labels)
+	var c_labels: Array[String] = []
+	cond_drum.fresh = {}
+	for c: String in _conds:
+		var l := CardArt.cond_label(c, "", negate and c != "")
+		c_labels.append(l)
+		if _fresh.has(c) or (negate and _fresh.has("not")):
+			cond_drum.fresh[l] = _fresh.get(c, _fresh.get("not", 0.0))
+	cond_drum.set_entries(c_labels)
 
 
 func _cond() -> String:
@@ -127,9 +170,6 @@ func _show() -> void:
 	var r := rule()
 	if r.is_empty():
 		return
-	var l := CardArt.lines(r)
-	flaps.show_text(0, l[0])
-	flaps.show_text(1, l[1])
 	queue_redraw()
 
 
@@ -197,6 +237,8 @@ func _flip_not() -> void:
 		return
 	negate = not negate
 	Sfx.play("switch", -6.0)
+	_label_drums()
+	cond_drum.select(cond_wheel.index)
 	_show()
 
 
@@ -222,7 +264,7 @@ func _draw() -> void:
 	# The board flashes as the press stamps.
 	var st := stamping()
 	if st >= 0.0:
-		var fr := _local("flaps")
+		var fr := _local("drum_window")
 		draw_rect(fr.grow(3), Color(Desk.AMBER, 0.25 * (1.0 - st)), false, 3.0)
 	# NOT switch.
 	var ns := _local("not_switch")
@@ -304,6 +346,14 @@ class Wheel:
 			while _spin <= -NOTCH:
 				_spin += NOTCH
 				_step(-1, false)
+
+	## Turned from elsewhere (its drum was rolled by hand): go to that notch, quietly.
+	func turn_to(i: int) -> void:
+		if count <= 0 or i == index:
+			return
+		var d := i - index
+		index = posmod(i, count)
+		_angle += d * NOTCH
 
 	func _step(d: int, animate := true) -> void:
 		if count <= 0:

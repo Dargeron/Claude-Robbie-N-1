@@ -85,7 +85,7 @@
     "stamp": "SEALED"
   },
   "notes": {
-    "welcome": "New one? Read these. Nobody else will tell you anything.\nThe tube's got your orders. Tap the capsule.",
+    "welcome": "New one? Read these. Nobody else will tell you anything.\nAnything painted red, you can put your hands on.\nThe tube's got your orders. Tap the capsule.",
     "dispatch": "He's already got a card in slot 1: swim to the beacon. Lift the red cover, pull the lever. Don't get attached to the first one.",
     "rewind": "Lost him. Drag the reels (or the wire) back and watch where it went wrong.",
     "tape": "The tape prints what he sensed. Tap a line, the wire jumps there.",
@@ -99,8 +99,8 @@
     "not": "NOT flips a condition.",
     "nursery": "No way round in there. Dark won't save him. The laser will. Ask yourself what it's clearing them for.",
     "hangar": "Hangar's sealed till the audit's done. It's never done.",
-    "cover": "Cover first. It's red so you'd notice.",
-    "print": "Turn the ORDER wheel by its grip till the board says what you want. Pull PRINT. The card drops in the tray.",
+    "cover": "Cover first. The red one, by the lever.",
+    "print": "Turn the ORDER wheel by its grip; the drum above it rolls. What sits between the marks is the card you get. Pull PRINT.",
     "insert": "Lift the glass (the handle on the right). Drag the card into a slot, shut the lid: the reader won't read with it open. Spoiled cards go down the PULP chute.",
     "tray_full": "Tray's full. Put a card in a slot or feed one to the PULP chute.",
     "lid": "The lid's shut. Lift it first: the handle on the right.",

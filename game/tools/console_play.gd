@@ -6,6 +6,7 @@ extends Node
 
 var c: Control
 var steps: Array = []
+var op: Node = null               # the game root, when playing through a view
 var fails := 0
 var wait := 0
 var _checks := 0
@@ -13,10 +14,15 @@ var _busy := false
 
 
 func _ready() -> void:
-	c = load("res://console/console.tscn").instantiate()
+	# ROBBIE_VIEW=chair: the same, played through the 3D chair view (positions traced onto its faces).
+	if OS.get_environment("ROBBIE_VIEW") == "chair":
+		op = load("res://console/operator.tscn").instantiate()
+		c = op.console
+	else:
+		c = load("res://console/console.tscn").instantiate()
 	c.state.save_path = "user://console_play.json"
 	c.state.persist = false
-	add_child(c)
+	add_child(op if op != null else c)
 	c.state.reset()
 	c._select_sector("dark")
 	steps = [
@@ -118,7 +124,12 @@ func _wall() -> Vector2:
 	return Desk.r("wall").get_center()
 
 
+func _screen(p: Vector2) -> Vector2:
+	return op.to_screen(p) if op != null else p
+
+
 func _mouse(pos: Vector2, pressed: bool) -> void:
+	pos = _screen(pos)
 	var e := InputEventMouseButton.new()
 	e.button_index = MOUSE_BUTTON_LEFT
 	e.pressed = pressed
@@ -129,6 +140,8 @@ func _mouse(pos: Vector2, pressed: bool) -> void:
 
 
 func _move(pos: Vector2, rel: Vector2) -> void:
+	rel = _screen(pos) - _screen(pos - rel)
+	pos = _screen(pos)
 	var e := InputEventMouseMotion.new()
 	e.position = pos
 	e.global_position = pos

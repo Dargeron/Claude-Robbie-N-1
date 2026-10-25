@@ -30,7 +30,12 @@ var _grab := Vector2.ZERO
 var _dragging := false
 var _drag_pos := Vector2.ZERO
 var _lid_press := false
-var _pulp: Array = []            # {rule, from: Vector2, t0}
+var _pulp: Array = []            # {rule, from: Vector2, t0}: a spoiled card being crumpled and fed to the chute
+const CRUMPLE := 0.32
+const TOSS := 0.34
+const SINK := 0.16
+const CHEW := 0.6
+
 var _bits: Array = []            # shreds flying out of the chute: {p, v, t0, rot}
 var _flash := {}                 # slot -> time it lit up
 
@@ -243,8 +248,7 @@ func _drop(k: int, p: Vector2) -> void:
 		_pulp.append({"rule": c["rule"], "from": c["pos"], "t0": Time.get_ticks_msec() / 1000.0})
 		cards.remove_at(k)
 		_compact_tray()
-		Sfx.play("tear", -2.0)
-		Sfx.play("crank", -6.0, 0.6)
+		Sfx.play("paper", -2.0, 0.55)
 		pulped.emit()
 		if from_slot:
 			changed.emit()
@@ -291,16 +295,24 @@ func _process(delta: float) -> void:
 	var now := Time.get_ticks_msec() / 1000.0
 	for i in range(_pulp.size() - 1, -1, -1):
 		var age: float = now - float(_pulp[i]["t0"])
-		if age > 0.5 and not _pulp[i].has("shredded"):
+		if age > CRUMPLE + TOSS and not _pulp[i].has("in"):
+			_pulp[i]["in"] = true
+			Sfx.play("crank", -5.0, 0.55)
+			Sfx.play("tear", -4.0, 0.8)
+		if age > CRUMPLE + TOSS + SINK + 0.12 and not _pulp[i].has("shredded"):
+			# The cutters chew it: shreds spat back up out of the throat.
 			_pulp[i]["shredded"] = true
+			Sfx.play("tear", -6.0, 1.15)
 			var m := Desk.r("chute_mouth")
-			for b in 18:
-				_bits.append({"p": m.get_center() + Vector2(randf_range(-30, 30), 0), "v": Vector2(randf_range(-60, 60), randf_range(-160, -60)),
-					"t0": now, "rot": randf() * TAU})
-		if age > 0.6:
+			for b in 22:
+				_bits.append({"p": m.get_center() + Vector2(randf_range(-26, 26), 6), "v": Vector2(randf_range(-70, 70), randf_range(-190, -70)),
+					"t0": now + randf() * 0.25, "rot": randf() * TAU})
+		if age > CRUMPLE + TOSS + SINK + CHEW:
 			_pulp.remove_at(i)
 	for i in range(_bits.size() - 1, -1, -1):
 		var b: Dictionary = _bits[i]
+		if now < float(b["t0"]):
+			continue
 		b["v"] = (b["v"] as Vector2) + Vector2(0, 420) * delta
 		b["p"] = (b["p"] as Vector2) + (b["v"] as Vector2) * delta
 		if now - float(b["t0"]) > 1.2:
@@ -364,9 +376,6 @@ func _draw() -> void:
 		draw_set_transform_matrix(base)
 		CardArt.draw(self, Rect2(-cs * 0.5, cs), c["rule"], {}, 0.0, base)
 		draw_set_transform_matrix(Transform2D.IDENTITY)
-	var tr := Desk.r("tray")
-	if _tray_count() == 0:
-		Desk.centred(self, Rect2(tr.position + Vector2(0, 50), Vector2(tr.size.x, 30)), "tray empty", Desk.font("hand"), 20, Color(Desk.NOTE, 0.25))
 	# Drop zones while dragging.
 	if _dragging and _press >= 0:
 		var m := Desk.r("chute_mouth")
@@ -463,29 +472,28 @@ func _draw_lid(now: float) -> void:
 func _draw_chute(now: float) -> void:
 	var m := Desk.r("chute_mouth")
 	var open := 0.0
+	var chew := 0.0
 	for p: Dictionary in _pulp:
 		var age: float = now - float(p["t0"])
-		open = maxf(open, 1.0 - absf(age - 0.25) * 3.0)
-		# The card sinks into the throat, shaking.
-		var k := clampf(age / 0.5, 0.0, 1.0)
-		var cs := card_size() * (1.0 - 0.6 * k)
-		var to := m.get_center() + Vector2(0, 10 * k)
-		var pos: Vector2 = (p["from"] as Vector2).lerp(to - cs * 0.5, minf(1.0, age * 5.0))
-		pos += Vector2(sin(now * 80.0) * 2.0 * k, 0)
-		if k < 1.0:
-			var base := Transform2D(sin(age * 30.0) * 0.1 * k, pos + cs * 0.5)
-			draw_set_transform_matrix(base)
-			CardArt.draw(self, Rect2(-cs * 0.5, cs), p["rule"], {}, 0.0, base)
-			draw_set_transform_matrix(Transform2D.IDENTITY)
+		var t_in := CRUMPLE + TOSS
+		open = maxf(open, clampf(1.0 - absf(age - (t_in + SINK * 0.3)) * 3.5, 0.0, 1.0))
+		if age > t_in + SINK:
+			chew = maxf(chew, clampf(1.0 - (age - t_in - SINK) / CHEW, 0.0, 1.0))
+		_draw_pulping(p, age, m)
 	var flap := Desk.tex("chute_flap")
 	if flap != null:
 		var fs := flap.get_size() * 0.5
 		var s := 1.0 - 0.85 * clampf(open, 0.0, 1.0)
-		draw_set_transform_matrix(Transform2D(0.0, Vector2(1.0, s), 0.0, Vector2(m.get_center().x, m.position.y)))
+		# While the cutters chew, the flap rattles on its hinge.
+		var shake := Vector2(sin(now * 90.0), cos(now * 71.0)) * 1.6 * chew
+		draw_set_transform_matrix(Transform2D(0.0, Vector2(1.0, s * (1.0 - 0.12 * chew * absf(sin(now * 40.0)))), 0.0,
+			Vector2(m.get_center().x, m.position.y) + shake))
 		draw_texture_rect(flap, Rect2(Vector2(-fs.x * 0.5, -4.0), fs), false)
 		draw_set_transform_matrix(Transform2D.IDENTITY)
 	for b: Dictionary in _bits:
 		var age := now - float(b["t0"])
+		if age < 0.0:
+			continue
 		var a := clampf(1.2 - age, 0.0, 1.0)
 		var pp: Vector2 = b["p"]
 		var rot := float(b["rot"]) + age * 9.0
@@ -493,3 +501,78 @@ func _draw_chute(now: float) -> void:
 		draw_line(pp - d, pp + d, Color(Desk.CARD, a), 2.0)
 	var pr := Desk.plaque_rect("chute")
 	Desk.engraved(self, pr, Desk.plaque("chute")[4], 13)
+
+
+## A spoiled card on its way out: crumpled in the hand, tossed into the chute's mouth, sunk into
+## the dark of the throat.
+func _draw_pulping(p: Dictionary, age: float, m: Rect2) -> void:
+	var cs := card_size()
+	var from: Vector2 = p["from"]
+	var c0 := from + cs * 0.5
+	var seed_i := hash(String(p["rule"].get("action", "")) + str(p["t0"]))
+	var ball_r := 17.0
+	if age < CRUMPLE:
+		var k := age / CRUMPLE
+		# The printed face shows until the paper folds over it.
+		if k < 0.45:
+			var base := Transform2D(0.03 * sin(k * 9.0), Vector2(1.0 - 0.05 * k, 1.0 - 0.1 * k), 0.0, c0)
+			draw_set_transform_matrix(base)
+			CardArt.draw(self, Rect2(-cs * 0.5, cs), p["rule"], {}, 0.0, base)
+			draw_set_transform_matrix(Transform2D.IDENTITY)
+		_draw_crumple(c0, cs, ball_r, k, clampf(k * 2.4, 0.0, 1.0), 0.0, seed_i, 1.0)
+		return
+	var mouth := Vector2(m.get_center().x, m.position.y + 8.0)
+	if age < CRUMPLE + TOSS:
+		# An underarm toss: up, over, and down into the mouth, spinning.
+		var k := (age - CRUMPLE) / TOSS
+		var pos := c0.lerp(mouth, k) + Vector2(0, -70.0 * 4.0 * k * (1.0 - k))
+		_draw_crumple(pos, cs, ball_r, 1.0, 1.0, k * 7.0, seed_i, 1.0)
+		return
+	if age < CRUMPLE + TOSS + SINK:
+		# Into the throat: darker and farther as it drops.
+		var k := (age - CRUMPLE - TOSS) / SINK
+		var pos := mouth + Vector2(0, 30.0 * k)
+		_draw_crumple(pos, cs, ball_r * (1.0 - 0.35 * k), 1.0, 1.0, 7.0 + k * 2.0, seed_i, 1.0 - 0.85 * k)
+
+
+## The paper ball, part way from a flat card (k = 0) to a crumpled ball (k = 1): its outline
+## pulled in unevenly, the facets catching the lamp differently, creases across it.
+func _draw_crumple(c: Vector2, cs: Vector2, r: float, k: float, cover: float, spin: float, seed_i: int, light: float) -> void:
+	var n := 28
+	var pts := PackedVector2Array()
+	var e := k * k * (3.0 - 2.0 * k)
+	for i in n:
+		var t := float(i) / n
+		# A point on the card's edge, going round.
+		var per := t * 2.0 * (cs.x + cs.y)
+		var q: Vector2
+		if per < cs.x:
+			q = Vector2(per, 0)
+		elif per < cs.x + cs.y:
+			q = Vector2(cs.x, per - cs.x)
+		elif per < 2.0 * cs.x + cs.y:
+			q = Vector2(cs.x - (per - cs.x - cs.y), cs.y)
+		else:
+			q = Vector2(0, cs.y - (per - 2.0 * cs.x - cs.y))
+		q -= cs * 0.5
+		var h := hash(seed_i + i * 131)
+		# Lumpy, not spiky: two slow waves round the ball and a little noise.
+		var ph := float(seed_i % 628) / 100.0
+		var jag := 0.9 + 0.1 * sin(TAU * t * 3.0 + ph) + 0.07 * sin(TAU * t * 5.0 + ph * 2.0) + 0.05 * (float(h % 1000) / 1000.0 - 0.5)
+		var ball := Vector2.from_angle(TAU * t + spin) * r * jag
+		var delay := float((h >> 10) % 100) / 100.0 * 0.35
+		var ki := clampf((e - delay) / (1.0 - delay), 0.0, 1.0)
+		pts.append(c + q.rotated(spin).lerp(ball, ki))
+	var face := Desk.CARD.darkened(0.08)
+	for i in n:
+		var h := hash(seed_i * 7 + i * 977)
+		var shade := 1.0 + (float(h % 1000) / 1000.0 - 0.55) * 0.55 * e
+		var col := Color(face.r * shade * light, face.g * shade * light, face.b * shade * light, cover)
+		draw_colored_polygon(PackedVector2Array([c, pts[i], pts[(i + 1) % n]]), col)
+	# Creases.
+	for j in 7:
+		var h := hash(seed_i * 13 + j * 4241)
+		var a := pts[h % n]
+		var b := pts[(h >> 8) % n]
+		draw_line(a, c.lerp(b, 0.4), Color(0.2, 0.15, 0.08, 0.4 * e * cover * light), 1.0, true)
+	draw_polyline(pts + PackedVector2Array([pts[0]]), Color(0.25, 0.2, 0.12, 0.5 * cover * light), 1.0, true)

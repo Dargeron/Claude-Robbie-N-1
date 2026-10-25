@@ -147,7 +147,7 @@ func _build() -> void:
 	_place(trials, Desk.r("trials"))
 	trials.cranked.connect(_start_trials)
 	trials.lamp_tapped.connect(_on_trial_lamp)
-	trials.locked_tapped.connect(func() -> void: _flash_note("trials_locked", "No beacon on record for this deck. Get one hull to the beacon first.", Vector2(1040, 360), Desk.r("trials").get_center()))
+	trials.locked_tapped.connect(func() -> void: _flash_note("trials_locked", "No beacon on record for this deck. Get one hull to the beacon first.", Vector3(1128, 309, 64)))
 	add_child(trials)
 	dispatch = DispatchLever.new()
 	_place(dispatch, Desk.r("dispatch"))
@@ -588,22 +588,22 @@ func _on_plate_missing(what: String) -> void:
 	var N: Dictionary = story["notes"]
 	match what:
 		"not":
-			_flash_note("not_locked", "NOT switch is locked till they issue the plate. Next shift.", Vector2(900, 380), Desk.r("not_switch").get_center())
+			_flash_note("not_locked", "NOT switch is locked till they issue the plate. Next shift.", _ring("not_switch", 26))
 		"tray_full":
-			_flash_note("tray_full", N["tray_full"], Vector2(380, 230), Desk.r("tray").get_center())
+			_flash_note("tray_full", N["tray_full"], _ring("chute_mouth", 50))
 		"lid":
-			_flash_note("lid_shut", N["lid"], Vector2(380, 230), Desk.r("lid_handle").get_center())
+			_flash_note("lid_shut", N["lid"], _ring("lid_handle", 30))
 
 
 func _on_refused(why: String) -> void:
 	var N: Dictionary = story["notes"]
 	match why:
 		"cover":
-			_flash_note("cover", N["cover"], Vector2(1046, 486), Vector2(1212, 392))
+			_flash_note("cover", N["cover"], _ring("cover", 40))
 		"LID OPEN":
-			_flash_note("lid_open", N["lid_open"], Vector2(780, 300), Desk.r("lid_handle").get_center())
+			_flash_note("lid_open", N["lid_open"], _ring("lid_handle", 30))
 		"NO CARDS":
-			_flash_note("empty", N["empty"], Vector2(780, 300), Desk.r("card_bed").get_center())
+			_flash_note("empty", N["empty"], null)
 
 
 # ---------------------------------------------------------------- dispatching and watching
@@ -951,7 +951,10 @@ func _did(what: String) -> bool:
 	return state.extra.get("marks", []).has(what)
 
 
-## Which notes should be on the console now: [id, position, width, arrow target].
+## Which notes should be on the console now: [id, position, width, targets]. A target is a
+## console position, or a Vector3 with the size of the loop round it in z.
+## Most go on the reader's glass, one under another below the cards in use; the rest on the
+## scope's glass.
 func _wanted_notes() -> Array:
 	var out: Array = []
 	var N: Dictionary = story["notes"]
@@ -961,42 +964,58 @@ func _wanted_notes() -> Array:
 	var last_lost: bool = not own.is_empty() and own.back()["result"] != "exit"
 	var made_it := state.program_made_it(room_id, program.to_text())
 	var rs := state.room_state(room_id)
-	# Notes on the reader go over its sealed slots, under the cards.
-	var rack_y := 172.0 + 51.0 * rs.room.slots
-	var wheel := Vector2(Desk.v("order_wheel")[0], Desk.v("order_wheel")[1])
-	var lever := Desk.r("print_lever").get_center()
+	var gy := [180.0 + 51.0 * rs.room.slots]
+	var glass := func(id: String, w: float, targets: Array, x := 712.0, advance := true) -> void:
+		out.append([id, Vector2(x, gy[0]), w, targets])
+		if advance:
+			gy[0] += OpNote.height_of(N[id], w) + 14.0
+	var wv := Desk.v("order_wheel")
+	var wheel := Vector3(float(wv[0]), float(wv[1]), float(wv[2]) + 12.0)
+	var knob := Vector3(1229, 526, 22)
+	var tube_c := Desk.r("tube_window").get_center()
+	var tube_t := Vector3(tube_c.x, tube_c.y, 38)
+	var cover := Desk.r("cover").get_center()
 	if not _read().has("open0"):
-		out.append(["welcome", Vector2(330, 120), 210.0, Desk.r("tube_window").get_center()])
+		out.append(["welcome", Vector2(372, 92), 236.0, [tube_t]])
 		return out
 	if not any_dive:
-		out.append(["dispatch", Vector2(712, rack_y), 236.0, Vector2(1212, 392)])
+		glass.call("dispatch", 236.0, [Vector3(cover.x, cover.y, 40)])
 		return out
 	if room_id == "dark" and not dark.certified:
 		if last_lost and not _scrubbed and not _did("rewound"):
-			out.append(["rewind", Vector2(56, 214), 200.0, Desk.r("reel_a").get_center()])
-			out.append(["tape", Vector2(300, 224), 190.0, Desk.r("paper").get_center() + Vector2(-40, 40)])
+			var ra := Desk.r("reel_a").get_center()
+			out.append(["rewind", Vector2(60, 232), 226.0, [Vector3(ra.x, ra.y, 46)]])
+			out.append(["tape", Vector2(322, 232), 226.0, [Vector3(230, 640, 44)]])
 		elif last_lost and not _did("printed"):
-			out.append(["deck", Vector2(712, rack_y), 240.0, wheel])
-			out.append(["print", Vector2(330, 200), 220.0, lever])
+			glass.call("deck", 240.0, [])
+			# How to print goes on the press itself, in the empty tray, if it is empty.
+			if table.tray_rules().is_empty():
+				out.append(["print", Vector2(674, 588), 236.0, [wheel, knob]])
+			else:
+				glass.call("print", 240.0, [wheel, knob])
 		elif _did("printed") and not _did("inserted"):
-			out.append(["insert", Vector2(712, rack_y), 240.0, Desk.r("lid_handle").get_center()])
+			var lh := Desk.r("lid_handle").get_center()
+			glass.call("insert", 240.0, [Vector3(lh.x, lh.y, 30)])
 		elif made_it and rs.survey.is_empty():
-			out.append(["trials", Vector2(712, rack_y), 220.0, Vector2(Desk.v("crank")[0], Desk.v("crank")[1])])
+			glass.call("trials", 230.0, [Vector3(float(Desk.v("crank")[0]), float(Desk.v("crank")[1]), 28)])
 	if not rs.certified and not rs.survey.is_empty() and not rs.survey.get("certified", false) and not _did("trial_lamp"):
-		out.append(["trial_fail", Vector2(712, rack_y), 220.0, Desk.r("trials").get_center()])
+		glass.call("trial_fail", 230.0, [Vector3(1128, 309, 64)])
 	if room_id == "dark" and dark.certified and _unread().size() > 0:
-		out.append(["certified", Vector2(330, 120), 210.0, Desk.r("tube_window").get_center()])
+		out.append(["certified", Vector2(372, 92), 236.0, [tube_t]])
 	var next := SECTORS.find(room_id) + 1
 	if rs.certified and next < SECTORS.size() and state.own_dives(SECTORS[next]).is_empty() and _unread().is_empty():
-		out.append(["next_sector", Vector2(712, rack_y), 220.0, Desk.r("sector_knob").get_center()])
+		var sk := Desk.r("sector_knob").get_center()
+		glass.call("next_sector", 230.0, [Vector3(sk.x, sk.y, 40)])
 	if any_dive and program.rules.size() >= 2 and current_dive != null and scope.replay.playing and not _did("lamps_seen"):
-		out.append(["lamps", Vector2(712, rack_y), 236.0, Vector2(675, 181)])
+		var lr: Dictionary = Desk.layout()["lamps"]
+		glass.call("lamps", 236.0, [Vector3(float(lr["rail_x"]), float(lr["first_y"]) + float(lr["pitch"]) * 0.5, 40)])
 	if room_id == "jellyfish" and not rs.certified and _read().has("open1"):
-		out.append(["jelly", Vector2(712, rack_y), 150.0, wheel])
+		var ns := Desk.r("not_switch").get_center()
 		if not _did("not"):
-			out.append(["not", Vector2(868, rack_y + 8), 110.0, Desk.r("not_switch").get_center()])
+			glass.call("not", 92.0, [Vector3(ns.x, ns.y, 26)], 872.0, false)
+		glass.call("jelly", 150.0, [wheel])
 	if room_id == "nursery" and not rs.certified and _read().has("open2"):
-		out.append(["nursery", Vector2(712, rack_y), 240.0, wheel])
+		glass.call("nursery", 240.0, [wheel])
 	return out
 
 
@@ -1034,14 +1053,22 @@ func _update_notes() -> void:
 
 
 ## A note for a moment: Op. 5 grumbling at something you just tried.
-func _flash_note(id: String, text: String, at: Vector2, arrow: Vector2) -> void:
+## They go low on the reader's glass, under anything else he has written there.
+func _flash_note(id: String, text: String, target: Variant) -> void:
 	if _notes.has(id):
 		_transient[id] = Time.get_ticks_msec() / 1000.0 + 5.0
 		return
-	var n := OpNote.make(text, at, 200.0, arrow)
+	var targets: Array = [] if target == null else [target]
+	var n := OpNote.make(text, Vector2(712, 396), 236.0, targets)
 	notes_layer.add_child(n)
 	_notes[id] = n
 	_transient[id] = Time.get_ticks_msec() / 1000.0 + 5.0
+
+
+## A loop round a machine from the layout, for a note to point at.
+func _ring(key: String, r: float) -> Vector3:
+	var c := Desk.r(key).get_center()
+	return Vector3(c.x, c.y, r)
 
 
 # ---------------------------------------------------------------- small pieces
