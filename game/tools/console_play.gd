@@ -27,13 +27,16 @@ func _ready() -> void:
 		["drag", _lever, Vector2(110, 0)], ["check", "pulling the lever dispatches Robbie 001", func() -> bool: return c.state.next_serial == 2],
 		["check", "the scope shows his dive", func() -> bool: return c.scope.has_dive()],
 		["check", "the teleprinter has lines", func() -> bool: return c.teleprinter.lines.size() > 2],
-		["drag", _drum_centre, Vector2(0, -34)], ["check", "rolling the order drum moves it on", func() -> bool: return c.keypunch.order_drum.index == 1],
-		["tap", _drum_lower], ["check", "tapping below the line turns it one more", func() -> bool: return c.keypunch.order_drum.index == 2],
-		["tap", _drum_upper], ["check", "tapping above turns it back", func() -> bool: return c.keypunch.order_drum.index == 1],
-		["drag", _punch_knob, Vector2(0, 170)], ["check", "pulling PUNCH adds a card", func() -> bool: return c.program.rules.size() == 2],
-		["check", "the new card is FOLLOW WALL LEFT", func() -> bool: return c.program.rules[1]["action"] == "follow_wall" and c.program.rules[1]["param"] == "left"],
-		["drag", _card0, _to_bin], ["check", "dragging card 1 into SPOILED bins it", func() -> bool: return c.program.rules.size() == 1 and c.program.rules[0]["action"] == "follow_wall"],
-		["check", "the gauge reads the new deck", func() -> bool: return c.gauge.used == 3],
+		["arc", "order_wheel", -90.0, -30.0], ["check", "turning the ORDER wheel by its grip moves it two notches", func() -> bool: return c.press.order_wheel.index == 2],
+		["tap", _wheel_left], ["check", "tapping left of the hub turns it back one", func() -> bool: return c.press.order_wheel.index == 1],
+		["check", "the board reads FOLLOW WALL LEFT", func() -> bool: return c.press.rule()["action"] == "follow_wall" and c.press.rule()["param"] == "left"],
+		["drag", _print_knob, Vector2(0, 170)], ["wait", 40], ["check", "pulling PRINT drops a card in the tray", func() -> bool: return c.table.tray_rules().size() == 1],
+		["drag", _tray_card, _to_slot1], ["check", "with the lid shut, a card won't go in", func() -> bool: return c.table.tray_rules().size() == 1],
+		["tap", _lid_handle], ["wait", 20], ["check", "the lid lifts", func() -> bool: return c.table.lid_open],
+		["drag", _slot_card0, _to_chute], ["wait", 40], ["check", "a card dropped in the PULP chute is gone", func() -> bool: return c.table.deck().is_empty()],
+		["drag", _tray_card, _to_slot1], ["wait", 20], ["check", "the printed card goes into slot 1", func() -> bool: return c.table.deck().size() == 1 and c.table.deck()[0]["action"] == "follow_wall"],
+		["drag", _lever, Vector2(110, 0)], ["check", "the reader refuses while the lid is open", func() -> bool: return c.state.next_serial == 2],
+		["tap", _lid_handle], ["wait", 20], ["check", "the lid shuts", func() -> bool: return not c.table.lid_open],
 		["drag", _lever, Vector2(110, 0)], ["check", "a second dispatch: Robbie 002", func() -> bool: return c.state.next_serial == 3],
 		["check", "Robbie 002 reaches the beacon", func() -> bool: return c.current_entry.get("result", "") == "exit"],
 		["drag", _reel, Vector2(0, 40)], ["check", "turning a reel scrubs the wire", func() -> bool: return not c.scope.replay.playing and c._scrubbed],
@@ -45,7 +48,6 @@ func _ready() -> void:
 		["wait", 30], ["tap", _tube], ["check", "the tally arrives by tube", func() -> bool: return c.memo.visible and c.memo.memo.get("kind", "") == "tally"],
 		["tap", _file_it], ["check", "FILE IT puts it away", func() -> bool: return not c.memo.visible],
 		["tap", _sector2], ["check", "the dial turns to The Jellyfish", func() -> bool: return c.room_id == "jellyfish"],
-		["tap", _card0], ["check", "tapping a card loads it into the keypunch", func() -> bool: return c.keypunch.replace == 0],
 		["tap", _binder], ["check", "the binder opens", func() -> bool: return c.memo.visible and c.memo.memo.get("kind", "") == "binder"],
 		["tap_at", Vector2(40, 40)], ["check", "and closes", func() -> bool: return not c.memo.visible],
 		["tap", _wall], ["check", "the Wall opens", func() -> bool: return c.wall.visible],
@@ -62,23 +64,30 @@ func _tube() -> Vector2:
 func _lever() -> Vector2:
 	return c.dispatch._knob() + c.dispatch.position
 
-func _drum_centre() -> Vector2:
-	return Desk.r("order_drum").get_center()
+func _wheel_c(key: String) -> Vector2:
+	var v := Desk.v(key)
+	return Vector2(float(v[0]), float(v[1]))
 
-func _drum_lower() -> Vector2:
-	return Desk.r("order_drum").get_center() + Vector2(0, 40)
+func _wheel_left() -> Vector2:
+	return _wheel_c("order_wheel") + Vector2(-30, 10)
 
-func _drum_upper() -> Vector2:
-	return Desk.r("order_drum").get_center() + Vector2(0, -40)
+func _print_knob() -> Vector2:
+	return c.press._knob_pos() + c.press.position
 
-func _punch_knob() -> Vector2:
-	return c.keypunch._knob_pos() + c.keypunch.position
+func _lid_handle() -> Vector2:
+	return Desk.r("lid_handle").get_center()
 
-func _card0() -> Vector2:
-	return c.rack.card_rect(0).get_center() + c.rack.position
+func _tray_card() -> Vector2:
+	return Desk.r("tray").position + Vector2(60, 20)
 
-func _to_bin() -> Vector2:
-	return Desk.r("bin").get_center() - _card0()
+func _slot_card0() -> Vector2:
+	return c.table.slot_rect(0).get_center()
+
+func _to_slot1() -> Vector2:
+	return c.table.slot_rect(0).get_center() - _tray_card()
+
+func _to_chute() -> Vector2:
+	return Desk.r("chute_mouth").get_center() - _slot_card0()
 
 func _reel() -> Vector2:
 	return Desk.r("reel_a").get_center() + Vector2(30, 0)
@@ -158,6 +167,25 @@ func _process(_d: float) -> void:
 				_move(p0 + d * i / 10.0, d / 10.0)
 				await get_tree().process_frame
 			_mouse(p0 + d, false)
+			_busy = false
+			wait = 4
+		"arc":
+			# Drag the wheel's grip round from one angle to another (degrees, 0 = east, -90 = up).
+			var ctr := _wheel_c(s[1])
+			var rad := float(Desk.v(s[1])[2]) - 4.0
+			var a0 := deg_to_rad(float(s[2]))
+			var a1 := deg_to_rad(float(s[3]))
+			_busy = true
+			var p0 := ctr + Vector2.from_angle(a0) * rad
+			_mouse(p0, true)
+			await get_tree().process_frame
+			var last := p0
+			for i in range(1, 13):
+				var p := ctr + Vector2.from_angle(lerpf(a0, a1, i / 12.0)) * rad
+				_move(p, p - last)
+				last = p
+				await get_tree().process_frame
+			_mouse(last, false)
 			_busy = false
 			wait = 4
 		"await_trials":

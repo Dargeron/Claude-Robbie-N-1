@@ -29,15 +29,18 @@ func _ready() -> void:
 		["seek", 1.0], ["wait", 30], ["shot", "c05-lost"],
 		["magnify"], ["wait", 20], ["shot", "c06-magnified"], ["magnify"], ["wait", 20],
 		["scrubbed"], ["wait", 4], ["shot", "c07-notes-deck"],
-		["tap_card", 0], ["wait", 4], ["shot", "c08-keypunch-loaded"],
-		["program", "follow_wall left"], ["dispatch"], ["seek", 0.35], ["wait", 8], ["shot", "c09-dark-follow"],
+		["dial_order", "follow_wall", "left"], ["wait", 30], ["shot", "c08a-flaps"],
+		["print"], ["wait", 8], ["shot", "c08b-printing"], ["wait", 40], ["shot", "c08c-printed"],
+		["lid", true], ["wait", 20], ["shot", "c08d-lid-open"],
+		["insert", 0, 1], ["wait", 20], ["pulp_slot", 0], ["wait", 12], ["shot", "c08e-pulping"],
+		["lid", false], ["wait", 20], ["program", "follow_wall left"], ["dispatch"], ["seek", 0.35], ["wait", 8], ["shot", "c09-dark-follow"],
 		["seek", 1.0], ["wait", 8], ["trials"], ["wait", 6], ["shot", "c10-trials-running"], ["await_trials"], ["wait", 10], ["shot", "c11-certified"],
 		["memo"], ["wait", 12], ["shot", "c12-tally"], ["close"], ["memo"], ["wait", 12], ["shot", "c13-letter"], ["close"],
 		["memo"], ["wait", 12], ["close"],
 		["binder"], ["wait", 10], ["shot", "c14-binder"], ["close"],
 		["sector", "jellyfish"], ["wait", 6], ["shot", "c15-jellyfish-chart"],
 		["program", "move_towards beacon"], ["dispatch"], ["seek_event", "damage", -10], ["wait", 8], ["shot", "c16-jelly-contact"],
-		["program", "lamp off\nkeep_distance 2\nmove_towards beacon"], ["dispatch"], ["seek", 0.4], ["wait", 8], ["shot", "c17-jelly-dark"],
+		["program", "lamp off\nmove_towards beacon"], ["dispatch"], ["seek", 0.4], ["wait", 8], ["shot", "c17-jelly-dark"],
 		["seek", 1.0], ["trials"], ["await_trials"], ["wait", 10], ["memo"], ["close"], ["memo"], ["close"], ["memo"], ["close"],
 		["sector", "nursery"], ["program", "shoot\nfollow_wall left"], ["dispatch"], ["seek_event", "laser", 2], ["wait", 8], ["shot", "c18-nursery-laser"],
 		["wall"], ["wait", 10], ["shot", "c19-wall"], ["wall_close"],
@@ -83,12 +86,31 @@ func _process(_d: float) -> void:
 			console._toggle_magnify()
 		"scrubbed":
 			console._scrubbed = true
-		"tap_card":
-			console._on_card_tapped(s[1])
 		"program":
-			console.program = Program.parse(s[1])
-			console.rack.setup(console.program)
-			console._on_program_changed()
+			var rules: Array = Program.parse(s[1]).rules
+			console.table.setup(console.state.room_state(console.room_id).room.slots, rules, [])
+			console._on_deck_changed()
+		"dial_order":
+			var pr: CardPress = console.press
+			for i in pr._orders.size():
+				if pr._orders[i][0] == s[1] and pr._orders[i][1] == s[2]:
+					pr.order_wheel._step(i - pr.order_wheel.index)
+		"print":
+			console.press._pulled = false
+			console.press._pull()
+		"lid":
+			console.table.set_lid(s[1])
+		"insert":
+			var t: CardTable = console.table
+			for c: Dictionary in t.cards:
+				if c["where"] == "tray" and c["i"] == s[1]:
+					t._drop(t.cards.find(c), t.slot_rect(s[2]).get_center())
+					break
+		"pulp_slot":
+			var t: CardTable = console.table
+			var k := t._in_slot(s[1])
+			if k >= 0:
+				t._drop(k, Desk.r("chute_mouth").get_center())
 		"trials":
 			console._start_trials()
 		"await_trials":

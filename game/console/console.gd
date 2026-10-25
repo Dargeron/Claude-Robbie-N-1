@@ -1,8 +1,8 @@
 extends Control
 ## The operator's console: the whole game on one dark desk (docs/design/station-ui.md).
-## The sonar receiver, the wire recorder and the teleprinter on the left; the card rack,
-## the keypunch, the reader's load gauge, the sea trials and the dispatch lever on the
-## right; the Company tube, the sector selector, the shift counter, Bathy's porthole and
+## The sonar receiver, the wire recorder and the teleprinter on the left; the card reader
+## under its glass lid, the pulp chute, the Company's counter, the sea trials, the dispatch
+## lever and the card press on the right; the Company tube, the sector selector, the shift counter, Bathy's porthole and
 ## the hangar window along the top. Nothing floats over it except paper.
 ## Prototype: the first three sectors, three shifts.
 
@@ -23,9 +23,10 @@ var plate: TextureRect
 var scope: Scope
 var recorder: WireRecorder
 var teleprinter: Teleprinter
-var rack: CardRack
-var keypunch: Keypunch
-var gauge: LoadGauge
+var table: CardTable
+var press: CardPress
+var counter: DebtCounter
+var ambience: Ambience
 var trials: SeaTrials
 var dispatch: DispatchLever
 var tube: Topside.Tube
@@ -139,21 +140,9 @@ func _build() -> void:
 	hangar.tapped.connect(func() -> void: _show_memo(_memo_from(story["hangar"], "memo")))
 	add_child(hangar)
 
-	rack = CardRack.new()
-	_place(rack, Desk.r("rack"))
-	rack.drop_zone = _drop_zone
-	rack.changed.connect(_on_program_changed)
-	rack.card_tapped.connect(_on_card_tapped)
-	rack.card_dropped.connect(_on_card_dropped)
-	add_child(rack)
-	deck_tab = Hotspot.new()
-	_place(deck_tab, Rect2(860, 452, 170, 16))
-	deck_tab.tapped.connect(_load_his_deck)
-	deck_tab.painter = _paint_deck_tab
-	add_child(deck_tab)
-	gauge = LoadGauge.new()
-	_place(gauge, Desk.r("gauge"))
-	add_child(gauge)
+	counter = DebtCounter.new()
+	_place(counter, Desk.r("counter"))
+	add_child(counter)
 	trials = SeaTrials.new()
 	_place(trials, Desk.r("trials"))
 	trials.cranked.connect(_start_trials)
@@ -165,12 +154,34 @@ func _build() -> void:
 	dispatch.dispatched.connect(_dispatch)
 	dispatch.refused.connect(_on_refused)
 	add_child(dispatch)
-	keypunch = Keypunch.new()
-	_place(keypunch, Desk.r("keypunch"))
-	add_child(keypunch)
-	keypunch.setup()
-	keypunch.punched.connect(_on_punched)
-	keypunch.plate_missing.connect(_on_plate_missing)
+	press = CardPress.new()
+	_place(press, Desk.r("press"))
+	add_child(press)
+	press.setup()
+	press.printed.connect(_on_printed)
+	press.refused.connect(_on_plate_missing)
+
+	# The cards lie over the reader and the press; the lid and the chute are part of them.
+	table = CardTable.new()
+	table.changed.connect(_on_deck_changed)
+	table.refused.connect(_on_plate_missing)
+	table.lid_moved.connect(func(open: bool) -> void:
+		if open:
+			_mark("lid_opened")
+		_refresh())
+	table.pulped.connect(func() -> void:
+		_mark("pulped")
+		_save_deck())
+	add_child(table)
+	deck_tab = Hotspot.new()
+	_place(deck_tab, Rect2(790, 456, 176, 16))
+	deck_tab.tapped.connect(_load_his_deck)
+	deck_tab.painter = _paint_deck_tab
+	add_child(deck_tab)
+
+	ambience = Ambience.new()
+	ambience.press = press
+	add_child(ambience)
 
 	light = Lights.new()
 	light.console = self
@@ -206,14 +217,6 @@ func _place(c: Control, r: Rect2) -> void:
 	c.size = r.size
 
 
-func _drop_zone(p: Vector2) -> String:
-	if Desk.r("bin").grow(6).has_point(p):
-		return "bin"
-	if Desk.r("punch_bed").grow(4).has_point(p) or Desk.r("order_drum").has_point(p) or Desk.r("cond_drum").has_point(p):
-		return "keypunch"
-	return ""
-
-
 # ---------------------------------------------------------------- shifts, plates, memos
 
 func _certified(i: int) -> bool:
@@ -238,7 +241,7 @@ func _plates() -> Array:
 
 func _refresh_plates(fresh: bool) -> void:
 	var s := _shift()
-	keypunch.set_plates(_plates(), story["shifts"][s]["plates"] if fresh and s > 0 else [])
+	press.set_plates(_plates(), story["shifts"][s]["plates"] if fresh and s > 0 else [])
 	nixies.value = s + 1
 
 
@@ -262,6 +265,15 @@ func _read() -> Array:
 func _unread() -> Array:
 	var read := _read()
 	return _memo_ids().filter(func(id: String) -> bool: return not read.has(id))
+
+
+func _lost_total() -> int:
+	var lost := 0
+	for id: String in SECTORS:
+		for e in state.own_dives(id):
+			if e["result"] != "exit":
+				lost += 1
+	return lost
 
 
 func _debt() -> int:
@@ -312,7 +324,7 @@ func _memo_for(id: String) -> Dictionary:
 			lost += 1
 	var body := str(story["tally"]).format({
 		"sector": story["sectors"][rid]["short"], "passed": rs.survey.get("passed", 0), "sent": sent, "lost": lost,
-		"hull_cost": _fmt(int(story["hull_cost"])), "credit": _fmt(int(story["certify_credit"])), "cpu": rs.best_cpu,
+		"hull_cost": _fmt(int(story["hull_cost"])), "credit": _fmt(int(story["certify_credit"])), "cards": _deck_size(rid),
 		"debt": _fmt(_debt()), "notice": sh["notice"]})
 	return {"kind": "tally", "ref": "DA-9/T%02d  ·  END OF SHIFT %d" % [i + 1, i + 1], "subject": "SHIFT TALLY", "body": body, "stamp": "CERTIFIED"}
 
@@ -377,17 +389,17 @@ func _open_binder() -> void:
 	var plates := _plates()
 	for a: String in Catalogue.ACTIONS:
 		var have := false
-		for o: Array in Keypunch.ORDERS:
+		for o: Array in PressOrders.ORDERS:
 			if o[0] == a and plates.has(o[2]):
 				have = true
 		if have:
-			orders += "[b]%s[/b]  ·  %d CPU\n%s\n\n" % [str(Catalogue.ACTIONS[a]["label"]).to_upper(), Catalogue.action_cpu(a, ""), Catalogue.HELP.get(a, "")]
-	conds += "[b]ALWAYS[/b]  ·  0 CPU\n%s\n\n" % Catalogue.HELP["always"]
+			orders += "[b]%s[/b]\n%s\n\n" % [str(Catalogue.ACTIONS[a]["label"]).to_upper(), _no_cpu(Catalogue.HELP.get(a, ""))]
+	conds += "[b]ALWAYS[/b]\n%s\n\n" % Catalogue.HELP["always"]
 	for c: String in Catalogue.CONDITIONS:
 		if plates.has(c):
-			conds += "[b]IF %s[/b]  ·  %d CPU (+1 for IF)\n%s\n\n" % [str(Catalogue.CONDITIONS[c]["label"]).to_upper(), Catalogue.condition_cpu(c), Catalogue.HELP.get(c, "")]
+			conds += "[b]IF %s[/b]\n%s\n\n" % [str(Catalogue.CONDITIONS[c]["label"]).to_upper(), _no_cpu(Catalogue.HELP.get(c, ""))]
 	if plates.has("not"):
-		conds += "[b]NOT[/b]  ·  1 CPU\n%s\n\n" % Catalogue.HELP["not"]
+		conds += "[b]NOT[/b]\nRun the card when its condition is NOT true.\n\n"
 	var op5 := ""
 	for i in SECTORS.size():
 		if _read().has("letter%d" % i):
@@ -405,9 +417,7 @@ func _open_binder() -> void:
 func _select_sector(id: String) -> void:
 	room_id = id
 	var rs := state.room_state(id)
-	program = Program.parse(rs.program_text)
-	rack.setup(program)
-	keypunch.new_card_mode()
+	_load_deck(id)
 	current_dive = null
 	current_entry = {}
 	var names: Array[String] = []
@@ -463,21 +473,88 @@ func _show_chart() -> void:
 	porthole.serial = 0
 
 
-func _on_program_changed() -> void:
+## The deck lives in the reader's slots and the tray. Saved per sector as card texts
+## ("" for an empty slot); the slots in order are the program.
+func _load_deck(id: String) -> void:
+	var rs := state.room_state(id)
+	var decks: Dictionary = state.extra.get("decks", {})
+	var slot_rules: Array = []
+	var tray_rules: Array = []
+	if decks.has(id):
+		for t: String in decks[id].get("slots", []):
+			slot_rules.append(_rule_of(t))
+		for t: String in decks[id].get("tray", []):
+			var r := _rule_of(t)
+			if not r.is_empty():
+				tray_rules.append(r)
+	else:
+		for r: Dictionary in Program.parse(rs.program_text).rules:
+			slot_rules.append(r)
+	table.setup(rs.room.slots, slot_rules, tray_rules)
+	table.set_lid(false)
+	press.slots = rs.room.slots
+	program = _program_from_table()
+
+
+static func _rule_of(text: String) -> Dictionary:
+	if text.strip_edges() == "":
+		return {}
+	var p := Program.parse(text)
+	return p.rules[0] if p.rules.size() == 1 else {}
+
+
+func _program_from_table() -> Program:
+	var p := Program.new()
+	for r: Dictionary in table.deck():
+		p.rules.append(r)
+	return p
+
+
+func _deck_size(id: String) -> int:
+	var decks: Dictionary = state.extra.get("decks", {})
+	if id == room_id:
+		return program.rules.size()
+	var n := 0
+	for t: String in decks.get(id, {}).get("slots", []):
+		if t != "":
+			n += 1
+	return n
+
+
+func _save_deck() -> void:
+	var tmp := Program.new()
+	var decks: Dictionary = state.extra.get("decks", {})
+	decks[room_id] = {
+		"slots": table.slot_rules().map(func(r: Dictionary) -> String: return "" if r.is_empty() else tmp.rule_text(r)),
+		"tray": table.tray_rules().map(func(r: Dictionary) -> String: return tmp.rule_text(r)),
+	}
+	state.extra["decks"] = decks
 	state.room_state(room_id).program_text = program.to_text()
 	state.save()
+
+
+func _on_deck_changed() -> void:
+	program = _program_from_table()
+	_mark("inserted")
+	_save_deck()
 	_refresh()
+
+
+static func _no_cpu(text: String) -> String:
+	var re := RegEx.create_from_string(" ?\\(\\d CPU\\)")
+	return re.sub(text, "", true)
 
 
 func _refresh() -> void:
 	var rs := state.room_state(room_id)
-	var used := program.cpu()
-	gauge.set_load(used, rs.room.cpu_budget)
-	keypunch.rack_size = program.rules.size()
-	keypunch.rack_full = program.rules.size() >= CardRack.SLOTS
-	keypunch._refresh_wheel()
+	press.tray_full = table.tray_full()
 	dispatch.serial = state.next_serial
-	dispatch.refuse_reason = "EMPTY RACK" if program.rules.is_empty() else ("TOO HEAVY" if used > rs.room.cpu_budget else "")
+	if program.rules.is_empty():
+		dispatch.refuse_reason = "NO CARDS"
+	elif table.lid_open:
+		dispatch.refuse_reason = "LID OPEN"
+	else:
+		dispatch.refuse_reason = ""
 	trials.enabled = state.program_made_it(room_id, program.to_text())
 	trials.certified = rs.certified
 	trials.needed = Survey.needed_for(Survey.FLEET)
@@ -485,68 +562,54 @@ func _refresh() -> void:
 	_check_tube()
 
 
-func _on_punched(r: Dictionary, replace: int) -> void:
-	if replace >= 0 and replace < program.rules.size():
-		program.rules[replace] = r
-		rack.refresh()
-		rack.flash(replace)
-	else:
-		program.rules.append(r)
-		rack.refresh(program.rules.size() - 1)
-	_mark("punched")
-	_on_program_changed()
+func _on_printed(r: Dictionary) -> void:
+	table.add_printed(r)
+	_mark("printed")
+	_save_deck()
+	_refresh()
 
 
-func _on_card_tapped(i: int) -> void:
-	keypunch.load_rule(program.rules[i], i)
-	rack.flash(i)
-
-
-func _on_card_dropped(i: int, where: String) -> void:
-	if where == "bin":
-		program.rules.remove_at(i)
-		Sfx.play("tear", -6.0, 1.3)
-		rack.setup(program)
-		if keypunch.replace == i:
-			keypunch.new_card_mode()
-		_mark("punched")
-		_on_program_changed()
-	else:
-		keypunch.load_rule(program.rules[i], i)
-		rack.setup(program)
-
-
+## The deck of the Robbie being watched, put back in the slots (the cards in the slots now go
+## to the tray, as far as it has room; the rest are pulped).
 func _load_his_deck() -> void:
 	if current_entry.is_empty() or str(current_entry.get("text", "")) == program.to_text():
 		return
-	program = Program.parse(str(current_entry["text"]))
-	rack.setup(program)
+	var his := Program.parse(str(current_entry["text"]))
+	var tray: Array = table.tray_rules()
+	for r: Dictionary in table.deck():
+		if tray.size() < CardTable.TRAY_MAX:
+			tray.append(r)
+	table.setup(state.room_state(room_id).room.slots, his.rules, tray)
 	Sfx.play("paper", -4.0)
-	_on_program_changed()
+	_on_deck_changed()
 
 
 func _on_plate_missing(what: String) -> void:
+	var N: Dictionary = story["notes"]
 	match what:
 		"not":
-			_flash_note("not_locked", "NOT switch is locked till they issue the plate. Next shift.", Vector2(980, 560), Desk.r("not_switch").get_center())
-		"rack_full":
-			_flash_note("rack_full", story["notes"]["rack_full"], Vector2(890, 380), Desk.r("bin").get_center())
+			_flash_note("not_locked", "NOT switch is locked till they issue the plate. Next shift.", Vector2(900, 380), Desk.r("not_switch").get_center())
+		"tray_full":
+			_flash_note("tray_full", N["tray_full"], Vector2(380, 230), Desk.r("tray").get_center())
+		"lid":
+			_flash_note("lid_shut", N["lid"], Vector2(380, 230), Desk.r("lid_handle").get_center())
 
 
 func _on_refused(why: String) -> void:
+	var N: Dictionary = story["notes"]
 	match why:
 		"cover":
-			_flash_note("cover", story["notes"]["cover"], Vector2(1046, 486), Vector2(1212, 392))
-		"TOO HEAVY":
-			_flash_note("over", story["notes"]["over"], Vector2(1046, 486), Desk.r("gauge").get_center())
-		"EMPTY RACK":
-			_flash_note("empty", "Empty rack. He needs at least one card.", Vector2(1046, 486), Desk.r("rack").get_center())
+			_flash_note("cover", N["cover"], Vector2(1046, 486), Vector2(1212, 392))
+		"LID OPEN":
+			_flash_note("lid_open", N["lid_open"], Vector2(780, 300), Desk.r("lid_handle").get_center())
+		"NO CARDS":
+			_flash_note("empty", N["empty"], Vector2(780, 300), Desk.r("card_bed").get_center())
 
 
 # ---------------------------------------------------------------- dispatching and watching
 
 func _dispatch() -> void:
-	if program.rules.is_empty() or program.cpu() > state.room_state(room_id).room.cpu_budget:
+	if program.rules.is_empty() or table.lid_open:
 		return
 	Sfx.play("ui_launch", -6.0)
 	_scrubbed = false
@@ -592,8 +655,9 @@ func _on_tape_line(t: int, r: int) -> void:
 	scope.replay.seek(float(t))
 	scope.replay.playing = false
 	_scrubbed = true
-	if r >= 0:
-		rack.flash(r)
+	var where := table.deck_slots()
+	if r >= 0 and r < where.size():
+		table.flash(where[r])
 	Sfx.play("switch", -12.0, 1.4)
 
 
@@ -772,8 +836,8 @@ func _process(_delta: float) -> void:
 		_step_trials()
 	_update_lamps()
 	_update_mood()
-	keypunch.bin_hot = rack.highlight_drop == "bin"
-	keypunch.bed_hot = rack.highlight_drop == "keypunch"
+	press.tray_full = table.tray_full()
+	counter.set_values(_debt(), _lost_total())
 	_update_notes()
 
 
@@ -796,7 +860,14 @@ func _update_lamps() -> void:
 						lamps[i] = {"state": "set", "reason": ""}
 					_:
 						lamps[i] = {"state": "skip", "reason": CardArt.reason(program.rules[i], str(c[1]))}
-	rack.lamps = lamps
+	# Lamps belong to slots; the program skips empty ones.
+	var by_slot: Array = []
+	for i in table.slot_count:
+		by_slot.append({"state": "off", "reason": ""})
+	var where := table.deck_slots()
+	for i in mini(lamps.size(), where.size()):
+		by_slot[where[i]] = lamps[i]
+	table.lamps = by_slot
 
 
 func _trace_at(k: int) -> Dictionary:
@@ -890,44 +961,48 @@ func _wanted_notes() -> Array:
 	var last_lost: bool = not own.is_empty() and own.back()["result"] != "exit"
 	var made_it := state.program_made_it(room_id, program.to_text())
 	var rs := state.room_state(room_id)
-	# Notes on the rack go in the empty space under the cards.
-	var rack_y := clampf(172.0 + 51.0 * program.rules.size(), 214.0, 340.0)
+	# Notes on the reader go over its sealed slots, under the cards.
+	var rack_y := 172.0 + 51.0 * rs.room.slots
+	var wheel := Vector2(Desk.v("order_wheel")[0], Desk.v("order_wheel")[1])
+	var lever := Desk.r("print_lever").get_center()
 	if not _read().has("open0"):
 		out.append(["welcome", Vector2(330, 120), 210.0, Desk.r("tube_window").get_center()])
 		return out
 	if not any_dive:
-		out.append(["dispatch", Vector2(780, rack_y), 220.0, Vector2(1212, 392)])
+		out.append(["dispatch", Vector2(712, rack_y), 236.0, Vector2(1212, 392)])
 		return out
 	if room_id == "dark" and not dark.certified:
 		if last_lost and not _scrubbed and not _did("rewound"):
 			out.append(["rewind", Vector2(56, 214), 200.0, Desk.r("reel_a").get_center()])
 			out.append(["tape", Vector2(300, 224), 190.0, Desk.r("paper").get_center() + Vector2(-40, 40)])
-		elif last_lost and not _did("punched"):
-			out.append(["deck", Vector2(760, rack_y), 240.0, Desk.r("order_drum").get_center()])
-			out.append(["punch", Vector2(330, 200), 220.0, Desk.r("punch_lever").get_center()])
+		elif last_lost and not _did("printed"):
+			out.append(["deck", Vector2(712, rack_y), 240.0, wheel])
+			out.append(["print", Vector2(330, 200), 220.0, lever])
+		elif _did("printed") and not _did("inserted"):
+			out.append(["insert", Vector2(712, rack_y), 240.0, Desk.r("lid_handle").get_center()])
 		elif made_it and rs.survey.is_empty():
-			out.append(["trials", Vector2(820, rack_y), 190.0, Vector2(Desk.v("crank")[0], Desk.v("crank")[1])])
+			out.append(["trials", Vector2(712, rack_y), 220.0, Vector2(Desk.v("crank")[0], Desk.v("crank")[1])])
 	if not rs.certified and not rs.survey.is_empty() and not rs.survey.get("certified", false) and not _did("trial_lamp"):
-		out.append(["trial_fail", Vector2(820, rack_y), 190.0, Desk.r("trials").get_center()])
+		out.append(["trial_fail", Vector2(712, rack_y), 220.0, Desk.r("trials").get_center()])
 	if room_id == "dark" and dark.certified and _unread().size() > 0:
 		out.append(["certified", Vector2(330, 120), 210.0, Desk.r("tube_window").get_center()])
 	var next := SECTORS.find(room_id) + 1
 	if rs.certified and next < SECTORS.size() and state.own_dives(SECTORS[next]).is_empty() and _unread().is_empty():
-		out.append(["next_sector", Vector2(780, rack_y), 190.0, Desk.r("sector_knob").get_center()])
+		out.append(["next_sector", Vector2(712, rack_y), 220.0, Desk.r("sector_knob").get_center()])
 	if any_dive and program.rules.size() >= 2 and current_dive != null and scope.replay.playing and not _did("lamps_seen"):
-		out.append(["lamps", Vector2(760, rack_y), 210.0, Vector2(675, 181)])
+		out.append(["lamps", Vector2(712, rack_y), 236.0, Vector2(675, 181)])
 	if room_id == "jellyfish" and not rs.certified and _read().has("open1"):
-		out.append(["jelly", Vector2(712, rack_y), 180.0, Desk.r("order_drum").get_center()])
+		out.append(["jelly", Vector2(712, rack_y), 150.0, wheel])
 		if not _did("not"):
-			out.append(["not", Vector2(902, rack_y + 10), 120.0, Desk.r("not_switch").get_center()])
+			out.append(["not", Vector2(868, rack_y + 8), 110.0, Desk.r("not_switch").get_center()])
 	if room_id == "nursery" and not rs.certified and _read().has("open2"):
-		out.append(["nursery", Vector2(760, rack_y), 220.0, Desk.r("order_drum").get_center()])
+		out.append(["nursery", Vector2(712, rack_y), 240.0, wheel])
 	return out
 
 
 func _update_notes() -> void:
 	var now := Time.get_ticks_msec() / 1000.0
-	if keypunch.negate:
+	if press.negate:
 		_mark("not")
 	if _scrubbed:
 		_mark("rewound")

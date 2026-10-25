@@ -19,6 +19,7 @@ var start_tx := 1
 var start_ty := 1
 var start_heading_deg := 90
 var cpu_budget := 10
+var slots := 2               # cards the operator's card reader holds here (the console's limit; every card costs the same)
 var energy := 6000
 var jelly_spawns: Array[Vector2i] = []
 var lurker_spawns: Array[Vector2i] = []
@@ -53,6 +54,7 @@ func parse(text: String) -> void:
 	id = str(header.get("id", ""))
 	title = str(header.get("name", id))
 	cpu_budget = int(header.get("cpu", 10))
+	slots = int(header.get("slots", 2))
 	energy = int(header.get("energy", 6000))
 	start_heading_deg = int(header.get("start_heading", 90))
 	var lines: Array[String] = []

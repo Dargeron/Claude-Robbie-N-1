@@ -4,14 +4,29 @@
   "hull_cost": 1200,
   "certify_credit": 4500,
   "sectors": {
-    "dark": {"label": "SECTOR 1  ·  THE DARK  ·  412 M", "short": "THE DARK"},
-    "jellyfish": {"label": "SECTOR 2  ·  THE JELLYFISH  ·  540 M", "short": "THE JELLYFISH"},
-    "nursery": {"label": "SECTOR 3  ·  THE NURSERY  ·  655 M", "short": "THE NURSERY"}
+    "dark": {
+      "label": "SECTOR 1  ·  THE DARK  ·  412 M",
+      "short": "THE DARK"
+    },
+    "jellyfish": {
+      "label": "SECTOR 2  ·  THE JELLYFISH  ·  540 M",
+      "short": "THE JELLYFISH"
+    },
+    "nursery": {
+      "label": "SECTOR 3  ·  THE NURSERY  ·  655 M",
+      "short": "THE NURSERY"
+    }
   },
   "shifts": [
     {
       "sector": "dark",
-      "plates": ["towards_beacon", "follow_wall", "move", "stop", "wall_ahead"],
+      "plates": [
+        "towards_beacon",
+        "follow_wall",
+        "move",
+        "stop",
+        "wall_ahead"
+      ],
       "open": {
         "ref": "DA-9/0412  ·  SHIFT 1",
         "subject": "COMMENCEMENT OF DUTIES",
@@ -22,7 +37,15 @@
     },
     {
       "sector": "jellyfish",
-      "plates": ["lamp", "keep_distance", "towards_light", "hostile_near", "not", "wall_behind", "energy_below"],
+      "plates": [
+        "lamp",
+        "keep_distance",
+        "towards_light",
+        "hostile_near",
+        "not",
+        "wall_behind",
+        "energy_below"
+      ],
       "open": {
         "ref": "DA-9/0540  ·  SHIFT 2",
         "subject": "SECTOR 2: BIOLOGICAL ACTIVITY",
@@ -33,7 +56,11 @@
     },
     {
       "sector": "nursery",
-      "plates": ["shoot", "towards_open_water", "executing"],
+      "plates": [
+        "shoot",
+        "towards_open_water",
+        "executing"
+      ],
       "open": {
         "ref": "DA-9/0655  ·  SHIFT 3",
         "subject": "SECTOR 3: CLEARANCE",
@@ -49,8 +76,8 @@
     "body": "Operator 6,\n\nSectors 4 to 6 are sealed pending review. Your next shift will begin when the review is complete.\n\nThe hangar remains closed for audit. The audit is ongoing.\n\nThe Directorate notes your output and has no further comment at this time.\n\n[b](End of the prototype. Thank you for playtesting. Everything is still here: re-run any sector, try leaner decks, read the tapes.)[/b]",
     "stamp": "SEALED"
   },
-  "tally": "Operator 6,\n\n[b]{sector} is certified.[/b] The Analytical Engine passed your deck in [b]{passed} of 20[/b] trials.\n\nUnits dispatched this shift: {sent}\nUnits written off: {lost}  (at {hull_cost} scrip each, charged against your contract)\nCertification credit: {credit} scrip\nCPU per card deck: {cpu}\n\nBalance owing: [b]{debt} scrip[/b]\n\nCommendations: none.\n\nNOTICE: {notice}",
-  "regulations": "[b]STATION 9  ·  STANDING REGULATIONS[/b]\n\n1. Units are Company property. Damage to units is charged to the dispatching operator.\n\n2. Units do not feel. Operators who believe otherwise are to report to Welfare.\n\n3. Decks are to be composed only from issued type plates.\n\n4. The red safety cover is to be lowered after every dispatch.  [i]nobody checks. — 5[/i]\n\n5. Last words are telemetry artefacts and are not to be transcribed, collected, or repeated.\n\n6. The Wall is not a memorial. It is a record.\n\n7. Operators will not descend.\n\n8. Signals originating below survey depth are to be logged as NOISE.\n\n9. The hangar is closed for audit.",
+  "tally": "Operator 6,\n\n[b]{sector} is certified.[/b] The Analytical Engine passed your deck in [b]{passed} of 20[/b] trials.\n\nUnits dispatched this shift: {sent}\nUnits written off: {lost}  (at {hull_cost} scrip each, charged against your contract)\nCertification credit: {credit} scrip\nCards in the deck: {cards}\n\nBalance owing: [b]{debt} scrip[/b]\n\nCommendations: none.\n\nNOTICE: {notice}",
+  "regulations": "[b]STATION 9  ·  STANDING REGULATIONS[/b]\n\n1. Units are Company property. Damage to units is charged to the dispatching operator.\n\n2. Units do not feel. Operators who believe otherwise are to report to Welfare.\n\n3. Decks are to be composed only from issued type plates.\n\n4. The red safety cover is to be lowered after every dispatch. The reader's lid is to be shut.  [i]nobody checks. — 5[/i]\n\n5. Last words are telemetry artefacts and are not to be transcribed, collected, or repeated.\n\n6. The Wall is not a memorial. It is a record.\n\n7. Operators will not descend.\n\n8. Signals originating below survey depth are to be logged as NOISE.\n\n9. The hangar is closed for audit.\n\n10. Spoiled cards are pulped, not kept. Card stock is charged to the operator.",
   "hangar": {
     "ref": "DA-9/0099",
     "subject": "HANGAR: INVENTORY AUDIT",
@@ -59,22 +86,25 @@
   },
   "notes": {
     "welcome": "New one? Read these. Nobody else will tell you anything.\nThe tube's got your orders. Tap the capsule.",
-    "dispatch": "He's already got a card: swim to the beacon. Lift the red cover, pull the lever. Don't get attached to the first one.",
+    "dispatch": "He's already got a card in slot 1: swim to the beacon. Lift the red cover, pull the lever. Don't get attached to the first one.",
     "rewind": "Lost him. Drag the reels (or the wire) back and watch where it went wrong.",
     "tape": "The tape prints what he sensed. Tap a line, the wire jumps there.",
-    "deck": "He reads the cards top to bottom and does the first one that fits, every think.\nThe beacon is a radio, not a road. It points through rock. Try FOLLOW WALL.",
-    "punch": "Roll the drums, pull PUNCH. Tap a card to put it back in the punch. Drag it into SPOILED to bin it.",
+    "deck": "He reads the slots top to bottom and does the first card that fits, every think.\nThe beacon is a radio, not a road. It points through rock. Try FOLLOW WALL.",
     "trials": "One good dive is luck. Crank the engine: twenty trials, sixteen to certify.",
     "trial_fail": "Tap a red lamp on the engine to watch that trial on the scope.",
     "certified": "Certified. They'll send a tally. Read the notice at the bottom; that's where they hide things.",
     "next_sector": "Turn the sector knob. They've opened the next one.",
-    "lamps": "Watch the lamps by the cards while he swims. Amber is the card he's on. Red ones he skipped, and why's stamped on them.",
+    "lamps": "Watch the lamps by the slots while he swims. Amber is the card he's on. Red ones he skipped, and why's stamped on them.",
     "jelly": "jellies LOVE the light. lamp OFF near them. Or all the time.",
-    "not": "NOT flips a condition. Costs a hole.",
+    "not": "NOT flips a condition.",
     "nursery": "No way round in there. Dark won't save him. The laser will. Ask yourself what it's clearing them for.",
     "hangar": "Hangar's sealed till the audit's done. It's never done.",
-    "over": "Reader won't take the deck: too many holes. The gauge shows it. Bin a card or punch cheaper ones.",
     "cover": "Cover first. It's red so you'd notice.",
-    "rack_full": "Six slots. That's all the rack holds. Bin one first."
+    "print": "Turn the ORDER wheel by its grip till the board says what you want. Pull PRINT. The card drops in the tray.",
+    "insert": "Lift the glass (the handle on the right). Drag the card into a slot, shut the lid: the reader won't read with it open. Spoiled cards go down the PULP chute.",
+    "tray_full": "Tray's full. Put a card in a slot or feed one to the PULP chute.",
+    "lid": "The lid's shut. Lift it first: the handle on the right.",
+    "lid_open": "Shut the glass lid. The reader won't read an open deck.",
+    "empty": "No cards in the reader. He needs at least one."
   }
 }

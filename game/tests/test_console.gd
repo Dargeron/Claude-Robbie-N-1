@@ -3,7 +3,7 @@ extends TestCase
 
 
 func test_every_order_on_the_drum_is_a_valid_card() -> void:
-	for o: Array in Keypunch.ORDERS:
+	for o: Array in PressOrders.ORDERS:
 		var r := {"action": o[0], "param": o[1], "cond": "", "cond_param": "", "negate": false}
 		var p := Program.parse(Program.new().rule_text(r))
 		check(p.is_valid() and p.rules.size() == 1, "drum order %s %s parses: %s" % [o[0], o[1], str(p.errors)])
@@ -11,8 +11,8 @@ func test_every_order_on_the_drum_is_a_valid_card() -> void:
 
 
 func test_every_condition_value_is_valid() -> void:
-	for c: String in Keypunch.CONDS:
-		var vals: Array = Keypunch.COND_VALUES.get(c, [""])
+	for c: String in PressOrders.CONDS:
+		var vals: Array = PressOrders.COND_VALUES.get(c, [""])
 		for v: String in vals:
 			if c == "executing" and int(v) > 1:
 				continue   # needs a deck that long
@@ -79,3 +79,16 @@ func test_the_console_save_is_its_own() -> void:
 	t.load_save()
 	eq(t.extra.get("memos_read", []), ["open0"], "console records round-trip")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_console_save.json"))
+
+
+func test_each_sector_can_be_certified_within_its_slots() -> void:
+	for id: String in ["dark", "jellyfish", "nursery", "valve", "listeners", "lock"]:
+		var room := RoomLibrary.load_room(id)
+		var fits := false
+		for f: String in DirAccess.get_files_at("res://content/programs/" + id):
+			if not f.ends_with(".rbt"):
+				continue
+			var text := FileAccess.get_file_as_string("res://content/programs/%s/%s" % [id, f])
+			if text.find("# certify: yes") >= 0 and Program.parse(text).rules.size() <= room.slots:
+				fits = true
+		check(fits, "%s has a certifying program within its %d slots" % [id, room.slots])

@@ -536,13 +536,19 @@ def build_plate():
     recess("hangar_well", L["hangar_view"], r=4, depth=0.1)
     plaque(L["plaques"]["hangar"][:4])
 
-    # Card rack.
+    # The card reader: slots behind a hinged glass lid; the lid's latch handle on the right.
     ra = L["rack"]
     housing("rack", ra, r=10)
     recess("card_bed", L["card_bed"], r=4, depth=0.04, mat=mats["felt"])
     cx0, cy0, cw0, ch0 = L["card_bed"]
-    slab("bed_rail_l", (cx0 - 4, cy0 - 2, 3, ch0 + 4), 0.0, 0.02, mats["brass"], r=1, bevel=0.003)
-    slab("bed_rail_r", (cx0 + cw0 + 1, cy0 - 2, 3, ch0 + 4), 0.0, 0.02, mats["brass"], r=1, bevel=0.003)
+    lx0, ly0, lw0, lh0 = L["lid"]
+    frame("lid_seat", (lx0 - 4, ly0 - 4, lw0 + 8, lh0 + 8), (lx0 + 2, ly0 + 2, lw0 - 4, lh0 - 4), 0.0, 0.02,
+          mats["steel"], r_out=8, r_in=5, bevel=0.004)
+    cylinder_x("lid_hinge", lx0 + 10, lx0 + lw0 - 10, ly0 - 2, 4, 0.03, mats["chrome"])
+    hx, hy, hw, hh = L["lid_handle"]
+    slab("latch_plate", (hx + 6, hy, hw - 12, hh), 0.0, 0.03, mats["brass_dark"], r=5, bevel=0.006)
+    for sy2 in (hy + 8, hy + hh - 8):
+        screw(hx + hw / 2, sy2, mats["brass"], r=2.4, z=0.03, angle=0.3)
     lr = L["lamp_rail"]
     slab("lamp_rail", lr, 0.0, 0.03, mats["brass_dark"], r=4, bevel=0.006)
     lamps = L["lamps"]
@@ -552,23 +558,24 @@ def build_plate():
         disc("lamp_glass", lamps["rail_x"], ly, 6.5, 0.0, 0.035, mats["recess"])
     plaque(L["plaques"]["rack"][:4])
 
-    # Card reader load gauge.
-    ga = L["gauge"]
-    housing("gauge", ga, r=10, rivet_step=70)
-    gcx, gcy, gr = L["gauge_c"]
-    arc_out, arc_in = [], []
-    for i in range(49):
-        a = math.radians(-180 + 180 * i / 48)
-        arc_out.append(P(gcx + (gr + 8) * math.cos(a), gcy + (gr + 8) * math.sin(a)))
-    arc_out += [P(gcx + gr + 8, gcy + 4), P(gcx - gr - 8, gcy + 4)]
-    for i in range(49):
-        a = math.radians(-180 + 180 * i / 48)
-        arc_in.append(P(gcx + gr * math.cos(a), gcy + gr * math.sin(a)))
-    arc_in += [P(gcx + gr, gcy - 2), P(gcx - gr, gcy - 2)]
-    face = prism("gauge_face_well", arc_out, -0.04, 0.002, mats["recess"], 0.0)
-    prism("gauge_bezel", arc_out, 0.0, 0.05, mats["brass"], 0.01, holes=[arc_in])
-    disc("gauge_hub", gcx, gcy - 2, 7, 0.05, 0.08, mats["brass_dark"])
-    plaque(L["plaques"]["gauge"][:4])
+    # The pulp chute: a brass hopper that eats spoiled cards.
+    ch = L["chute"]
+    housing("chute", ch, r=10, rivet_step=70)
+    mx, my, mw, mh = L["chute_mouth"]
+    frame("chute_lip", (mx - 8, my - 8, mw + 16, mh + 16), (mx, my, mw, mh), 0.0, 0.06, mats["brass"], r_out=10, r_in=6, bevel=0.01)
+    recess("chute_throat", (mx, my, mw, mh), r=6, depth=0.4)
+    for i in range(5):
+        slab("chute_tooth", (mx + 6 + i * (mw - 12) / 4.0 - 2, my + mh - 10, 4, 10), -0.3, -0.05, mats["steel"], r=1, bevel=0)
+    plaque(L["plaques"]["chute"][:4])
+
+    # The Company's counter: what the operator owes, on rolling wheels.
+    co = L["counter"]
+    housing("counter", co, r=10, rivet_step=70)
+    recess("counter_window", (co[0] + 10, co[1] + 34, co[2] - 20, 38), r=3, depth=0.06)
+    frame("counter_bezel", (co[0] + 6, co[1] + 30, co[2] - 12, 46), (co[0] + 10, co[1] + 34, co[2] - 20, 38), 0.0, 0.04,
+          mats["brass"], r_out=5, r_in=3, bevel=0.006)
+    recess("counter_window2", (co[0] + 26, co[1] + 84, co[2] - 52, 24), r=3, depth=0.05)
+    plaque(L["plaques"]["counter"][:4])
 
     # Sea trials.
     tr = L["trials"]
@@ -618,32 +625,42 @@ def build_plate():
     disc("ready_glass", rlx, rly, rlr, -0.01, 0.015, mats["recess"])
     plaque(L["plaques"]["dispatch"][:4])
 
-    # Keypunch.
-    kp = L["keypunch"]
-    housing("keypunch", kp, r=12, rivet_step=60)
-    for key in ("order_drum", "cond_drum", "param_wheel"):
-        x, y, w, h = L[key]
-        frame(key + "_frame", (x - 7, y - 7, w + 14, h + 14), (x, y, w, h), 0.0, 0.05, mats["brass"], r_out=8, r_in=4, bevel=0.008)
-        recess(key + "_well", (x, y, w, h), r=4, depth=0.3)
-        cylinder_x(key + "_drum", x + 2, x + w - 2, y + h / 2, h / 2 + 6, -(h / 2 + 6) / 100.0 - 0.03, mats["ivory"])
-        # Drum end caps peeking out at the sides.
-        for ex in (x - 1, x + w - 5):
-            slab("drum_cap", (ex, y + 4, 6, h - 8), -0.07, 0.004, mats["brass_dark"], r=2, bevel=0.003)
-    for key in ("order", "cond", "param", "punch"):
-        plaque(L["plaques"][key][:4])
-    bx2, by2, bw2, bh2 = L["punch_bed"]
-    recess("punch_bed", L["punch_bed"], r=5, depth=0.05, mat=mats["felt"])
-    slab("bed_guide_t", (bx2 + 4, by2 + 6, bw2 - 8, 3), 0.0, 0.016, mats["steel"], r=1, bevel=0.002)
-    slab("bed_guide_b", (bx2 + 4, by2 + bh2 - 9, bw2 - 8, 3), 0.0, 0.016, mats["steel"], r=1, bevel=0.002)
+    # The press: a split-flap readout, two selector wheels, the NOT switch and value wheel, the tray the
+    # printed cards fall into, and the PRINT lever.
+    pr = L["press"]
+    housing("press", pr, r=12, rivet_step=60)
+    fx, fy, fw, fh = L["flaps"]
+    frame("flap_bezel", (fx - 6, fy - 6, fw + 12, fh + 12), (fx, fy, fw, fh), 0.0, 0.05, mats["brass"], r_out=8, r_in=4, bevel=0.008)
+    recess("flap_well", (fx, fy, fw, fh), r=4, depth=0.1)
+    ex, ey, ew, eh = L["card_exit"]
+    recess("card_exit", (ex + 6, ey + 4, ew - 12, 5), r=2, depth=0.08)
     nx2, ny2, nw2, nh2 = L["not_switch"]
-    slab("not_plate", (nx2 + 2, ny2 + 4, nw2 - 4, nh2 - 8), 0.0, 0.02, mats["brass_dark"], r=4, bevel=0.005)
-    ring_obj("not_bushing", nx2 + nw2 / 2, ny2 + nh2 / 2 - 4, 9, 5, 0.02, 0.05, mats["chrome"])
-    gx2, gy2, gw2, gh2 = L["bin"]
-    slab("bin_face", (gx2, gy2, gw2, gh2), -0.02, 0.04, mats["steel"], r=6, bevel=0.01)
-    recess("bin_mouth", (gx2 + 8, gy2 + 8, gw2 - 16, 18), r=4, depth=0.1)
-    lx2, ly2, lw2, lh2 = L["punch_slot"]
-    slab("punch_track", (lx2 - 6, ly2 - 8, lw2 + 12, lh2 + 16), 0.0, 0.025, mats["steel"], r=7, bevel=0.006)
-    recess("punch_slot", L["punch_slot"], r=6, depth=0.06)
+    slab("not_plate", (nx2 + 2, ny2 + 2, nw2 - 4, nh2 - 4), 0.0, 0.02, mats["brass_dark"], r=4, bevel=0.005)
+    ring_obj("not_bushing", nx2 + nw2 / 2, ny2 + nh2 / 2 - 6, 9, 5, 0.02, 0.05, mats["chrome"])
+    vx, vy, vw, vh = L["value_wheel"]
+    frame("value_frame", (vx - 4, vy - 4, vw + 8, vh + 8), (vx, vy, vw, vh), 0.0, 0.04, mats["brass"], r_out=6, r_in=4, bevel=0.006)
+    recess("value_well", (vx, vy, vw, vh), r=4, depth=0.1)
+    tx, ty, tw, th = L["tray"]
+    recess("tray", (tx, ty, tw, th), r=6, depth=0.06, mat=mats["felt"])
+    for gx in range(int(tx) + 14, int(tx + tw) - 6, 18):
+        slab("tray_wire", (gx, ty + 4, 2, th - 8), -0.055, -0.04, mats["steel"], r=0.8, bevel=0)
+    slab("tray_lip", (tx - 4, ty + th - 6, tw + 8, 8), 0.0, 0.05, mats["brass"], r=3, bevel=0.008)
+    for key in ("order_wheel", "cond_wheel"):
+        wx, wy, wr = L[key]
+        disc(key + "_well", wx, wy, wr + 6, -0.04, 0.002, mats["recess"])
+        ring_obj(key + "_ring", wx, wy, wr + 10, wr + 5, 0.0, 0.04, mats["brass"], bevel=0.006)
+        for i in range(24):
+            a = 2 * math.pi * i / 24
+            tl2 = 5 if i % 2 == 0 else 3
+            slab("wheel_tick", (wx + (wr + 7.5) * math.cos(a) - 1, wy + (wr + 7.5) * math.sin(a) - 1, 2, 2), 0.04, 0.046, mats["recess"], r=1, bevel=0)
+        plaque(L["plaques"][key][:4])
+    lx2, ly2, lw2, lh2 = L["print_slot"]
+    slab("print_track", (lx2 - 6, ly2 - 8, lw2 + 12, lh2 + 16), 0.0, 0.025, mats["steel"], r=7, bevel=0.006)
+    recess("print_slot", L["print_slot"], r=6, depth=0.06)
+    plaque(L["plaques"]["print"][:4])
+    plaque(L["plaques"]["tray"][:4])
+    # The steam pipe behind the press, where it vents when it prints.
+    cylinder_y("press_pipe", 470, 500, 1182, 5, 0.04, mats["brass_dark"])
 
 
 # ------------------------------------------------------------------ sprites (each drawn on its own, at the origin)
@@ -756,7 +773,50 @@ def build_platen(c):
     slab("tear_bar", (-w / 2 + 20, -h / 2 + 4, w - 40, 4), 0.06, 0.09, m["chrome"], r=1, bevel=0.003, coll=c)
 
 
+def build_wheel(c, r, spokes, knob=True):
+    """A selector wheel seen face on: a rim, spokes, a hub, and a bakelite grip on the rim to turn it by."""
+    m = M()
+    ring_obj("wheel_rim", 0, 0, r, r - 7, 0.0, 0.1, m["brass"], bevel=0.02, coll=c)
+    for k in range(spokes):
+        a = 2 * math.pi * k / spokes
+        sp = slab("spoke", (-2.6, -(r - 5), 5.2, r - 10), 0.03, 0.08, m["brass_dark"], r=2, bevel=0.01, coll=c)
+        sp.rotation_euler = (0, 0, a)
+    disc("wheel_hub", 0, 0, r * 0.26, 0.04, 0.13, m["chrome"], bevel=0.02, coll=c)
+    disc("wheel_cap", 0, 0, r * 0.13, 0.13, 0.16, m["bakelite_black"], bevel=0.01, coll=c)
+    if knob:
+        disc("grip_base", 0, -(r - 3.5), 6, 0.1, 0.13, m["chrome"], coll=c)
+        cylinder_y("grip", -(r - 3.5) - 1, -(r - 3.5) + 1, 0, 5, 0.22, m["bakelite"], coll=c)
+        uv_sphere("grip_top", 0, -(r - 3.5), 0.26, 5.6, m["bakelite"], 0.9, coll=c)
+    # A pointer notch on the rim, so you can see it turn.
+    slab("wheel_mark", (-2, r - 7, 4, 7), 0.1, 0.105, m["ivory"], r=1, bevel=0, coll=c)
+
+
+def build_lid(c):
+    """The reader's glass lid, closed: a brass frame with a latch tab; the glass itself is drawn by the game."""
+    m = M()
+    w, h = L["lid"][2], L["lid"][3]
+    frame("lid_frame", (-w / 2, -h / 2, w, h), (-w / 2 + 9, -h / 2 + 9, w - 18, h - 18), 0.0, 0.07, m["brass"],
+          r_out=8, r_in=4, bevel=0.012, coll=c)
+    for (sx2, sy2) in ((-w / 2 + 5, -h / 2 + 5), (w / 2 - 5, -h / 2 + 5), (-w / 2 + 5, h / 2 - 5), (w / 2 - 5, h / 2 - 5)):
+        uv_sphere("lid_rivet", sx2, sy2, 0.07, 2.4, m["brass_dark"], 0.5, coll=c)
+    slab("lid_tab", (w / 2 - 2, -14, 22, 28), 0.02, 0.08, m["brass"], r=6, bevel=0.01, coll=c)
+    disc("lid_tab_knob", w / 2 + 12, 0, 6, 0.08, 0.16, m["bakelite"], bevel=0.02, coll=c)
+
+
+def build_chute_flap(c):
+    m = M()
+    w, h = L["chute_mouth"][2], L["chute_mouth"][3]
+    slab("flap", (-w / 2, 0, w, h * 0.55), 0.0, 0.05, m["steel"], r=3, bevel=0.01, coll=c)
+    cylinder_x("flap_hinge", -w / 2 + 2, w / 2 - 2, 1, 3, 0.04, m["chrome"], coll=c)
+    for i in range(3):
+        slab("flap_rib", (-w / 2 + 10, 8 + i * 8, w - 20, 2), 0.05, 0.06, m["brass_dark"], r=1, bevel=0, coll=c)
+
+
 SPRITES = {
+    "wheel_order": (lambda c: build_wheel(c, L["order_wheel"][2], 6), (L["order_wheel"][2] + 10, L["order_wheel"][2] + 10)),
+    "wheel_cond": (lambda c: build_wheel(c, L["cond_wheel"][2], 5), (L["cond_wheel"][2] + 10, L["cond_wheel"][2] + 10)),
+    "lid": (build_lid, (L["lid"][2] / 2 + 26, L["lid"][3] / 2 + 6)),
+    "chute_flap": (build_chute_flap, (L["chute_mouth"][2] / 2 + 4, L["chute_mouth"][3] * 0.6 + 4)),
     # name: (builder, half-size in screen pixels (w, h), origin offset)
     "reel": (build_reel, (46, 46)),
     "knob_speed": (lambda c: build_knob(c, 30, "line"), (36, 36)),
@@ -866,5 +926,11 @@ def do_sprites():
 if WHAT in ("plate", "all"):
     do_plate()
 if WHAT in ("sprites", "all"):
+    do_sprites()
+elif WHAT not in ("plate",):
+    # A single sprite by name.
+    _all = dict(SPRITES)
+    SPRITES.clear()
+    SPRITES.update({k: v for k, v in _all.items() if k in WHAT.split(",")})
     do_sprites()
 print("console art written to", OUT)
