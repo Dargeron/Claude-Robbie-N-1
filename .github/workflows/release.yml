@@ -1,16 +1,14 @@
 name: Release
 
-# A build for Albert to download from the Releases page: the signed Android APK and the Windows zip.
-# Runs whenever RELEASE.md changes (its first heading names the version), or by hand from the Actions tab.
-# Signing needs three repository secrets (Settings > Secrets and variables > Actions), copied from Albert's
-# Drive file "Robbie N+1 - Android signing key (private).txt": ROBBIE_KEYSTORE_B64, ROBBIE_KEYSTORE_PASS,
-# ROBBIE_KEY_ALIAS. Without them it still builds everything (with a throwaway key) as a test of the pipeline, keeps
-# the files as a run artifact, publishes nothing, and fails: an APK signed with another key can't update his game.
+# Publishes a test build for Albert on the Releases page. The build is made and signed in a Claude session
+# (tools/release.sh), which pushes it to the throwaway branch `release-drop` as one commit on top of the source:
+# release/RobbieN1-<version>.apk and release/RobbieN1-<version>-windows.zip, with RELEASE.md as the notes.
+# This job attaches the files to a release tagged v<version> on the source commit, then deletes the branch, so the
+# binaries never stay in the project's history and nobody downloads them with the code.
 
 on:
   push:
-    paths: ["RELEASE.md", ".github/workflows/release.yml"]
-  workflow_dispatch:
+    branches: [release-drop]
 
 permissions:
   contents: write
@@ -20,86 +18,38 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    env:
-      ROBBIE_KEYSTORE_B64: ${{ secrets.ROBBIE_KEYSTORE_B64 }}
-      ROBBIE_KEYSTORE_PASS: ${{ secrets.ROBBIE_KEYSTORE_PASS }}
-      ROBBIE_KEY_ALIAS: ${{ secrets.ROBBIE_KEY_ALIAS }}
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-
-      - name: Is the signing key set?
-        id: key
-        run: |
-          if [[ -n "$ROBBIE_KEYSTORE_B64" && -n "$ROBBIE_KEYSTORE_PASS" ]]; then
-            echo "signed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "signed=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::No signing key secrets: building as a test only, nothing will be published. See docs/RELEASES.md."
-          fi
-
-      - uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: "17"
+          fetch-depth: 2
 
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/robbie
-          key: godot-4.7.2-stable-linux-x86_64
-      - uses: actions/cache@v4
-        with:
-          path: ~/.local/share/godot/export_templates
-          key: export-templates-4.7.2-stable
-
-      - name: Install pinned Godot
-        run: tools/bootstrap.sh
-
-      - name: Version
-        id: version
+      - name: What is being released
+        id: v
         run: |
           v=$(grep -m1 -oE '^# [0-9][^ ]*' RELEASE.md | cut -c3-)
           [[ -n "$v" ]] || { echo "::error::RELEASE.md must start with '# <version> ...'"; exit 1; }
+          for f in "release/RobbieN1-$v.apk" "release/RobbieN1-$v-windows.zip"; do
+            [[ -s "$f" ]] || { echo "::error::missing $f"; exit 1; }
+          done
           echo "version=$v" >> "$GITHUB_OUTPUT"
-          echo "Building $v"
-
-      - name: Android APK
-        run: |
-          mkdir -p build
-          tools/android.sh "$PWD/build/RobbieN1-${{ steps.version.outputs.version }}.apk"
-
-      - name: Windows
-        run: |
-          mkdir -p build/windows
-          tools/godot.sh --headless --path game --export-release Windows "$PWD/build/windows/RobbieN1.exe"
-          test -s build/windows/RobbieN1.exe
-          (cd build/windows && zip -q "../RobbieN1-${{ steps.version.outputs.version }}-windows.zip" *)
-
-      - name: Keep the test build (no key)
-        if: steps.key.outputs.signed != 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-build-unsigned-key
-          path: build/RobbieN1-*
-          retention-days: 3
+          echo "source=$(git rev-parse HEAD^)" >> "$GITHUB_OUTPUT"
+          echo "Releasing $v from $(git rev-parse --short HEAD^)"
 
       - name: Publish the release
-        if: steps.key.outputs.signed == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: Robbie N+1 ${{ steps.version.outputs.version }}
+          tag_name: v${{ steps.v.outputs.version }}
+          name: Robbie N+1 ${{ steps.v.outputs.version }}
           body_path: RELEASE.md
-          target_commitish: ${{ github.sha }}
+          target_commitish: ${{ steps.v.outputs.source }}
           prerelease: true
           files: |
-            build/RobbieN1-${{ steps.version.outputs.version }}.apk
-            build/RobbieN1-${{ steps.version.outputs.version }}-windows.zip
+            release/RobbieN1-${{ steps.v.outputs.version }}.apk
+            release/RobbieN1-${{ steps.v.outputs.version }}-windows.zip
 
-      - name: Stop without the key
-        if: steps.key.outputs.signed != 'true'
-        run: |
-          echo "::error::Built fine, but not published: the signing key secrets (ROBBIE_KEYSTORE_B64, ROBBIE_KEYSTORE_PASS, ROBBIE_KEY_ALIAS) are missing. See docs/RELEASES.md."
-          exit 1
+      - name: Delete the drop branch
+        if: always()
+        run: git push origin --delete release-drop

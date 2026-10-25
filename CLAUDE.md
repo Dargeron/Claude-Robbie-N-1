@@ -51,6 +51,7 @@ The old station (`game/station/station.tscn`) still runs: Mission Control, the L
 | `python3 tools/art/console_paper.py` | The tiling paper grain for cards, tape, memos and notes |
 | `tools/godot.sh --headless --path game --export-release <Linux/Windows/macOS/Web> <path>` | Builds (templates in ~/.local/share/godot/export_templates/4.7.2.stable) |
 | `tools/export_setup.sh [--desktop-only]` | Installs the export templates and the Android build tools (about 2 min the first time) |
+| `tools/release.sh` | Publish a test build for Albert on GitHub Releases (signed APK + Windows zip; see docs/RELEASES.md) |
 | `tools/android.sh [out.apk]` | The signed Android APK (arm64) in build/android/; needs the release key in the environment (see "Where the project lives") |
 | `tools/web_artifact.sh` | Web build packed for a claude.ai page (engine gzipped inside a script); then publish build/artifact/robbie-play.html with its files |
 | `tools/desktop.sh [out_dir]` | Export Linux/Windows/macOS and zip them into /mnt/user-data/outputs (about 90 s) |
@@ -130,13 +131,17 @@ it, look at it, update STATUS/BACKLOG/devlog, commit, and show Albert something 
 
 - **Builds for Albert (since 2026-10-24):** native apps, not the browser. An Android APK for his tablet
   (`tools/android.sh`) and a Windows EXE (`tools/desktop.sh`, or the Windows preset alone).
-  **Since 2026-10-25 he downloads them from the GitHub Releases page:** to publish a test build, rewrite
-  `RELEASE.md` (first line `# <new version> · <title>`, then what's new and what to try, in plain words) and push;
-  `.github/workflows/release.yml` builds and signs both on GitHub and publishes the release. Check the run with the
-  GitHub tools and give him the link. See `docs/RELEASES.md`. Bump `version/code` in `export_presets.cfg` too.
+  **Since 2026-10-25 he downloads them from the GitHub Releases page**
+  (https://github.com/Dargeron/Claude-Robbie-N-1/releases). To publish a test build: rewrite `RELEASE.md` (first line
+  `# <new version> · <title>`, then what's new and what to try, in plain words), bump `version/code` in
+  `game/export_presets.cfg`, commit and push, then run `tools/release.sh`. It builds and signs both here and pushes
+  them to the throwaway branch `release-drop` (Albert allowed pushing to it on 2026-10-25);
+  `.github/workflows/release.yml` publishes them and deletes the branch, so binaries never enter the history. Check
+  the run with the GitHub tools and give him the link. See `docs/RELEASES.md`.
   Android installs an update only if it carries the same signature, so always sign with Robbie's release key: it is
   in Albert's Google Drive as "Robbie N+1 - Android signing key (private).txt"; export its three lines as environment
-  variables before `tools/android.sh`. Never commit it. A build signed with another key can't replace his installed
+  variables before `tools/android.sh`, or save the file as `~/.cache/robbie/keys/robbie-n1-signing-key.txt`, where
+  `tools/release.sh` reads it. Never commit it. A build signed with another key can't replace his installed
   game without an uninstall, which deletes his save.
 - **The web build** (`tools/web_artifact.sh` → `tools/webcheck.sh` → `tools/site.sh` → `tools/deploy_cf.sh`,
   https://robbie-n1.bauldejuegos.workers.dev, needs `CLOUDFLARE_API_TOKEN`) is no longer the main target. The old
