@@ -18,6 +18,8 @@ var _press_key := -1
 var _drag := ""                  # "track" or "reel"
 var _drag_a := 0.0
 var _speed_i := 1
+var _knob_press := Vector2.ZERO
+var _knob_moved := false
 
 
 func _init() -> void:
@@ -68,15 +70,37 @@ func _gui_input(event: InputEvent) -> void:
 				var c := _r("reel_a").get_center() if _r("reel_a").grow(4).has_point(p) else _r("reel_b").get_center()
 				_drag_a = (p - c).angle()
 				replay.playing = false
-			elif _r("speed_knob").has_point(p):
+			elif _r("speed_knob").grow(6).has_point(p):
+				# Tap to click it on a mark, or drag it round to one.
+				_drag = "speed"
+				_knob_press = p
+				_knob_moved = false
+			accept_event()
+		else:
+			if _drag == "speed" and not _knob_moved:
 				_speed_i = (_speed_i + 1) % SPEEDS.size()
 				_apply_speed()
 				Sfx.play("drum", -8.0, 0.8)
-			accept_event()
-		else:
 			_press_key = -1
 			_drag = ""
 			queue_redraw()
+	elif event is InputEventMouseMotion and _drag == "speed":
+		if event.position.distance_to(_knob_press) > 6.0:
+			_knob_moved = true
+		var c := _r("speed_knob").get_center()
+		if _knob_moved and event.position.distance_to(c) > 8.0:
+			var a := rad_to_deg((event.position - c).angle())
+			var best := _speed_i
+			var bd := 999.0
+			for i in SPEEDS.size():
+				var d := absf(wrapf(a - (-210.0 + 60.0 * i), -180.0, 180.0))
+				if d < bd:
+					bd = d
+					best = i
+			if best != _speed_i:
+				_speed_i = best
+				_apply_speed()
+				Sfx.play("drum", -8.0, 0.8)
 	elif event is InputEventMouseMotion and _drag != "" and _has_dive():
 		if _drag == "track":
 			_seek_track(event.position.x)
@@ -189,6 +213,8 @@ func _draw() -> void:
 			tx = "PAUSE" if replay.playing else "PLAY"
 		var sp := Desk.tex("key_down" if down else "key_up")
 		if sp != null:
+			if not down:
+				draw_texture_rect(sp, Rect2(kr.position - Vector2(4, 3) + Desk.SHADOW * 0.7, kr.size + Vector2(8, 8)), false, Color(0, 0, 0, 0.35))
 			draw_texture_rect(sp, Rect2(kr.position - Vector2(4, 3), kr.size + Vector2(8, 8)), false)
 		else:
 			draw_rect(kr, Color(0.06, 0.05, 0.05))

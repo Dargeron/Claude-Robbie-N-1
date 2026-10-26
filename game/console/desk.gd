@@ -121,12 +121,22 @@ static func centred(ci: CanvasItem, rect: Rect2, text: String, f: Font, size: in
 		text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, col)
 
 
-## A sprite rendered at 2x, drawn at screen size with its centre at `at`, turned by `angle`.
-static func draw_sprite(ci: CanvasItem, name: String, at: Vector2, angle: float = 0.0, modulate: Color = Color.WHITE, scale: float = 1.0) -> void:
+## The work lamp is up and to the left: shadows fall this way, and stay put when a part turns.
+const SHADOW := Vector2(3.0, 5.0)
+
+
+## A sprite rendered at 2x, drawn at screen size with its centre at `at`, turned by `angle`. Its
+## shadow is its own silhouette, darkened and offset towards the lower right (`lift` scales how far
+## it stands off the panel; 0 for none).
+static func draw_sprite(ci: CanvasItem, name: String, at: Vector2, angle: float = 0.0, modulate: Color = Color.WHITE, scale: float = 1.0, lift: float = 1.0) -> void:
 	var t := tex(name)
 	if t == null:
 		return
 	var sz := t.get_size() * 0.5 * scale
+	if lift > 0.0:
+		for k: float in [1.0, 0.55]:
+			ci.draw_set_transform(at + SHADOW * lift * (2.0 - k), angle, Vector2.ONE * (1.0 + 0.03 * (1.0 - k)))
+			ci.draw_texture_rect(t, Rect2(-sz * 0.5, sz), false, Color(0, 0, 0, 0.32 * k))
 	ci.draw_set_transform(at, angle, Vector2.ONE)
 	ci.draw_texture_rect(t, Rect2(-sz * 0.5, sz), false, modulate)
 	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

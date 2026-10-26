@@ -17,7 +17,6 @@ func _ready() -> void:
 	var rules: Array = Program.parse("follow_wall left").rules
 	console.table.setup(console.state.room_state("dark").room.slots, rules, [])
 	console._on_deck_changed()
-	console.dispatch.armed = true
 	console._dispatch()
 	console.scope.replay.seek(float(console.scope.replay.view.last_tick()) * 0.12)
 	console.scope.replay.playing = true

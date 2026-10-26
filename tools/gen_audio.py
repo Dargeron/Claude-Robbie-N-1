@@ -334,6 +334,44 @@ def cover():
     return out
 
 
+
+def whistle():
+    """A steam whistle: three pipes not quite in tune, breath in the attack, a wavering pitch, hiss under it."""
+    sec = 1.7
+    n = int(SR * sec)
+    tt = t(sec)
+    wobble = 1.0 + 0.006 * np.sin(2 * np.pi * 5.5 * tt) + 0.01 * (1 - np.exp(-tt * 3))
+    tone = np.zeros(n)
+    for f, a in ((392.0, 1.0), (466.0, 0.8), (587.0, 0.6)):
+        ph = 2 * np.pi * np.cumsum(f * wobble) / SR
+        tone += a * (np.sin(ph) + 0.25 * np.sin(2 * ph) + 0.1 * np.sin(3 * ph))
+    breath = bandpass(rng.standard_normal(n), 900, 4000) * 0.5
+    shape = np.minimum(1.0, tt / 0.12) * np.minimum(1.0, (sec - tt) / 0.35)
+    hiss = highpass(rng.standard_normal(n), 3000) * 0.25 * np.exp(-np.maximum(0, tt - 1.2) * 4)
+    return (tone * (0.6 + 0.4 * np.minimum(1.0, tt / 0.3)) + breath) * shape + hiss * shape
+
+
+def chain():
+    """A chain swinging: a scatter of small metal clinks."""
+    n = int(SR * 0.35)
+    out = np.zeros(n)
+    for i in range(9):
+        s = int(rng.uniform(0, 0.28) * SR)
+        k = _knock(rng.uniform(2800, 5200), 0.04, 0.004, 1.2, 3500) * rng.uniform(0.3, 1.0)
+        out[s:s + len(k)] += k[: max(0, n - s)]
+    return out
+
+
+def chuff():
+    """The press feeding a card out by one notch: a clack and a rasp of card."""
+    n = int(SR * 0.09)
+    out = np.zeros(n)
+    k = _knock(900, 0.05, 0.006, 0.8, 1800)
+    out[:len(k)] += k
+    r = bandpass(rng.standard_normal(n), 1500, 6000) * env(n, 0.005, 0.05) * 0.3
+    return out + r
+
+
 if __name__ == "__main__":
     write("amb_dive", amb_dive(), 0.6)
     write("amb_station", amb_station(), 0.5)
@@ -362,3 +400,6 @@ if __name__ == "__main__":
     write("stamp", stamp(), 0.8)
     write("relay", relay(), 0.35)
     write("cover", cover(), 0.6)
+    write("whistle", whistle(), 0.6)
+    write("chain", chain(), 0.4)
+    write("chuff", chuff(), 0.5)

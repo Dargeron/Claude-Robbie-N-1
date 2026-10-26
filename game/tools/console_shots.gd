@@ -36,7 +36,7 @@ func _ready() -> void:
 		["magnify"], ["wait", 20], ["shot", "c06-magnified"], ["magnify"], ["wait", 20],
 		["scrubbed"], ["wait", 4], ["shot", "c07-notes-deck"],
 		["dial_order", "follow_wall", "left"], ["wait", 30], ["shot", "c08a-drums"],
-		["print"], ["wait", 8], ["shot", "c08b-printing"], ["wait", 40], ["shot", "c08c-printed"],
+		["print"], ["wait", 72], ["shot", "c08b-printing"], ["wait", 70], ["shot", "c08c-printed"],
 		["insert", 0, 1], ["wait", 20], ["pulp_slot", 0], ["wait", 8], ["shot", "c08e-pulping"], ["wait", 10], ["shot", "c08f-tossed"],
 		["program", "follow_wall left"], ["dispatch"], ["seek", 0.35], ["wait", 8], ["shot", "c09-dark-follow"],
 		["seek", 1.0], ["wait", 8], ["trials"], ["wait", 6], ["shot", "c10-trials-running"], ["await_trials"], ["wait", 10], ["shot", "c11-certified"],
@@ -76,8 +76,7 @@ func _process(_d: float) -> void:
 		"binder":
 			console._open_binder()
 		"dispatch":
-			console.dispatch.armed = true
-			console._dispatch()
+					console._dispatch()
 		"seek":
 			rp.seek(s[1] * float(rp.view.last_tick()))
 			rp.playing = false

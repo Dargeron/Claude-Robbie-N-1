@@ -4,7 +4,8 @@ extends Node
 
 const NAMES := ["launch", "jelly", "sting", "crash", "lurker_wake", "strike", "valve", "laser",
 	"exit", "burst", "ui_click", "ui_launch", "blip",
-	"drum", "punch", "lever", "thump", "tear", "paper", "type", "switch", "crank", "stamp", "relay", "cover"]
+	"drum", "punch", "lever", "thump", "tear", "paper", "type", "switch", "crank", "stamp", "relay", "cover",
+	"whistle", "chain", "chuff"]
 const POOL := 8
 
 var muted := false

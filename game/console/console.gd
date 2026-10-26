@@ -28,7 +28,7 @@ var press: CardPress
 var counter: DebtCounter
 var ambience: Ambience
 var trials: SeaTrials
-var dispatch: DispatchLever
+var dispatch: PullChain
 var tube: Topside.Tube
 var dial: Topside.SectorDial
 var nixies: Topside.Nixies
@@ -150,7 +150,7 @@ func _build() -> void:
 	trials.lamp_tapped.connect(_on_trial_lamp)
 	trials.locked_tapped.connect(func() -> void: _flash_note("trials_locked", "No beacon on record for this deck. Get one hull to the beacon first.", Vector3(1128, 309, 64)))
 	add_child(trials)
-	dispatch = DispatchLever.new()
+	dispatch = PullChain.new()
 	_place(dispatch, Desk.r("dispatch"))
 	dispatch.dispatched.connect(_dispatch)
 	dispatch.refused.connect(_on_refused)
@@ -363,7 +363,6 @@ func _start_over() -> void:
 		(_notes[id] as OpNote).queue_free()
 	_notes.clear()
 	_transient.clear()
-	dispatch.armed = false
 	_select_sector(SECTORS[0])
 	_refresh_plates(false)
 	_unread_seen = 0
@@ -590,8 +589,8 @@ func _on_plate_missing(what: String) -> void:
 func _on_refused(why: String) -> void:
 	var N: Dictionary = story["notes"]
 	match why:
-		"cover":
-			_flash_note("cover", N["cover"], _ring("cover", 40))
+		"busy":
+			_flash_note("busy", "Engine's still running trials. Let it finish.", _ring("trials", 60))
 		"NO CARDS":
 			_flash_note("empty", N["empty"], null)
 
@@ -960,12 +959,12 @@ func _wanted_notes() -> Array:
 	var knob := Vector3(1229, 526, 22)
 	var tube_c := Desk.r("tube_window").get_center()
 	var tube_t := Vector3(tube_c.x, tube_c.y, 38)
-	var cover := Desk.r("cover").get_center()
+	var chain := dispatch.handle()
 	if not _read().has("open0"):
 		out.append(["welcome", Vector2(372, 92), 236.0, [tube_t]])
 		return out
 	if not any_dive:
-		glass.call("dispatch", 236.0, [Vector3(cover.x, cover.y, 40)])
+		glass.call("dispatch", 236.0, [Vector3(chain.x, chain.y, 34)])
 		return out
 	if room_id == "dark" and not dark.certified:
 		if last_lost and not _scrubbed and not _did("rewound"):

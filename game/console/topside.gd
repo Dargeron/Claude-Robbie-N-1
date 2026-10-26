@@ -60,7 +60,8 @@ class Tube:
 
 
 ## The sector selector: a bakelite knob with six positions; only the sectors the Company
-## has opened will take it. Drag the knob or tap a name.
+## has opened will take it. Drag the knob round, tap it to click on to the next open sector, or
+## tap a number.
 class SectorDial:
 	extends Control
 	signal chosen(i: int)
@@ -70,6 +71,8 @@ class SectorDial:
 	var index := 0
 	var _angle := 0.0
 	var _drag := false
+	var _moved := false
+	var _press := Vector2.ZERO
 
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_STOP
@@ -93,9 +96,19 @@ class SectorDial:
 						return
 				if event.position.distance_to(_c()) < 32.0:
 					_drag = true
+					_moved = false
+					_press = event.position
 					accept_event()
 			elif _drag:
 				_drag = false
+				if not _moved:
+					# A tap on the knob clicks it on to the next sector that's open.
+					for k in range(1, names.size() + 1):
+						var j := (index + k) % names.size()
+						if open[j]:
+							_choose(j)
+							break
+					return
 				var best := index
 				var bd := 99.0
 				for i in names.size():
@@ -105,7 +118,10 @@ class SectorDial:
 						best = i
 				_choose(best)
 		elif event is InputEventMouseMotion and _drag:
-			_angle = (event.position - _c()).angle()
+			if event.position.distance_to(_press) > 6.0:
+				_moved = true
+			if _moved:
+				_angle = (event.position - _c()).angle()
 			queue_redraw()
 
 	func _choose(i: int) -> void:

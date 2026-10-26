@@ -754,33 +754,18 @@ def build_plate():
     # Dispatch.
     di = L["dispatch"]
     housing("dispatch", di, r=10, rivet_step=70)
-    dpx, dpy, dlen = L["dispatch_pivot"]
-    # The lever's quadrant: an arc slot from -42 to +42 degrees around the pivot.
-    slot_o, slot_i = [], []
-    for i in range(33):
-        a = math.radians(-90 - 46 + 92 * i / 32)
-        slot_o.append(P(dpx + (dlen + 6) * math.cos(a), dpy + (dlen + 6) * math.sin(a)))
-    for i in range(33):
-        a = math.radians(-90 + 46 - 92 * i / 32)
-        slot_o.append(P(dpx + (dlen - 18) * math.cos(a), dpy + (dlen - 18) * math.sin(a)))
-    prism("lever_quadrant", slot_o, -0.02, 0.025, mats["steel"], 0.006)
-    slot_i = []
-    for i in range(33):
-        a = math.radians(-90 - 42 + 84 * i / 32)
-        slot_i.append(P(dpx + (dlen - 2) * math.cos(a), dpy + (dlen - 2) * math.sin(a)))
-    for i in range(33):
-        a = math.radians(-90 + 42 - 84 * i / 32)
-        slot_i.append(P(dpx + (dlen - 10) * math.cos(a), dpy + (dlen - 10) * math.sin(a)))
-    prism("lever_slot", slot_i, 0.02, 0.028, mats["recess"], 0.0)
-    for k, a in enumerate((-42, 0, 42)):
-        aa = math.radians(-90 + a)
-        slab("quad_mark", (dpx + (dlen + 12) * math.cos(aa) - 2, dpy + (dlen + 12) * math.sin(aa) - 2, 4, 4),
-             0.0, 0.03, mats["brass"], r=1, bevel=0)
-    disc("pivot_boss", dpx, dpy, 15, 0.0, 0.05, mats["brass"], bevel=0.012)
-    cvx, cvy, cvw, cvh = L["cover"]
-    slab("cover_base", (cvx - 3, cvy - 3, cvw + 6, cvh + 6), 0.0, 0.02, mats["steel"], r=5, bevel=0.005)
-    recess("cover_well", (cvx + 6, cvy + 8, cvw - 12, cvh - 14), r=4, depth=0.03)
-    cylinder_x("cover_hinge", cvx + 4, cvx + cvw - 4, cvy + 1, 3.5, 0.03, mats["chrome"])
+    # The steam whistle the pull chain blows: a bronze bell on its pipe, a mouth cut in its side.
+    wx, wy, ww, wh = L["whistle"]
+    wc = wx + ww / 2
+    cylinder_y("whistle_pipe", wy + wh * 0.62, wy + wh + 6, wc, 5, 0.06, mats["brass_dark"])
+    slab("whistle_flange", (wc - 12, wy + wh * 0.58, 24, 6), 0.0, 0.1, mats["brass"], r=2, bevel=0.006)
+    cylinder_y("whistle_bell", wy + 8, wy + wh * 0.6, wc, 12, 0.13, mats["brass"])
+    slab("whistle_mouth", (wc - 9, wy + wh * 0.42, 18, 5), 0.2, 0.26, mats["recess"], r=2, bevel=0)
+    disc("whistle_cap", wc, wy + 8, 12, 0.08, 0.2, mats["brass_dark"], bevel=0.01)
+    disc("whistle_nut", wc, wy + 8, 5, 0.2, 0.26, mats["brass"], n=6)
+    # Where the chain hangs: a bronze guide eye on the panel's top lip.
+    cx_ = L["chain"]["x"]
+    ring_obj("chain_guide", cx_, di[1] + 6, 9, 5, 0.0, 0.12, mats["brass"], bevel=0.01)
     plaque(L["plaques"]["dispatch"][:4])
 
     # The press: a split-flap readout, two selector wheels, the NOT switch and value wheel, the tray the
@@ -815,8 +800,13 @@ def build_plate():
             tl2 = 5 if i % 2 == 0 else 3
             slab("wheel_tick", (wx + (wr + 7.5) * math.cos(a) - 1, wy + (wr + 7.5) * math.sin(a) - 1, 2, 2), 0.04, 0.046, mats["recess"], r=1, bevel=0)
         plaque(L["plaques"][key][:4])
+    vx, vy, vr = L["value_knob"]
+    disc("value_knob_well", vx, vy, vr + 4, -0.04, 0.002, mats["recess"])
+    ring_obj("value_knob_ring", vx, vy, vr + 7, vr + 3, 0.0, 0.04, mats["brass"], bevel=0.005)
     lx2, ly2, lw2, lh2 = L["print_slot"]
-    slab("print_track", (lx2 - 6, ly2 - 8, lw2 + 12, lh2 + 16), 0.0, 0.025, mats["steel"], r=7, bevel=0.006)
+    slab("print_track", (lx2 - 10, ly2 - 12, lw2 + 20, lh2 + 24), 0.0, 0.04, mats["brass_dark"], r=9, bevel=0.01)
+    for sy in (ly2 - 6, ly2 + lh2 + 6):
+        screw(lx2 + lw2 / 2, sy, mats["brass"], r=2.6, z=0.04, angle=0.5)
     recess("print_slot", L["print_slot"], r=6, depth=0.06)
     plaque(L["plaques"]["print"][:4])
     plaque(L["plaques"]["tray"][:4])
@@ -877,21 +867,9 @@ def build_lever(c, length, ball=13):
 def build_punch_knob(c):
     """The PRINT pull: a valve-red pull-knob with a scalloped edge, like a sea-cock's, on a bronze stem."""
     m = M()
-    slab("pk_stem", (-3, -4, 6, 26), 0.03, 0.08, m["brass_dark"], r=2, bevel=0.004, coll=c)
-    prism("pk_pull", scallops(0, -6, 13, 6, 4), 0.06, 0.16, m["red"], 0.012, coll=c)
-    disc("pk_nut", 0, -6, 4.6, 0.16, 0.21, m["brass"], n=6, bevel=0.003, coll=c)
-
-
-def build_cover(c, open_):
-    m = M()
-    w, h = L["cover"][2], L["cover"][3]
-    if not open_:
-        slab("cover", (-w / 2, 0, w, h), 0.03, 0.09, m["red"], r=6, bevel=0.012, coll=c)
-        slab("cover_stripe", (-w / 2 + 6, h - 14, w - 12, 6), 0.09, 0.095, m["ivory"], r=1, bevel=0, coll=c)
-    else:
-        # Lifted: seen nearly edge-on above the hinge, its underside showing.
-        slab("cover", (-w / 2, -16, w, 16), 0.03, 0.14, m["red"], r=4, bevel=0.01, coll=c)
-    cylinder_x("hinge", -w / 2 + 4, w / 2 - 4, 1, 3.5, 0.03, m["chrome"], coll=c)
+    prism("pk_pull", scallops(0, -6, 19, 6, 5), 0.06, 0.18, m["red"], 0.014, coll=c)
+    disc("pk_boss", 0, -6, 8, 0.18, 0.22, m["brass_dark"], bevel=0.004, coll=c)
+    disc("pk_nut", 0, -6, 5.5, 0.22, 0.27, m["brass"], n=6, bevel=0.003, coll=c)
 
 
 def build_toggle(c, up):
@@ -941,13 +919,18 @@ def build_wheel(c, r, spokes, knob=True):
     """A selector wheel like a valve handwheel: a valve-red rim knuckled for the fingers, three red spokes, a bronze
     hub and nut. A bronze notch on the rim shows it turn."""
     m = M()
-    prism("wheel_rim", scallops(0, 0, r - 3, 6, 6), 0.0, 0.11, m["red"], 0.02, holes=[circle_pts(0, 0, r - 13, 96)], coll=c)
+    rim = max(5.0, r * 0.2)
+    prism("wheel_rim", scallops(0, 0, r - 3, 6, max(2.5, r * 0.1)), 0.0, 0.11, m["red"], 0.02,
+          holes=[circle_pts(0, 0, r - 3 - rim, 96)], coll=c)
+    sw = max(3.0, r * 0.15)
     for k in range(3):
-        sp = slab("spoke", (-4.5, -(r - 8), 9, r - 14), 0.02, 0.08, m["red"], r=3, bevel=0.01, coll=c)
+        sp = slab("spoke", (-sw / 2, -(r - 3 - rim * 0.5), sw, r - 3 - rim * 0.5), 0.02, 0.08, m["red"],
+                  r=min(3.0, sw / 2), bevel=0.01, coll=c)
         sp.rotation_euler = (0, 0, math.pi / 6 + 2 * math.pi * k / 3)
     disc("wheel_hub", 0, 0, r * 0.3, 0.03, 0.15, m["brass"], bevel=0.02, coll=c)
     disc("wheel_nut", 0, 0, r * 0.15, 0.15, 0.21, m["brass_dark"], n=6, bevel=0.006, coll=c)
-    slab("wheel_mark", (-2.5, r - 12, 5, 8), 0.11, 0.115, m["brass"], r=1, bevel=0, coll=c)
+    slab("wheel_mark", (-max(1.5, r * 0.04), r - 3 - rim, max(3.0, r * 0.08), rim * 0.7), 0.11, 0.115, m["brass"], r=1,
+         bevel=0, coll=c)
 
 
 def build_chute_flap(c):
@@ -967,10 +950,8 @@ SPRITES = {
     "reel": (build_reel, (46, 46)),
     "knob_speed": (lambda c: build_knob(c, 30, "line"), (36, 36)),
     "knob_sector": (lambda c: build_knob(c, 26, "arrow"), (36, 36)),
-    "lever_dispatch": (lambda c: build_lever(c, L["dispatch_pivot"][2]), (22, 98)),
-    "punch_knob": (build_punch_knob, (22, 26)),
-    "cover_closed": (lambda c: build_cover(c, False), (48, 66)),
-    "cover_open": (lambda c: build_cover(c, True), (48, 66)),
+    "punch_knob": (build_punch_knob, (28, 32)),
+    "wheel_value": (lambda c: build_wheel(c, L["value_knob"][2], 3), (L["value_knob"][2] + 8, L["value_knob"][2] + 8)),
     "toggle_up": (lambda c: build_toggle(c, True), (14, 32)),
     "toggle_down": (lambda c: build_toggle(c, False), (14, 32)),
     "capsule": (build_capsule, (20, 30)),
@@ -1136,9 +1117,7 @@ def do_sprites():
         reset()
         c = bpy.context.scene.collection
         builder(c)
-        # A shadow catcher behind the part, so it casts its shadow onto whatever Godot draws it over.
-        catcher = slab("catcher", (-400, -400, 800, 800), -0.31, -0.3, M()["enamel"], r=0, bevel=0)
-        catcher.is_shadow_catcher = True
+        # No shadow in the sprite: it would turn with the part. The game draws a fixed one (Desk.draw_sprite).
         lights(0.0, 0.0)
         w, h = half[0] * 2, half[1] * 2
         setup_render(w, h, 0, 0, 16 if PREVIEW else 64)

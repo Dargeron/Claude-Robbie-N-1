@@ -13,7 +13,10 @@ signal pulped
 signal refused(why: String)
 
 const TRAY_MAX := 4
-const TRAY_STEP := 24.0
+const TRAY_STEP := 20.0
+const FEED_TIME := 1.1           # a printed card comes out of the press's slot in FEED_NOTCHES jerks...
+const FEED_NOTCHES := 5
+const DROP_G := 2600.0           # ...then drops onto the platter
 const MAX_SLOTS := 6
 const DRAG_START := 6.0
 
@@ -31,6 +34,9 @@ const TOSS := 0.34
 const SINK := 0.16
 const CHEW := 0.6
 
+var _feeding: Array = []         # {rule, t0, notch}: cards coming out of the press's slot
+var _mouth: Control              # clips them: what hasn't come out yet is still inside the press
+var _clock := 0.0                # game time, for the feed (a slow frame doesn't skip it)
 var _bits: Array = []            # shreds flying out of the chute: {p, v, t0, rot}
 var _flash := {}                 # slot -> time it lit up
 
@@ -38,6 +44,14 @@ var _flash := {}                 # slot -> time it lit up
 func _init() -> void:
 	size = Vector2(1280, 720)
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_mouth = Control.new()
+	_mouth.clip_contents = true
+	_mouth.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var ex := Desk.r("card_exit")
+	_mouth.position = Vector2(ex.position.x - 6, ex.get_center().y)
+	_mouth.size = Vector2(ex.size.x + 12, 80)
+	_mouth.draw.connect(_draw_feeding)
+	add_child(_mouth)
 
 
 func setup(n_slots: int, slot_rules: Array, tray_rules: Array) -> void:
@@ -104,17 +118,21 @@ func slot_rules() -> Array:
 	return out
 
 
+## The cards on the platter, in order, and any still coming out of the press.
 func tray_rules() -> Array:
 	var t: Array = []
 	for c: Dictionary in cards:
 		if c["where"] == "tray":
 			t.append(c)
 	t.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["i"]) < int(b["i"]))
-	return t.map(func(c: Dictionary) -> Dictionary: return c["rule"])
+	var out: Array = t.map(func(c: Dictionary) -> Dictionary: return c["rule"])
+	for f: Dictionary in _feeding:
+		out.append(f["rule"])
+	return out
 
 
 func tray_full() -> bool:
-	return _tray_count() >= TRAY_MAX
+	return _tray_count() + _feeding.size() >= TRAY_MAX
 
 
 func _tray_count() -> int:
@@ -132,12 +150,36 @@ func _in_slot(i: int) -> int:
 	return -1
 
 
-## A fresh card out of the press: it slides from the press's mouth into the tray.
+## A fresh card out of the press: it feeds out of the slot a notch at a time, printed side up,
+## then drops onto the platter.
 func add_printed(rule: Dictionary) -> void:
-	var ex := Desk.r("card_exit")
-	cards.append({"rule": rule, "where": "tray", "i": _tray_count(), "pos": Vector2(ex.position.x + 40.0, ex.position.y - 4.0),
-		"born": Time.get_ticks_msec() / 1000.0})
+	_feeding.append({"rule": rule, "t0": _clock, "notch": -1})
 	queue_redraw()
+
+
+## How far a feeding card is out of the slot, 0..1: it jerks out a notch at a time.
+func _fed(age: float) -> float:
+	var k := clampf(age / FEED_TIME, 0.0, 1.0) * FEED_NOTCHES
+	var n := floorf(k)
+	var f := clampf((k - n) / 0.35, 0.0, 1.0)
+	return minf(1.0, (n + f * f * (3.0 - 2.0 * f)) / FEED_NOTCHES)
+
+
+func _feed_x() -> float:
+	var ex := Desk.r("card_exit")
+	return ex.position.x + (ex.size.x - card_size().x) * 0.5
+
+
+func _draw_feeding() -> void:
+	var cs := card_size()
+	for f: Dictionary in _feeding:
+		var age := _clock - float(f["t0"])
+		var y := -cs.y + _fed(age) * cs.y
+		var shake := Vector2(sin(age * 70.0), 0) * 0.6 if fmod(age / FEED_TIME * FEED_NOTCHES, 1.0) < 0.35 else Vector2.ZERO
+		CardArt.draw(_mouth, Rect2(Vector2(_feed_x() - _mouth.position.x, y) + shake, cs), f["rule"])
+	# The slot's lip shades the card where it comes out.
+	if not _feeding.is_empty():
+		_mouth.draw_rect(Rect2(0, 0, _mouth.size.x, 4), Color(0, 0, 0, 0.55))
 
 
 func flash(slot: int) -> void:
@@ -247,14 +289,45 @@ func _drop(k: int, p: Vector2) -> void:
 # ------------------------------------------------------------------ animation and drawing
 
 func _process(delta: float) -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	_clock += delta
+	# Cards coming out of the press: a chunk of the feed at every notch; out, they drop.
+	for i in range(_feeding.size() - 1, -1, -1):
+		var f: Dictionary = _feeding[i]
+		var age := _clock - float(f["t0"])
+		var notch := int(clampf(age / FEED_TIME, 0.0, 0.999) * FEED_NOTCHES)
+		if notch != int(f["notch"]) and age < FEED_TIME:
+			f["notch"] = notch
+			Sfx.play("chuff", -6.0, 0.95 + 0.04 * notch)
+		if age >= FEED_TIME:
+			_feeding.remove_at(i)
+			cards.append({"rule": f["rule"], "where": "tray", "i": _tray_count(), "born": now,
+				"pos": Vector2(_feed_x(), _mouth.position.y), "vel": Vector2(0, 60)})
 	for k in cards.size():
 		if _dragging and k == _press:
 			continue
 		var c: Dictionary = cards[k]
 		var t := _target(c)
 		var p: Vector2 = c["pos"]
+		if c.has("vel"):
+			# Falling onto the platter, bouncing once or twice.
+			var v: Vector2 = c["vel"]
+			v.y += DROP_G * delta
+			p.y += v.y * delta
+			p.x = lerpf(p.x, t.x, minf(1.0, delta * 10.0))
+			if p.y >= t.y:
+				p.y = t.y
+				if absf(v.y) < 160.0:
+					c.erase("vel")
+					Sfx.play("paper", -10.0, 1.2)
+				else:
+					v.y = -v.y * 0.28
+					Sfx.play("paper", -14.0, 1.5)
+			if c.has("vel"):
+				c["vel"] = v
+			c["pos"] = p
+			continue
 		c["pos"] = p.lerp(t, minf(1.0, delta * (9.0 if c["born"] == 0.0 else 6.0)))
-	var now := Time.get_ticks_msec() / 1000.0
 	for i in range(_pulp.size() - 1, -1, -1):
 		var age: float = now - float(_pulp[i]["t0"])
 		if age > CRUMPLE + TOSS and not _pulp[i].has("in"):
@@ -280,6 +353,7 @@ func _process(delta: float) -> void:
 		if now - float(b["t0"]) > 1.2:
 			_bits.remove_at(i)
 	queue_redraw()
+	_mouth.queue_redraw()
 
 
 func _draw_order() -> Array[int]:

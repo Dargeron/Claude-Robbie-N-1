@@ -29,17 +29,16 @@ func _ready() -> void:
 		["wait", 10],
 		["tap", _tube], ["check", "the tube opens a memo", func() -> bool: return c.memo.visible],
 		["tap_at", Vector2(80, 650)], ["check", "tapping outside files the memo", func() -> bool: return not c.memo.visible],
-		["tap_at", Vector2(1212, 392)], ["check", "the cover lifts", func() -> bool: return c.dispatch.armed],
-		["drag", _lever, Vector2(110, 0)], ["check", "pulling the lever dispatches Robbie 001", func() -> bool: return c.state.next_serial == 2],
+		["drag", _lever, Vector2(6, 95)], ["wait", 30], ["check", "pulling the chain down dispatches Robbie 001", func() -> bool: return c.state.next_serial == 2],
 		["check", "the scope shows his dive", func() -> bool: return c.scope.has_dive()],
 		["check", "the teleprinter has lines", func() -> bool: return c.teleprinter.lines.size() > 2],
 		["arc", "order_wheel", -90.0, -30.0], ["check", "turning the ORDER wheel by its grip moves it two notches", func() -> bool: return c.press.order_wheel.index == 2],
 		["tap", _wheel_left], ["check", "tapping left of the hub turns it back one", func() -> bool: return c.press.order_wheel.index == 1],
 		["check", "the board reads FOLLOW WALL LEFT", func() -> bool: return c.press.rule()["action"] == "follow_wall" and c.press.rule()["param"] == "left"],
-		["drag", _print_knob, Vector2(0, 170)], ["wait", 40], ["check", "pulling PRINT drops a card in the tray", func() -> bool: return c.table.tray_rules().size() == 1],
+		["drag", _print_knob, Vector2(0, 170)], ["wait", 150], ["check", "pulling PRINT drops a card in the tray", func() -> bool: return c.table.tray_rules().size() == 1],
 		["drag", _slot_card0, _to_chute], ["wait", 40], ["check", "a card dropped in the PULP chute is gone", func() -> bool: return c.table.deck().is_empty()],
 		["drag", _tray_card, _to_slot1], ["wait", 20], ["check", "the printed card goes into slot 1", func() -> bool: return c.table.deck().size() == 1 and c.table.deck()[0]["action"] == "follow_wall"],
-		["drag", _lever, Vector2(110, 0)], ["check", "a second dispatch: Robbie 002", func() -> bool: return c.state.next_serial == 3],
+		["drag", _lever, Vector2(-4, 95)], ["wait", 30], ["check", "a second dispatch: Robbie 002", func() -> bool: return c.state.next_serial == 3],
 		["check", "Robbie 002 reaches the beacon", func() -> bool: return c.current_entry.get("result", "") == "exit"],
 		["drag", _reel, Vector2(0, 40)], ["check", "turning a reel scrubs the wire", func() -> bool: return not c.scope.replay.playing and c._scrubbed],
 		["tap", _tape_line], ["check", "tapping a tape line winds the wire there", func() -> bool: return c.scope.replay.view.t < c.current_dive.rec.ticks - 1],
@@ -47,11 +46,15 @@ func _ready() -> void:
 		["check", "the recorder starts at speed 1 (normal), not AUTO", func() -> bool: return not c.scope.replay.auto and c.scope.replay.speed() == 2.0],
 		["tap", _speed_knob], ["check", "tapping the speed knob turns it to 2", func() -> bool: return not c.scope.replay.auto and c.scope.replay.speed() == 4.0],
 		["tap", _speed_knob], ["check", "and once more to AUTO", func() -> bool: return c.scope.replay.auto],
+		["drag", func() -> Vector2: return _speed_knob() + Vector2(0, -22), Vector2(-22, 32)], ["check", "dragging the speed knob round to ½ sets ½", func() -> bool: return not c.scope.replay.auto and c.scope.replay.speed() == 1.0],
+		["tap", _order_drum], ["check", "touching the drum's glass does nothing", func() -> bool: return c.press.order_wheel.index == 1],
 		["tap", _crank], ["check", "cranking sends the sea trials", func() -> bool: return c.survey_run != null],
 		["await_trials"], ["check", "The Dark is certified", func() -> bool: return c.state.room_state("dark").certified],
 		["wait", 30], ["tap", _tube], ["check", "the tally arrives by tube", func() -> bool: return c.memo.visible and c.memo.memo.get("kind", "") == "tally"],
 		["tap", _file_it], ["check", "FILE IT puts it away", func() -> bool: return not c.memo.visible],
 		["tap", _sector2], ["check", "the dial turns to The Jellyfish", func() -> bool: return c.room_id == "jellyfish"],
+		["tap", _sector_knob], ["check", "tapping the sector knob clicks it on to the next open sector", func() -> bool: return c.room_id == "dark"],
+		["tap", _sector2], ["check", "and the number takes it back", func() -> bool: return c.room_id == "jellyfish"],
 		["tap", _binder], ["check", "the binder opens", func() -> bool: return c.memo.visible and c.memo.memo.get("kind", "") == "binder"],
 		["tap_at", Vector2(40, 40)], ["check", "and closes", func() -> bool: return not c.memo.visible],
 		["tap", _wall], ["check", "the Wall opens", func() -> bool: return c.wall.visible],
@@ -66,7 +69,7 @@ func _tube() -> Vector2:
 	return Desk.r("tube_window").get_center()
 
 func _lever() -> Vector2:
-	return c.dispatch._knob() + c.dispatch.position
+	return c.dispatch.handle()
 
 func _wheel_c(key: String) -> Vector2:
 	var v := Desk.v(key)
@@ -111,6 +114,12 @@ func _file_it() -> Vector2:
 
 func _sector2() -> Vector2:
 	return c.dial._label_pos(1) + c.dial.position
+
+func _sector_knob() -> Vector2:
+	return Desk.r("sector_knob").get_center()
+
+func _order_drum() -> Vector2:
+	return Desk.r("order_drum").get_center() + Vector2(0, -18)
 
 func _binder() -> Vector2:
 	return Desk.r("binder").get_center()

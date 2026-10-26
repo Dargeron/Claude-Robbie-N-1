@@ -1,10 +1,11 @@
 class_name CardPress
 extends Control
 ## The press that makes order cards. Turn the ORDER wheel and the CONDITION wheel (drag them
-## round by the grip, or tap either side to click one notch), set the value wheel and the
-## NOT switch; each wheel rolls a printed drum behind the glass above it, so the operator sees the
-## choice at the index line and the ones either side. Pull PRINT: the press stamps the
-## card and it slides out into the tray, where the operator picks it up.
+## round, or tap either side to click one notch), the small wheel for the value, and set the NOT
+## switch. Each wheel rolls a printed drum behind glass, so the operator sees the choice at the
+## index line and the ones either side; the drums themselves are behind the glass, out of reach.
+## Pull PRINT down: the press stamps the card, feeds it out of its slot a notch at a time, and
+## it drops onto the platter below, where the operator picks it up.
 ## Which orders the wheels carry depends on the type plates the Company has issued.
 
 signal printed(rule: Dictionary)
@@ -18,6 +19,7 @@ const PRINT_TIME := 0.7
 var plates: Array = []
 var order_wheel: Wheel
 var cond_wheel: Wheel
+var value_wheel: Wheel
 var value: Drum
 var order_drum: Drum
 var cond_drum: Drum
@@ -30,7 +32,8 @@ var _lever := 0.0
 var _lever_drag := false
 var _lever_grab := 0.0
 var _pulled := false
-var _printing := -1.0            # time printing started, or -1
+var _printing := -1.0            # when printing started (on _clock), or -1
+var _clock := 0.0                # game time
 var _print_rule: Dictionary = {}
 var _fresh := {}                 # plate -> time it was issued (its entries glint on the board)
 
@@ -53,7 +56,7 @@ func setup() -> void:
 	_put_wheel(order_wheel, "order_wheel", "wheel_order")
 	cond_wheel = Wheel.new()
 	_put_wheel(cond_wheel, "cond_wheel", "wheel_cond")
-	# The wheels roll the drums; the drums can be rolled by hand too, and turn their wheel.
+	# Only the wheels turn the drums.
 	order_wheel.turned.connect(func(i: int) -> void:
 		order_drum.select(i)
 		_show())
@@ -61,17 +64,17 @@ func setup() -> void:
 		cond_drum.select(i)
 		_refresh_value()
 		_show())
-	order_drum.turned.connect(func(i: int) -> void:
-		order_wheel.turn_to(i)
-		_show())
-	cond_drum.turned.connect(func(i: int) -> void:
-		cond_wheel.turn_to(i)
-		_refresh_value()
-		_show())
 	value = Drum.new()
 	value.font_size = 18
+	value.wrap = true
 	_put(value, Desk.r("value_wheel"))
-	value.turned.connect(func(_i: int) -> void: _show())
+	value_wheel = Wheel.new()
+	_put_wheel(value_wheel, "value_knob", "wheel_value")
+	value_wheel.turned.connect(func(i: int) -> void:
+		value.select(i)
+		_show())
+	for d: Drum in [order_drum, cond_drum, value]:
+		d.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 func _put(c: Control, r: Rect2) -> void:
@@ -154,6 +157,9 @@ func _refresh_value() -> void:
 	value.locked = not COND_VALUES.has(c)
 	var keep := value.current()
 	value.set_entries(vals, keep if vals.has(keep) else (vals[mini(1, vals.size() - 1)] if c == "hostile_near" else ""))
+	value_wheel.count = vals.size()
+	value_wheel.locked = value.locked
+	value_wheel.index = value.index
 
 
 ## The card the press is set to print.
@@ -175,8 +181,8 @@ func _show() -> void:
 
 func _knob_pos() -> Vector2:
 	var s := Desk.v("print_slot")
-	var top := Vector2(float(s[0]) + float(s[2]) * 0.5, float(s[1]) + 14.0) - position
-	return top + Vector2(0, (float(s[3]) - 28.0) * _lever)
+	var top := Vector2(float(s[0]) + float(s[2]) * 0.5, float(s[1]) + 18.0) - position
+	return top + Vector2(0, (float(s[3]) - 36.0) * _lever)
 
 
 func _local(key: String) -> Rect2:
@@ -187,7 +193,7 @@ func _local(key: String) -> Rect2:
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
-			if event.position.distance_to(_knob_pos()) < 28.0:
+			if event.position.distance_to(_knob_pos()) < 36.0:
 				_lever_drag = true
 				_lever_grab = event.position.y - _knob_pos().y
 				_pulled = false
@@ -203,8 +209,8 @@ func _gui_input(event: InputEvent) -> void:
 				tw.tween_callback(_pull)
 	elif event is InputEventMouseMotion and _lever_drag:
 		var s := Desk.v("print_slot")
-		var travel := float(s[3]) - 28.0
-		var top := float(s[1]) + 14.0 - position.y
+		var travel := float(s[3]) - 36.0
+		var top := float(s[1]) + 18.0 - position.y
 		_lever = clampf((event.position.y - _lever_grab - top) / travel, 0.0, 1.0)
 		if _lever > 0.95:
 			_pull()
@@ -225,7 +231,7 @@ func _pull() -> void:
 	if r.is_empty():
 		return
 	_print_rule = r
-	_printing = Time.get_ticks_msec() / 1000.0
+	_printing = _clock
 	Sfx.play("punch", -2.0)
 	Sfx.play("type", -10.0)
 
@@ -246,10 +252,11 @@ func _flip_not() -> void:
 func stamping() -> float:
 	if _printing < 0.0:
 		return -1.0
-	return clampf((Time.get_ticks_msec() / 1000.0 - _printing) / PRINT_TIME, 0.0, 1.0)
+	return clampf((_clock - _printing) / PRINT_TIME, 0.0, 1.0)
 
 
 func _process(delta: float) -> void:
+	_clock += delta
 	if not _lever_drag and _lever > 0.0:
 		_lever = maxf(0.0, _lever - delta * 3.0)
 	if _printing >= 0.0 and stamping() >= 1.0:
@@ -287,8 +294,18 @@ func _draw() -> void:
 	for k in ["order_wheel", "cond_wheel", "print", "tray"]:
 		var pr := Desk.plaque_rect(k)
 		Desk.engraved(self, Rect2(pr.position - position, pr.size), Desk.plaque(k)[4], 12)
-	# The PRINT lever's knob.
-	Desk.draw_sprite(self, "punch_knob", _knob_pos() + Vector2(0, 4))
+	# The PRINT lever: a heavy bronze arm out of the slot, the red pull on its end.
+	var sl := _local("print_slot")
+	var k := _knob_pos()
+	var arm := Rect2(Vector2(sl.get_center().x - 9.0, sl.position.y - 2.0), Vector2(18, k.y - sl.position.y + 2.0))
+	draw_rect(Rect2(arm.position + Vector2(4, 5), arm.size), Color(0, 0, 0, 0.35))
+	draw_rect(arm, Color(0.3, 0.22, 0.12))
+	draw_rect(Rect2(arm.position + Vector2(3, 0), Vector2(4, arm.size.y)), Color(0.56, 0.43, 0.24, 0.85))
+	draw_rect(Rect2(arm.position + Vector2(14, 0), Vector2(4, arm.size.y)), Color(0.14, 0.1, 0.05))
+	for y in range(int(arm.position.y) + 8, int(arm.end.y) - 4, 22):
+		draw_circle(Vector2(arm.get_center().x, y), 2.2, Color(0.2, 0.15, 0.08))
+	draw_rect(Rect2(Vector2(sl.get_center().x - 15.0, sl.position.y - 6.0), Vector2(30, 8)), Color(0.36, 0.27, 0.14))
+	Desk.draw_sprite(self, "punch_knob", k + Vector2(0, 6))
 
 
 ## A selector wheel: drag it round by the grip (one notch every NOTCH of turn), or tap
@@ -299,6 +316,7 @@ class Wheel:
 	const NOTCH := PI / 6.0
 	var sprite := ""
 	var radius := 60.0
+	var locked := false          # nothing to choose: it turns, but dim
 	var count := 1
 	var index := 0
 	var _angle := 0.0            # shown angle
@@ -372,4 +390,4 @@ class Wheel:
 		queue_redraw()
 
 	func _draw() -> void:
-		Desk.draw_sprite(self, sprite, _c(), _angle)
+		Desk.draw_sprite(self, sprite, _c(), _angle, Color(0.6, 0.6, 0.6) if locked else Color.WHITE)

@@ -104,8 +104,9 @@ func _draw() -> void:
 	var x0 := float(tl["x"]) - 6.0 - position.x
 	var f := Desk.font("plate")
 	draw_string(f, Vector2(x0, y + 4.0), "%d OF %d TO PASS" % [needed, fleet], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(Desk.STENCIL, 0.7))
-	Desk.draw_lamp(self, Vector2(x0 + 92.0, y), "BEACON", Desk.AMBER, 1.0 if enabled else 0.0, 3.8, 1, 10)
-	Desk.draw_lamp(self, Vector2(x0 + 140.0, y), "CERTIFIED", Desk.GREEN_LAMP, 1.0 if certified else 0.0, 3.8, 1, 10)
+	# (Clear of the dispatch chain, which hangs past this panel.)
+	Desk.draw_lamp(self, Vector2(x0 + 122.0, y), "BEACON", Desk.AMBER, 1.0 if enabled else 0.0, 3.8, 1, 10)
+	Desk.draw_lamp(self, Vector2(x0 + 172.0, y), "CERTIFIED", Desk.GREEN_LAMP, 1.0 if certified else 0.0, 3.8, 1, 10)
 	Desk.draw_sprite(self, "crank", _crank_c(), _crank, Color.WHITE if enabled else Color(0.6, 0.6, 0.6))
 	var pr := Desk.plaque_rect("trials")
 	Desk.engraved(self, Rect2(pr.position - position, pr.size), Desk.plaque("trials")[4], 12)

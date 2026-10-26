@@ -1,11 +1,12 @@
 # Status
 
-Updated 2026-10-26, session 40: **0.5.0, the Admiralty desk.** Albert picked handle style 2 (Admiralty) and asked
-for the whole machine to follow it: console_scene.py's materials are now bronze, navy grey-green enamel and chipped
-valve red (`_m_admiralty`), and the hand parts are rebuilt in that style (handwheels, T-handle lever, scalloped PRINT
-pull, wing knobs, spoon toggle, red keys in bronze bezels). Before that, 0.4.0 (session 39): flat desk only, speed
-knob ½ / 1 / 2 / AUTO, lamps instead of changing text, no lid, Bathy swims. Waiting on Albert: his playtest of 0.5.0;
-his reaction to the Lab ideas (docs/design/hangar-ideas.md).
+Updated 2026-10-26, session 41: **0.6.0, the pull chain.** From Albert's 0.5.0 playtest: FIRE LASER issued with
+the Jellyfish shift; dispatch is a pull chain hanging from the ceiling (console/dispatch.gd, `PullChain`: a Verlet
+chain, pull rod on a spring, steam whistle) in place of the lever, cover and ARMED plate; the press feeds the printed
+card out of its slot in jerks and drops it onto the platter; PRINT's plate on top and a heavier lever; the drums only
+turn by their wheels, the value drum has its own small wheel; sprites carry no baked shadows (Desk.draw_sprite draws a
+fixed silhouette shadow); the speed knob and the sector selector both take taps and drags. Before that, 0.5.0: the
+Admiralty desk. Waiting on Albert: his playtest of 0.6.0; his reaction to the Lab ideas (docs/design/hangar-ideas.md).
 
 ## Where we are
 

@@ -44,12 +44,13 @@
         "hostile_near",
         "not",
         "wall_behind",
-        "energy_below"
+        "energy_below",
+        "shoot"
       ],
       "open": {
         "ref": "DA-9/0540  ·  SHIFT 2",
         "subject": "SECTOR 2: BIOLOGICAL ACTIVITY",
-        "body": "Operator 6,\n\nSector 2 contains [b]bioluminescent organisms[/b] of no commercial value. They are attracted to the unit's lamp and will damage the hull. Damage is charged to the dispatching operator.\n\nThe Company has developed nothing that lives here, and accepts no responsibility for anything that does.\n\nType plates issued: LAMP ON/OFF  ·  KEEP DISTANCE  ·  SWIM TOWARDS LIGHT  ·  IF HOSTILE NEAR  ·  IF WALL BEHIND  ·  IF CHARGE BELOW  ·  the NOT switch is released for use.\n\nUnits are not to be named.\n\nYour balance is [b]{debt} scrip[/b]."
+        "body": "Operator 6,\n\nSector 2 contains [b]bioluminescent organisms[/b] of no commercial value. They are attracted to the unit's lamp and will damage the hull. Damage is charged to the dispatching operator.\n\nThe Company has developed nothing that lives here, and accepts no responsibility for anything that does.\n\nType plates issued: LAMP ON/OFF  ·  KEEP DISTANCE  ·  SWIM TOWARDS LIGHT  ·  IF HOSTILE NEAR  ·  IF WALL BEHIND  ·  IF CHARGE BELOW  ·  FIRE LASER (Company patent; each discharge is metered)  ·  the NOT switch is released for use.\n\nUnits are not to be named.\n\nYour balance is [b]{debt} scrip[/b]."
       },
       "notice": "Operators are reminded that units are not to be named. A number is sufficient. A number has always been sufficient.",
       "letter": "The wrecks move.\n\nI marked where 44 went silent. On the next chart he was two hundred metres east, wedged in a crack, facing the station. Like somebody set him there to look at us.\n\nI asked the Directorate. They sent me a memo about morale.\n\nThe Nursery is a tunnel and it is full. Dark won't save him in there. They'll issue you the laser. It's Company property.\nSo is he."
@@ -57,14 +58,13 @@
     {
       "sector": "nursery",
       "plates": [
-        "shoot",
         "towards_open_water",
         "executing"
       ],
       "open": {
         "ref": "DA-9/0655  ·  SHIFT 3",
         "subject": "SECTOR 3: CLEARANCE",
-        "body": "Operator 6,\n\nSector 3 is a breeding ground. The Directorate has classified it a [b]clearance zone[/b]. The tunnel is to be opened for future survey by whatever means the deck requires.\n\nType plates issued: FIRE LASER (Company patent; each discharge is metered)  ·  SWIM TOWARDS OPEN WATER  ·  IF EXECUTING CARD.\n\nOperators who experience reluctance during clearance are reminded that reluctance is a symptom, and that symptoms are treatable.\n\nReports of signals originating below the Nursery are unfounded.\n\nYour balance is [b]{debt} scrip[/b]."
+        "body": "Operator 6,\n\nSector 3 is a breeding ground. The Directorate has classified it a [b]clearance zone[/b]. The tunnel is to be opened for future survey by whatever means the deck requires.\n\nType plates issued: SWIM TOWARDS OPEN WATER  ·  IF EXECUTING CARD. The laser issued last shift is approved for clearance work.\n\nOperators who experience reluctance during clearance are reminded that reluctance is a symptom, and that symptoms are treatable.\n\nReports of signals originating below the Nursery are unfounded.\n\nYour balance is [b]{debt} scrip[/b]."
       },
       "notice": "Operator 5 was not lost. Operator 5 was reassigned. Further questions on this subject will be noted.",
       "letter": "If you're reading this they gave you the Nursery. They gave it to me too.\n\nGo back through the tapes of the ones you lost there and read the last words in order, one after another. It's a sentence. It's the same sentence every time, and it isn't finished.\n\nI don't think it's theirs. I think it's being said through them.\n\nI'm going down to ask what the end of it is.\n\nDon't let them seal the hangar."
@@ -77,7 +77,7 @@
     "stamp": "SEALED"
   },
   "tally": "Operator 6,\n\n[b]{sector} is certified.[/b] The Analytical Engine passed your deck in [b]{passed} of 20[/b] trials.\n\nUnits dispatched this shift: {sent}\nUnits written off: {lost}  (at {hull_cost} scrip each, charged against your contract)\nCertification credit: {credit} scrip\nCards in the deck: {cards}\n\nBalance owing: [b]{debt} scrip[/b]\n\nCommendations: none.\n\nNOTICE: {notice}",
-  "regulations": "[b]STATION 9  ·  STANDING REGULATIONS[/b]\n\n1. Units are Company property. Damage to units is charged to the dispatching operator.\n\n2. Units do not feel. Operators who believe otherwise are to report to Welfare.\n\n3. Decks are to be composed only from issued type plates.\n\n4. The red safety cover is to be lowered after every dispatch.  [i]nobody checks. — 5[/i]\n\n5. Last words are telemetry artefacts and are not to be transcribed, collected, or repeated.\n\n6. The Wall is not a memorial. It is a record.\n\n7. Operators will not descend.\n\n8. Signals originating below survey depth are to be logged as NOISE.\n\n9. The hangar is closed for audit.\n\n10. Spoiled cards are pulped, not kept. Card stock is charged to the operator.",
+  "regulations": "[b]STATION 9  ·  STANDING REGULATIONS[/b]\n\n1. Units are Company property. Damage to units is charged to the dispatching operator.\n\n2. Units do not feel. Operators who believe otherwise are to report to Welfare.\n\n3. Decks are to be composed only from issued type plates.\n\n4. The dispatch chain is to be pulled once, firmly, and released.  [i]nobody checks. — 5[/i]\n\n5. Last words are telemetry artefacts and are not to be transcribed, collected, or repeated.\n\n6. The Wall is not a memorial. It is a record.\n\n7. Operators will not descend.\n\n8. Signals originating below survey depth are to be logged as NOISE.\n\n9. The hangar is closed for audit.\n\n10. Spoiled cards are pulped, not kept. Card stock is charged to the operator.",
   "hangar": {
     "ref": "DA-9/0099",
     "subject": "HANGAR: INVENTORY AUDIT",
@@ -86,7 +86,7 @@
   },
   "notes": {
     "welcome": "New one? Read these. Nobody else will tell you anything.\nAnything painted red, you can put your hands on.\nThe tube's got your orders. Tap the capsule.",
-    "dispatch": "He's already got a card in slot 1: swim to the beacon. Lift the red cover, pull the lever. Don't get attached to the first one.",
+    "dispatch": "He's already got a card in slot 1: swim to the beacon. Pull the chain, all the way down. Don't get attached to the first one.",
     "rewind": "Lost him. Drag the reels (or the wire) back and watch where it went wrong.",
     "tape": "The tape prints what he sensed. Tap a line, the wire jumps there.",
     "deck": "He reads the slots top to bottom and does the first card that fits, every think.\nThe beacon is a radio, not a road. It points through rock. Try FOLLOW WALL.",
@@ -95,11 +95,10 @@
     "certified": "Certified. They'll send a tally. Read the notice at the bottom; that's where they hide things.",
     "next_sector": "Turn the sector knob. They've opened the next one.",
     "lamps": "Watch the lamps by the slots while he swims. Amber is the card he's on. Red ones he skipped, and why's stamped on them.",
-    "jelly": "jellies LOVE the light. lamp OFF near them. Or all the time.",
+    "jelly": "jellies LOVE the light. lamp OFF near them. Or burn them with the laser, if you can live with it.",
     "not": "NOT flips a condition.",
     "nursery": "No way round in there. Dark won't save him. The laser will. Ask yourself what it's clearing them for.",
     "hangar": "Hangar's sealed till the audit's done. It's never done.",
-    "cover": "Cover first. The red one, by the lever.",
     "print": "Turn the ORDER wheel by its grip; the drum above it rolls. What sits between the marks is the card you get. Pull PRINT.",
     "insert": "Drag the card out of the tray and into a slot. Spoiled cards go down the PULP chute.",
     "tray_full": "Tray's full. Put a card in a slot or feed one to the PULP chute.",
