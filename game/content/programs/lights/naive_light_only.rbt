@@ -1,0 +1,4 @@
+# expect: fail
+# certify: no
+# Follows the lights to the last one, and then has nothing left to follow.
+move_towards light

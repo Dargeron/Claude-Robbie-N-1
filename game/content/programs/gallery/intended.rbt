@@ -1,0 +1,6 @@
+# expect: exit
+# certify: yes
+# Lurkers hide in the alcoves; when one wakes its eyes glow, and a moment later it strikes
+# where Robbie was. Back away from it, then go on while it rests.
+keep_distance 4
+move_towards beacon

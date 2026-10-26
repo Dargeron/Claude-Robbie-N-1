@@ -71,6 +71,14 @@ static func lines(dive: Dive, sonar: SonarView, serial: int, sector: String, cap
 				out.append({"t": t, "text": "AN EEL HAS HEARD HIM", "kind": "hit", "rule": rec.rrule[t]})
 			"valve":
 				out.append({"t": t, "text": "VALVE %s" % str(e["state"]).to_upper(), "kind": "info", "rule": rec.rrule[t]})
+			"lure_seen":
+				var lp: Vector2i = dive.room.lures[int(e["i"])]
+				var ldx := lp.x * Fx.TILE + Fx.TILE / 2 - rec.rx[t]
+				var ldy := lp.y * Fx.TILE + Fx.TILE / 2 - rec.ry[t]
+				var lb := (int(roundf(rad_to_deg(atan2(float(ldx), float(-ldy))))) + 360) % 360
+				out.append({"t": t, "text": "A LIGHT  ·  BRG %03d  ·  NOT ON THE CHART" % lb, "kind": "contact", "rule": rec.rrule[t]})
+			"lure_out":
+				out.append({"t": t, "text": "THE LIGHT WENT OUT", "kind": "info", "rule": rec.rrule[t]})
 	for k in range(1, n):
 		var pct := rec.ren[k] * 100 / maxi(dive.world.energy_max, 1)
 		var prev := rec.ren[k - 1] * 100 / maxi(dive.world.energy_max, 1)

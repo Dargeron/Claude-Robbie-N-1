@@ -1,13 +1,18 @@
-# 0.7.0-lever · The big lever, and a proper card slot
+# 0.8.0-depths · Three new sectors
 
-The last two station controls:
+The station is done; now the sea. After The Dark and The Jellyfish come three new sectors, each solved with two
+cards, each bringing exactly one new type plate (the new card on the wheel is your hint), and each one's answer is
+the trap in the next.
 
-- **Dispatch is a big lever.** A long bronze arm on a pivot, a thick chipped red grip on its end, a notched quadrant
-  behind it. Grab the grip and haul it all the way down: it clunks home, the steam whistle blows and hisses, and
-  Robbie drops. Let go and it springs back up against its stop. If the deck can't go, it jams a few degrees down with
-  a clunk and **HOLD** is lit; **READY** means it will go. (A tap on the grip throws it for you.) The chain is gone.
-- **The press has a real card slot.** A bronze mouth juts out over the platter with the slot running along it. Pull
-  PRINT and the card comes out of it a notch at a time, printed, and drops onto the platter just below.
+- **Sector 3 · The Listeners.** Blind eels patrol shafts across a corridor. They can't see Robbie; they *hear* him
+  swim. New plate: **STOP**.
+- **Sector 4 · The Gallery.** A corridor of alcoves, and things live in them. Their eyes light up, and a moment later
+  they strike where Robbie *was*. New plate: **KEEP DISTANCE**. (What worked in the Listeners will not work here.)
+- **Sector 5 · The Lights.** A dark cave, a long wall, and lights that aren't on the Company's chart. They glow ahead
+  of Robbie and go out behind him, one by one. New plate: **SWIM TOWARDS LIGHT**. (The beacon lies here. So do walls.)
+
+The Company has memos for each, and Op. 5 has letters. The Nursery is set aside for now (the laser came with the
+Jellyfish in 0.6.0).
 
 Install as before: the `.apk` on the tablet (it updates the copy you have), or unzip the Windows build and run
-`RobbieN1.exe`. Your progress is kept.
+`RobbieN1.exe`. Your progress is kept: if you've certified the Jellyfish, the tube has your orders for Sector 3.

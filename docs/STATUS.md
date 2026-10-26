@@ -1,10 +1,10 @@
 # Status
 
-Updated 2026-10-26, session 42: **0.7.0, the big lever.** Albert wasn't sold on the pull chain: dispatch is a big
-lever pulled down through a notched quadrant (console/dispatch.gd, `DispatchLever`: spring return, jams when the deck
-can't go, steam whistle kept), and printed cards come out of a visible bronze card slot over the platter. Albert:
-"that'll be all for the Station controls". Next: whatever he picks (the Lab ideas in docs/design/hangar-ideas.md are
-waiting). Before: 0.6.0 (laser in the Jellyfish, printing, fixed shadows, dials), 0.5.0 (the Admiralty desk).
+Updated 2026-10-26, session 43: **0.8.0, five sectors.** Station controls are done (0.7.0). Albert: the first two
+levels are fine; get three more that are fun with two cards. Brainstorm of ten in docs/design/levels-3-5.md; picked
+The Listeners (stop), The Gallery (back away; new room) and The Lights (follow the cold lights; new room and a new sim
+element, `o` in a room, that goes out when Robbie reaches it). One new type plate per sector. The Nursery, Valve and
+Lock stay for later. Waiting on Albert: his playtest of sectors 3-5; the Lab ideas (docs/design/hangar-ideas.md).
 
 ## Where we are
 

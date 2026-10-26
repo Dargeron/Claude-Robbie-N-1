@@ -1,0 +1,5 @@
+# expect: fail
+# certify: no
+# The beam glances off a lurker's shell.
+shoot
+move_towards beacon

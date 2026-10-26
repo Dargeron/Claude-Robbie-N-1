@@ -4,10 +4,10 @@ extends Control
 ## with its slots, the pulp chute, the Company's counter, the sea trials, the dispatch
 ## lever and the card press on the right; the Company tube, the sector selector, the shift counter, Bathy's porthole and
 ## the hangar window along the top. Nothing floats over it except paper.
-## Prototype: the first three sectors, three shifts.
+## Prototype: five sectors, five shifts.
 
 const SAVE := "user://console_save.json"
-const SECTORS := ["dark", "jellyfish", "nursery"]
+const SECTORS := ["dark", "jellyfish", "listeners", "gallery", "lights"]
 const TICKS := World.TICKS_PER_SECOND
 
 var state := GameState.new()
@@ -999,8 +999,10 @@ func _wanted_notes() -> Array:
 		if not _did("not"):
 			glass.call("not", 92.0, [Vector3(ns.x, ns.y, 26)], 872.0, false)
 		glass.call("jelly", 150.0, [wheel])
-	if room_id == "nursery" and not rs.certified and _read().has("open2"):
-		glass.call("nursery", 240.0, [wheel])
+	# Sectors 3 to 5: Op. 5's one line on what to do there, at the wheel that makes the card.
+	var si := SECTORS.find(room_id)
+	if si >= 2 and not rs.certified and _read().has("open%d" % si) and N.has(room_id):
+		glass.call(room_id, 240.0, [wheel])
 	return out
 
 

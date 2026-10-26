@@ -47,7 +47,9 @@ func _ready() -> void:
 		["program", "move_towards beacon"], ["dispatch"], ["seek_event", "damage", -10], ["wait", 8], ["shot", "c16-jelly-contact"],
 		["program", "lamp off\nmove_towards beacon"], ["dispatch"], ["seek", 0.4], ["wait", 8], ["shot", "c17-jelly-dark"],
 		["seek", 1.0], ["trials"], ["await_trials"], ["wait", 10], ["memo"], ["close"], ["memo"], ["close"], ["memo"], ["close"],
-		["sector", "nursery"], ["program", "shoot\nfollow_wall left"], ["dispatch"], ["seek_event", "laser", 2], ["wait", 8], ["shot", "c18-nursery-laser"],
+		["sector", "listeners"], ["program", "stop if hostile_near 4\nmove_towards beacon"], ["dispatch"], ["seek", 0.4], ["wait", 8], ["shot", "c18-listeners"],
+		["unlock"], ["sector", "gallery"], ["program", "keep_distance 4\nmove_towards beacon"], ["dispatch"], ["seek_event", "lurker_wakes", 8], ["wait", 8], ["shot", "c18b-gallery"],
+		["sector", "lights"], ["program", "move_towards light\nmove_towards beacon"], ["dispatch"], ["seek", 0.45], ["wait", 8], ["shot", "c18c-lights"],
 		["wall"], ["wait", 10], ["shot", "c19-wall"], ["wall_close"],
 		["sector", "dark"], ["wait", 30], ["shot", "c20-dark-chart-after"],
 		["quit"],
@@ -120,6 +122,8 @@ func _process(_d: float) -> void:
 				steps.push_front(["await_trials"])
 		"sector":
 			console._select_sector(s[1])
+		"unlock":
+			console.state.unlock_all = true
 		"wall":
 			console._open_wall()
 		"wall_close":

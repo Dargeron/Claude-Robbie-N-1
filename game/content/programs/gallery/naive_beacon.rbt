@@ -1,0 +1,4 @@
+# expect: fail
+# certify: no
+# Straight down the gallery: the first lurker that wakes kills him.
+move_towards beacon

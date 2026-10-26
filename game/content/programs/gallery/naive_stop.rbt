@@ -1,0 +1,5 @@
+# expect: fail
+# certify: no
+# The Listeners' answer: hold still. A lurker isn't listening; it strikes whatever is in reach.
+stop if hostile_near 4
+move_towards beacon

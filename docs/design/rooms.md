@@ -7,7 +7,11 @@ Programs live in `game/content/programs/<room>/`; `tests/test_reference_programs
 Budgets went up by about half in block 19 (Albert's note #8). The tables below were measured with the old budgets;
 the programs and their survey results are the same, since a budget only limits what can be launched.
 
-Map key: `#` rock, `.` water, `S` start, `E` exit and beacon, `J` jellyfish, `L` lurker niche, `G` valve, `p` glowing plant.
+Map key: `#` rock, `.` water, `S` start, `E` exit and beacon, `J` jellyfish, `L` lurker niche, `G` valve, `p` glowing plant,
+`o` cold light.
+
+**The console's five sectors (since 2026-10-26):** The Dark, The Jellyfish, The Listeners, The Gallery, The Lights,
+two cards each (`docs/design/levels-3-5.md`). The Nursery, The Valve and The Lock are kept for later.
 
 ## 1. The Dark
 
@@ -289,3 +293,99 @@ Robbie to wait while it is shut (The Valve). Each room's own answer fails here o
 | `stop if hostile_near 4` / `move_towards beacon` | 6 | 8/20 | The Listeners' answer: crushed in the valve |
 | `stop if valve_shut` / `move_towards beacon` | 6 | 8/20 | Waits for the valve, then swims past the eels |
 | `move_towards beacon` | 2 | 2/20 | Crushed or bitten |
+
+
+## 7. The Gallery
+
+Two cards · energy 5000 · four lurkers in alcoves, alternating above and below a straight corridor, seven tiles apart
+
+```text
+########################################
+########################################
+########################################
+########################################
+########################################
+########################################
+#......#########################.......#
+#......#########################.......#
+#......###L##############L######.......#
+#....................................EE#
+#..S.................................EE#
+#....................................EE#
+#......##########L##############L......#
+#...p..#########################.......#
+#......#########################.......#
+########################################
+########################################
+########################################
+########################################
+########################################
+########################################
+########################################
+```
+
+Added 2026-10-26 (console sector 4). No new creature: the Valve's lurker, four times, without the valve.
+
+**Teaches:** back away from what wakes. A lurker strikes where Robbie *was*; backing off as its eyes glow takes him
+out of reach, and he goes on while it rests. Straight after The Listeners, where stopping was the answer: here
+stopping is fatal.
+
+| Program | Survey fleet (20 seeds) | What happens |
+| --- | --- | --- |
+| `keep_distance 4` / `move_towards beacon` (intended) | 20/20 | Four small retreats, four strikes at empty water |
+| `keep_distance 6` / `move_towards beacon` | 20/20 | The same, more cautious |
+| `move_towards beacon` | 0/20 | The first lurker that wakes |
+| `stop if hostile_near 4` / `move_towards beacon` | 0/20 | The Listeners' answer: holds still in reach |
+| `shoot` / `move_towards beacon` | 0/20 | The beam glances off |
+| `keep_distance 2` / `move_towards beacon` | 0/20 | Backs off too late |
+| `follow_wall left` | 0/20 | Hugs the alcoves |
+
+The exploit hunt's passing decks all keep distance (with the move in either order).
+
+## 8. The Lights
+
+Two cards · energy 5600 · 33 cold lights
+
+```text
+########################################
+#......................#...............#
+#.S.o.o.o..............#..o.o..........#
+#........o.o...###.....#.o....o........#
+#.......###o...###.....#...#...........#
+#.......###....###.....#.o.#...o.......#
+#..........o...........#...#...........#
+#...........###........#...#....o......#
+#...###....o###...###..#.o.#...........#
+#...###...o.......###..#...#...........#
+#...###...........###..#.o.#.....EE....#
+#..........o.o.o.......#...#.....EE....#
+#......................#.o.#...........#
+#......###......o##....#...#...........#
+#......###.......##....#.o.#...........#
+#...........##.o.......#...#...........#
+#..###......##..o......#...#...........#
+#..###......##.........#.o.#...........#
+#..###..........o.o........#...........#
+#...................o.o.oo.#...........#
+#..........................#...........#
+########################################
+```
+
+Added 2026-10-26 (console sector 5), with a new thing in the water: **cold lights** (`o`). Each glows (sensed within
+3.5 tiles, by line of sight, or in the lamp) until Robbie comes within 9 px of it; then it goes out for good
+(`lure_seen` / `lure_out` events; the scope draws them pale blue-white, the tape reports "A LIGHT · NOT ON THE
+CHART"). `move_towards light` takes the nearest one still burning. They lead from the start, between the pillars, into
+a zig-zag channel through a double wall (in at the bottom, out at the top) and on towards the exit, which floats in
+open water in the far chamber.
+
+**Teaches:** follow something you don't understand; the beacon and the wall both lie here. The zig-zag closes the
+first map's loopholes (a fixed south-east route, or sliding down the wall then taking the beacon).
+
+| Program | Survey fleet (20 seeds) | What happens |
+| --- | --- | --- |
+| `move_towards light` / `move_towards beacon` (intended) | 20/20 | Light to light through the channel, then the beacon in plain view |
+| `move_towards beacon` | 0/20 | Into the long wall |
+| `follow_wall left` / `follow_wall right` | 0/20 | Tours the whole cave and never touches the floating exit; runs out of charge |
+| `move_towards light` | 0/20 | Reaches the last light and has nothing left to follow |
+| `move_towards light` / `follow_wall left` | 0/20 | Out of lights, back to the walls |
+| `move 135 if wall_ahead` / `move_towards beacon` | 0/20 | Slides down the outer wall, can't climb the channel |

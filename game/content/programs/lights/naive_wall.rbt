@@ -1,0 +1,4 @@
+# expect: fail
+# certify: no
+# The Dark's answer. The exit floats in open water: a wall never leads to it.
+follow_wall left

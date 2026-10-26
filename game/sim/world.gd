@@ -38,6 +38,8 @@ const DRAIN_MOVE := 1
 const WALL_AHEAD := 16 * 256    # look-ahead beyond the hull for "wall ahead"
 const RAY_STEP := 2 * 256
 const PLANT_GLOW := 40 * 256
+const LURE_GLOW := 56 * 256       # the cold lights: seen by their own glow this far, past rock no
+const LURE_REACH := 9 * 256       # ...and they go out when Robbie comes this close
 
 # Jellyfish
 const J_RADIUS := 4 * 256
@@ -93,6 +95,8 @@ var gate_closing_t := 45
 var gate_closed_t := 105
 var gate_state := GateState.OPEN
 var last_laser_target := -1
+var lure_out := PackedByteArray()  # per cold light: 1 once Robbie has reached it and it went dark
+var lure_seen := PackedByteArray()
 
 
 func _init(r: Room, seed_v: int, calm_v: bool = false) -> void:
@@ -112,6 +116,8 @@ func _init(r: Room, seed_v: int, calm_v: bool = false) -> void:
 	robbie.hp = R_HP
 	energy = room.energy
 	energy_max = room.energy
+	lure_out.resize(room.lures.size())
+	lure_seen.resize(room.lures.size())
 
 	gate_open_t = room.gate_param("open", 75)
 	gate_closing_t = room.gate_param("closing", 45)
@@ -570,7 +576,32 @@ func light_heading() -> int:
 			if best_d == -1 or d < best_d:
 				best_d = d
 				best_a = Fx.angle_of(cx - robbie.x, cy - robbie.y)
+	for i in room.lures.size():
+		if lure_out[i] == 1 or not lure_sensed(i):
+			continue
+		var cx := room.lures[i].x * Fx.TILE + Fx.TILE / 2
+		var cy := room.lures[i].y * Fx.TILE + Fx.TILE / 2
+		var d := Fx.dist(cx - robbie.x, cy - robbie.y)
+		if best_d == -1 or d < best_d:
+			best_d = d
+			best_a = Fx.angle_of(cx - robbie.x, cy - robbie.y)
 	return best_a
+
+
+## A cold light still burning that Robbie senses now: by its own glow, or in the lamp.
+func lure_sensed(i: int) -> bool:
+	if lure_out[i] == 1:
+		return false
+	var cx := room.lures[i].x * Fx.TILE + Fx.TILE / 2
+	var cy := room.lures[i].y * Fx.TILE + Fx.TILE / 2
+	var dx := cx - robbie.x
+	var dy := cy - robbie.y
+	if absi(dx) > LAMP_RANGE or absi(dy) > LAMP_RANGE:
+		return false
+	var d := Fx.dist(dx, dy)
+	if d <= LURE_GLOW and los(robbie.x, robbie.y, cx, cy):
+		return true
+	return lit(cx, cy)
 
 
 func open_water_heading() -> int:
@@ -670,6 +701,7 @@ func step() -> void:
 			events.append({"t": tick, "type": "energy_out"})
 	if tick % THINK_EVERY == 0:
 		_update_seen()
+	_update_lures()
 	if result == Result.RUNNING and room.is_exit(robbie.x / Fx.TILE, robbie.y / Fx.TILE):
 		result = Result.EXIT
 		cause = "exit"
@@ -682,6 +714,21 @@ func step() -> void:
 	if result == Result.RUNNING and tick >= MAX_TICKS:
 		result = Result.TIMEOUT
 		cause = "timeout"
+
+
+## The cold lights: each is noted the first time Robbie senses it, and goes out when he reaches it.
+func _update_lures() -> void:
+	for i in room.lures.size():
+		if lure_out[i] == 1:
+			continue
+		if lure_seen[i] == 0 and lure_sensed(i):
+			lure_seen[i] = 1
+			events.append({"t": tick, "type": "lure_seen", "i": i})
+		var cx := room.lures[i].x * Fx.TILE + Fx.TILE / 2
+		var cy := room.lures[i].y * Fx.TILE + Fx.TILE / 2
+		if Fx.dist(cx - robbie.x, cy - robbie.y) <= LURE_REACH:
+			lure_out[i] = 1
+			events.append({"t": tick, "type": "lure_out", "i": i})
 
 
 func _update_gate(initial: bool) -> void:

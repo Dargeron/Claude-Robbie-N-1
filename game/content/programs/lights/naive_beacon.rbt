@@ -1,0 +1,4 @@
+# expect: fail
+# certify: no
+# The beacon points straight through the long wall.
+move_towards beacon

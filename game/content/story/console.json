@@ -15,6 +15,18 @@
     "nursery": {
       "label": "SECTOR 3  ·  THE NURSERY  ·  655 M",
       "short": "THE NURSERY"
+    },
+    "listeners": {
+      "label": "SECTOR 3  ·  THE LISTENERS  ·  655 M",
+      "short": "THE LISTENERS"
+    },
+    "gallery": {
+      "label": "SECTOR 4  ·  THE GALLERY  ·  710 M",
+      "short": "THE GALLERY"
+    },
+    "lights": {
+      "label": "SECTOR 5  ·  THE LIGHTS  ·  790 M",
+      "short": "THE LIGHTS"
     }
   },
   "shifts": [
@@ -24,13 +36,12 @@
         "towards_beacon",
         "follow_wall",
         "move",
-        "stop",
         "wall_ahead"
       ],
       "open": {
         "ref": "DA-9/0412  ·  SHIFT 1",
         "subject": "COMMENCEMENT OF DUTIES",
-        "body": "Operator 6,\n\nWelcome to Station 9. Your passage from Earth has been entered against your contract at the standard rate, together with oxygen, berth, and the training you did not receive. You will repay it in shifts. Your balance is [b]{debt} scrip[/b].\n\nYour duty is to chart the sectors beneath the station with Company survey units (type ROBBIE; hereafter \"units\"). A unit is dispatched with a deck of punched order cards and executes the deck. Units do not improvise. Units do not feel. Any appearance to the contrary is an artefact of the telemetry.\n\nThis shift: chart and certify [b]Sector 1, The Dark[/b]. Certification requires the Analytical Engine to pass your deck in sixteen trials of twenty.\n\nType plates issued: SWIM TOWARDS BEACON  ·  FOLLOW WALL  ·  SWIM (BEARING)  ·  STOP  ·  IF WALL AHEAD.\n\nYour predecessor's effects have been removed. Notes left on Company equipment are Company property and are not to be read.\n\nProductivity is its own reward."
+        "body": "Operator 6,\n\nWelcome to Station 9. Your passage from Earth has been entered against your contract at the standard rate, together with oxygen, berth, and the training you did not receive. You will repay it in shifts. Your balance is [b]{debt} scrip[/b].\n\nYour duty is to chart the sectors beneath the station with Company survey units (type ROBBIE; hereafter \"units\"). A unit is dispatched with a deck of punched order cards and executes the deck. Units do not improvise. Units do not feel. Any appearance to the contrary is an artefact of the telemetry.\n\nThis shift: chart and certify [b]Sector 1, The Dark[/b]. Certification requires the Analytical Engine to pass your deck in sixteen trials of twenty.\n\nType plates issued: SWIM TOWARDS BEACON  ·  FOLLOW WALL  ·  SWIM (BEARING)  ·  IF WALL AHEAD.\n\nYour predecessor's effects have been removed. Notes left on Company equipment are Company property and are not to be read.\n\nProductivity is its own reward."
       },
       "notice": "Operators are reminded that unit telemetry (\"last words\") is not speech and is not to be logged as such.",
       "letter": "They count the hulls. I counted the words.\n\nRobbie 31 said it's warm by the wall. There is nothing warm at four hundred metres. Unless something is.\n\nKeep a list of what they say. They'll tell you to burn it. Don't.\n\nThe Jellyfish is next. Lamp off. You'll see."
@@ -39,8 +50,6 @@
       "sector": "jellyfish",
       "plates": [
         "lamp",
-        "keep_distance",
-        "towards_light",
         "hostile_near",
         "not",
         "wall_behind",
@@ -50,30 +59,57 @@
       "open": {
         "ref": "DA-9/0540  ·  SHIFT 2",
         "subject": "SECTOR 2: BIOLOGICAL ACTIVITY",
-        "body": "Operator 6,\n\nSector 2 contains [b]bioluminescent organisms[/b] of no commercial value. They are attracted to the unit's lamp and will damage the hull. Damage is charged to the dispatching operator.\n\nThe Company has developed nothing that lives here, and accepts no responsibility for anything that does.\n\nType plates issued: LAMP ON/OFF  ·  KEEP DISTANCE  ·  SWIM TOWARDS LIGHT  ·  IF HOSTILE NEAR  ·  IF WALL BEHIND  ·  IF CHARGE BELOW  ·  FIRE LASER (Company patent; each discharge is metered)  ·  the NOT switch is released for use.\n\nUnits are not to be named.\n\nYour balance is [b]{debt} scrip[/b]."
+        "body": "Operator 6,\n\nSector 2 contains [b]bioluminescent organisms[/b] of no commercial value. They are attracted to the unit's lamp and will damage the hull. Damage is charged to the dispatching operator.\n\nThe Company has developed nothing that lives here, and accepts no responsibility for anything that does.\n\nType plates issued: LAMP ON/OFF  ·  IF HOSTILE NEAR  ·  IF WALL BEHIND  ·  IF CHARGE BELOW  ·  FIRE LASER (Company patent; each discharge is metered)  ·  the NOT switch is released for use.\n\nUnits are not to be named.\n\nYour balance is [b]{debt} scrip[/b]."
       },
       "notice": "Operators are reminded that units are not to be named. A number is sufficient. A number has always been sufficient.",
-      "letter": "The wrecks move.\n\nI marked where 44 went silent. On the next chart he was two hundred metres east, wedged in a crack, facing the station. Like somebody set him there to look at us.\n\nI asked the Directorate. They sent me a memo about morale.\n\nThe Nursery is a tunnel and it is full. Dark won't save him in there. They'll issue you the laser. It's Company property.\nSo is he."
+      "letter": "The wrecks move.\n\nI marked where 44 went silent. On the next chart he was two hundred metres east, wedged in a crack, facing the station. Like somebody set him there to look at us.\n\nI asked the Directorate. They sent me a memo about morale.\n\nThe next sector is full of things that can't see. They don't need to. They hear him swim. Make him a stone when they come close, and they go right past."
     },
     {
-      "sector": "nursery",
+      "sector": "listeners",
       "plates": [
+        "stop"
+      ],
+      "open": {
+        "ref": "DA-9/0655  ·  SHIFT 3",
+        "subject": "SECTOR 3: ACOUSTIC FAUNA",
+        "body": "Operator 6,\n\nSector 3 is a corridor crossed by the shafts of [b]eels[/b] of a blind species. They do not see the unit. They hear it. A unit in motion draws them; a unit at rest is, to them, rock.\n\nThe Company does not encourage rest. Rest is not productive.\n\nType plates issued: STOP.\n\nA stationary unit continues to draw on its charge, and on your contract.\n\nYour balance is [b]{debt} scrip[/b]."
+      },
+      "notice": "Operator 5 was not lost. Operator 5 was reassigned. Further questions on this subject will be noted.",
+      "letter": "They hear him moving. Not the lamp, not the hull: the moving. So I told mine to stop when one came near, and it slid past him like he was one of the dead.\n\nGo back through the tapes of the ones you lost and read the last words in order, one after another. It's a sentence. It's the same sentence every time, and it isn't finished.\n\nThe next one is the opposite. Mouths in the walls. When the eyes light, back off: they bite where he was, not where he's going."
+    },
+    {
+      "sector": "gallery",
+      "plates": [
+        "keep_distance"
+      ],
+      "open": {
+        "ref": "DA-9/0710  ·  SHIFT 4",
+        "subject": "SECTOR 4: THE GALLERY",
+        "body": "Operator 6,\n\nSector 4 is a corridor of natural alcoves, several of them occupied. The occupants are [b]ambush predators[/b]: patient, armoured against the laser, and quick. They strike where a unit is, not where it is going.\n\nType plates issued: KEEP DISTANCE.\n\nThe Directorate reminds operators that retreat is a cost, not a strategy. It is, however, permitted.\n\nYour balance is [b]{debt} scrip[/b]."
+      },
+      "notice": "Units lost to fauna are written off at full replacement value. Fauna are not written off.",
+      "letter": "I don't think the sentence is theirs. I think it's being said through them.\n\nThere are lights in Sector 5. They aren't on any chart and the Company says they aren't there. They come on ahead of him and go out behind him, one at a time, like somebody walking him home.\n\nFollow them. I did."
+    },
+    {
+      "sector": "lights",
+      "plates": [
+        "towards_light",
         "towards_open_water",
         "executing"
       ],
       "open": {
-        "ref": "DA-9/0655  ·  SHIFT 3",
-        "subject": "SECTOR 3: CLEARANCE",
-        "body": "Operator 6,\n\nSector 3 is a breeding ground. The Directorate has classified it a [b]clearance zone[/b]. The tunnel is to be opened for future survey by whatever means the deck requires.\n\nType plates issued: SWIM TOWARDS OPEN WATER  ·  IF EXECUTING CARD. The laser issued last shift is approved for clearance work.\n\nOperators who experience reluctance during clearance are reminded that reluctance is a symptom, and that symptoms are treatable.\n\nReports of signals originating below the Nursery are unfounded.\n\nYour balance is [b]{debt} scrip[/b]."
+        "ref": "DA-9/0790  ·  SHIFT 5",
+        "subject": "SECTOR 5: UNLIT CAVERN",
+        "body": "Operator 6,\n\nSector 5 is an unlit cavern. Survey instruments report [b]no light sources[/b] in the sector. Any light reported by the unit is an artefact of the telemetry and is to be disregarded.\n\nType plates issued: SWIM TOWARDS LIGHT  ·  SWIM TOWARDS OPEN WATER  ·  IF EXECUTING CARD.\n\nThe beacon is the Company's. Follow the beacon.\n\nYour balance is [b]{debt} scrip[/b]."
       },
-      "notice": "Operator 5 was not lost. Operator 5 was reassigned. Further questions on this subject will be noted.",
-      "letter": "If you're reading this they gave you the Nursery. They gave it to me too.\n\nGo back through the tapes of the ones you lost there and read the last words in order, one after another. It's a sentence. It's the same sentence every time, and it isn't finished.\n\nI don't think it's theirs. I think it's being said through them.\n\nI'm going down to ask what the end of it is.\n\nDon't let them seal the hangar."
+      "notice": "There are no lights in Sector 5. Operators reporting lights will be referred to Welfare. Welfare is fully booked.",
+      "letter": "If you've watched them go out behind him, you know.\n\nThey aren't lighting the way for him. He's a number; the Company told you so. They're lighting the way for whoever is reading his tapes.\n\nI'm going down to ask what the end of the sentence is.\n\nDon't let them seal the hangar."
     }
   ],
   "end": {
-    "ref": "DA-9/0700",
-    "subject": "SECTOR 4: SEALED PENDING REVIEW",
-    "body": "Operator 6,\n\nSectors 4 to 6 are sealed pending review. Your next shift will begin when the review is complete.\n\nThe hangar remains closed for audit. The audit is ongoing.\n\nThe Directorate notes your output and has no further comment at this time.\n\n[b](End of the prototype. Thank you for playtesting. Everything is still here: re-run any sector, try leaner decks, read the tapes.)[/b]",
+    "ref": "DA-9/0800",
+    "subject": "SECTOR 6: SEALED PENDING REVIEW",
+    "body": "Operator 6,\n\nSector 6 and below are sealed pending review. Your next shift will begin when the review is complete.\n\nThe hangar remains closed for audit. The audit is ongoing.\n\nThe Directorate notes your output and has no further comment at this time.\n\n[b](End of the prototype. Thank you for playtesting. Everything is still here: re-run any sector, try leaner decks, read the tapes.)[/b]",
     "stamp": "SEALED"
   },
   "tally": "Operator 6,\n\n[b]{sector} is certified.[/b] The Analytical Engine passed your deck in [b]{passed} of 20[/b] trials.\n\nUnits dispatched this shift: {sent}\nUnits written off: {lost}  (at {hull_cost} scrip each, charged against your contract)\nCertification credit: {credit} scrip\nCards in the deck: {cards}\n\nBalance owing: [b]{debt} scrip[/b]\n\nCommendations: none.\n\nNOTICE: {notice}",
@@ -97,11 +133,13 @@
     "lamps": "Watch the lamps by the slots while he swims. Amber is the card he's on. Red ones he skipped, and why's stamped on them.",
     "jelly": "jellies LOVE the light. lamp OFF near them. Or burn them with the laser, if you can live with it.",
     "not": "NOT flips a condition.",
-    "nursery": "No way round in there. Dark won't save him. The laser will. Ask yourself what it's clearing them for.",
     "hangar": "Hangar's sealed till the audit's done. It's never done.",
     "print": "Turn the ORDER wheel by its grip; the drum above it rolls. What sits between the marks is the card you get. Pull PRINT.",
     "insert": "Drag the card out of the tray and into a slot. Spoiled cards go down the PULP chute.",
     "tray_full": "Tray's full. Put a card in a slot or feed one to the PULP chute.",
-    "empty": "No cards in the reader. He needs at least one."
+    "empty": "No cards in the reader. He needs at least one.",
+    "listeners": "They're blind. They hear him SWIM. STOP when one's near and it goes right past.",
+    "gallery": "Things in the alcoves. Eyes light, then it bites where he WAS. KEEP DISTANCE, then go on.",
+    "lights": "Those lights aren't on their chart. Follow them. When they run out, the beacon's right there."
   }
 }

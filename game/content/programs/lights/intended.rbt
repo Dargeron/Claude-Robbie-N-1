@@ -1,0 +1,6 @@
+# expect: exit
+# certify: yes
+# Cold lights mark a way through the dark, each going out as he reaches it. Follow them;
+# when there are none left, the beacon is in plain view.
+move_towards light
+move_towards beacon

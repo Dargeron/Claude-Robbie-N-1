@@ -29,7 +29,8 @@ func test_the_shifts_issue_every_plate_once() -> void:
 			check(not seen.has(p), "plate %s issued once" % p)
 			seen[p] = true
 	# Every order a shift's reference program needs is on the drum by that shift.
-	var needs := {"dark": ["follow_wall"], "jellyfish": ["lamp", "towards_beacon"], "nursery": ["shoot", "follow_wall"]}
+	var needs := {"dark": ["follow_wall"], "jellyfish": ["lamp", "towards_beacon", "shoot"], "listeners": ["stop", "hostile_near"],
+		"gallery": ["keep_distance"], "lights": ["towards_light"]}
 	var have: Array = []
 	for i in story["shifts"].size():
 		var sh: Dictionary = story["shifts"][i]
@@ -82,7 +83,7 @@ func test_the_console_save_is_its_own() -> void:
 
 
 func test_each_sector_can_be_certified_within_its_slots() -> void:
-	for id: String in ["dark", "jellyfish", "nursery", "valve", "listeners", "lock"]:
+	for id: String in ["dark", "jellyfish", "listeners", "gallery", "lights", "nursery", "valve", "lock"]:
 		var room := RoomLibrary.load_room(id)
 		var fits := false
 		for f: String in DirAccess.get_files_at("res://content/programs/" + id):

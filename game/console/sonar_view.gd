@@ -217,6 +217,7 @@ func _draw() -> void:
 	if lamp_on and rec.rhp[k] > 0:
 		_draw_wedge(k, rpos)
 	_draw_plants_sonar(k, now)
+	_draw_lures(k, now)
 	_draw_beacon_sonar(k, now)
 	_draw_valve(k, now)
 	_draw_contacts(k, k2, f, now)
@@ -296,6 +297,38 @@ func _draw_plants_sonar(k: int, now: float) -> void:
 		draw_circle(pos, 1.4, Color(Desk.PHOSPHOR, a))
 		if found:
 			_found_ring(pos, k, plant_found[i], Desk.PHOSPHOR, 10.0)
+
+
+## The cold lights (The Lights): the one thing on the scope that isn't phosphor green or Bathy's
+## amber. Each shows once Robbie has sensed it, pulses slowly while it burns, and when he reaches
+## it, goes out in a ring that fades.
+const COLD := Color(0.78, 0.9, 1.0)
+
+func _draw_lures(k: int, now: float) -> void:
+	if dive.room.lures.is_empty():
+		return
+	var seen := {}
+	var out := {}
+	for e in dive.world.events:
+		if e["type"] == "lure_seen":
+			seen[int(e["i"])] = int(e["t"])
+		elif e["type"] == "lure_out":
+			out[int(e["i"])] = int(e["t"])
+	for i in dive.room.lures.size():
+		if not seen.has(i) or int(seen[i]) > k:
+			continue
+		var p := dive.room.lures[i]
+		var pos := Vector2(p.x * 16 + 8, p.y * 16 + 8)
+		if out.has(i) and int(out[i]) <= k:
+			var age := k - int(out[i])
+			if age < 45:
+				draw_arc(pos, 3.0 + age * 0.5, 0, TAU, 20, Color(COLD, 0.6 * (1.0 - age / 45.0)), 1.2)
+			draw_circle(pos, 1.0, Color(COLD, 0.15))
+			continue
+		var pulse := 0.75 + 0.25 * sin(now * 0.9 + i * 1.3)
+		Desk.draw_glow(self, pos, 12.0 * pulse, Color(COLD, 0.55))
+		draw_circle(pos, 1.8, Color(COLD, 0.95))
+		_found_ring(pos, k, int(seen[i]), COLD, 12.0)
 
 
 func _draw_beacon_sonar(k: int, now: float) -> void:
