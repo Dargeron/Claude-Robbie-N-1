@@ -50,6 +50,9 @@ The old station (`game/station/station.tscn`) still runs: Mission Control, the L
 | `tools/certify.sh <room> <prog.rbt> [fleet] [first_seed]` | Survey fleet: pass rate over seeds |
 | `tools/bless.sh` | Re-record golden replays after a deliberate sim change |
 | `tools/godot.sh --headless --path game --script res://tools/hunt.gd -- <room> [seeds]` | Exploit hunt over all 1-rule and most 2-rule programs (slow) |
+| `tools/godot.sh --headless --path game --script res://tools/hunt.gd -- <room> 3 "" "move ,move_towards,follow_wall"` | Quick hunt over one family of orders (minutes, not hours) |
+| `tools/godot.sh --headless --path game --script res://tools/gauntlet.gd -- <room> <decks.txt> [seeds]` | Run a list of decks (one per line, rules split by " / ") against a room in one start; for map iteration |
+| `tools/rooms/lights_map.py [--write]` | Generate and check The Lights' map (light chain, exit off compass lines) |
 | `tools/movie.sh <room> <prog.rbt> [seed] [out.mp4] [speed] [serial]` | Record the replay as MP4 (GIF=1 for a GIF too) under a virtual display |
 | `xvfb-run -a tools/godot.sh --path game --rendering-driver opengl3 --audio-driver Dummy res://tools/shots.tscn -- <out_dir>` | Scripted tour of the old station UI, saving screenshots to look at |
 | `tools/console_check.sh [out_dir]` | The console's smoke test: the scripted tour (screenshots, none blank) and the touch play-through (taps and drags only; every machine must answer), flat and again through the 3D chair view (out_dir/chair) |

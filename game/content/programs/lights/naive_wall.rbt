@@ -1,4 +1,4 @@
 # expect: fail
 # certify: no
-# The Dark's answer. The exit floats in open water: a wall never leads to it.
+# The Dark's answer. The exit is inside a floating island: the outer wall never leads to it.
 follow_wall left

@@ -19,7 +19,7 @@ What a good sector needs here:
 | --- | --- | --- | --- | --- |
 | 1 | **The Listeners.** Blind eels patrol shafts across a corridor; they hear a moving Robbie | STOP IF HOSTILE NEAR 4 · SWIM TOWARDS BEACON | Straight for the beacon (bitten); backing away (still noise); lamp off (they're blind); laser (they slip out of it) | **Pick.** Counter-intuitive and tense: you watch him freeze while an eel slides past. Already built and proven |
 | 2 | **The Gallery.** Lurkers hide in alcoves along a corridor; their eyes glow, then they strike where Robbie *was* | KEEP DISTANCE 4 · SWIM TOWARDS BEACON | Straight on (struck); STOP when near (the Listeners' answer, and here it's fatal); laser (it glances off) | **Pick.** The exact opposite of sector 3, right after it: same kind of deck, opposite verb. A lovely "but last time..." |
-| 3 | **The Lights.** Cold lights no chart shows lead through a dark cave, each going out as Robbie reaches it; the exit floats in open water past a long wall | SWIM TOWARDS LIGHT · SWIM TOWARDS BEACON | The beacon (through the wall); follow a wall (tours the cave, never touches the floating exit); the lights alone (stalls at the last one) | **Pick.** A new tool, a new look on the scope (the only blue-white thing on it), and the story's turn: something is helping |
+| 3 | **The Lights.** Cold lights no chart shows lead through a dark cave, each going out as Robbie reaches it, into a floating island of rock where the exit hides at the end of an S | SWIM TOWARDS LIGHT · SWIM TOWARDS BEACON | The beacon (into rock); follow a wall (tours the outer wall, never goes into the island); the lights alone (stalls at the last one); beacon-unless-a-wall (bounces off the island) | **Pick.** A new tool, a new look on the scope (the only blue-white thing on it), and the story's turn: something is helping |
 | 4 | **The Valve, alone.** A timed gate that stings when shut and crushes when it closes on you | STOP IF VALVE SHUT · SWIM TOWARDS BEACON | Straight on (stung or crushed) | One gate, one wait: correct but thin. Kept for later, with the lurker it already has (three cards) |
 | 5 | **The Nursery.** A tunnel full of resting jellyfish; going dark doesn't help when they're in your way | FIRE LASER · FOLLOW WALL | Dark and wall (stung); the beacon | The laser now comes with the Jellyfish, so this repeats it. Kept for later, for its moral weight |
 | 6 | **The Shepherd.** Jellyfish crowd the exit; lead them off with the lamp, then go dark and slip in | LAMP OFF IF CHARGE BELOW n · FOLLOW WALL | Lamp off from the start (they never move) | Clever, but fragile across dives and hard to read on the scope |
@@ -43,7 +43,7 @@ Results (survey fleet, 20 dives each; full tables in rooms.md):
 | --- | --- | --- |
 | The Listeners | 20/20 | beacon 4/20, stop at 2 tiles 1/20, keep distance 6/20, lamp off 4/20, laser 0/20 |
 | The Gallery | 20/20 (keep distance 6 too) | beacon 0/20, stop when near 0/20, laser 0/20, follow a wall 0/20 |
-| The Lights | 20/20 | beacon 0/20, follow a wall (either hand) 0/20, the lights alone 0/20, fixed routes 0/20 |
+| The Lights | 20/20 (lights then open water too) | beacon 0/20, follow a wall (either hand) 0/20, the lights alone 0/20, fixed routes 0/20, beacon-unless-a-wall 0/20, battery-timed switches 0/20 |
 
 Story: the eels are the first thing that *listens*; Op. 5 notices the last words make one sentence; the lights are
 not on the Company's chart ("There are no lights in Sector 5. Operators reporting lights will be referred to

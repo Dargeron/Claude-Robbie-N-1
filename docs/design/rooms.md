@@ -344,51 +344,67 @@ The exploit hunt's passing decks all keep distance (with the move in either orde
 
 ## 8. The Lights
 
-Two cards · energy 5600 · 35 cold lights
+Two cards · energy 3800 · 32 cold lights · map generated and checked by `tools/rooms/lights_map.py`
 
 ```text
 ########################################
-#......................#...............#
-#.S.o.o.o..............#..o.o..........#
-#........o.o...###.....#.o....o........#
-#.......###o...###.....#...#...........#
-#.......###....###.....#.o.#...o.......#
-#..........o...........#...#...........#
-#...........###........#...#....o......#
-#...###....o###...###..#.o.#...........#
-#...###...o.......###..#...#...........#
-#...###...........###..#.o.#....o......#
-#..........o.o.o.......#...#...........#
-#......................#.o.#...o.......#
-#......###......o##....#...#...........#
-#......###.......##....#.o.#...........#
-#...........##.o.......#...#...EE......#
-#..###......##..o......#...#...EE......#
-#..###......##.........#.o.#...........#
-#..###..........o.o........#...........#
-#...................o.o.oo.#...........#
-#..........................#...........#
+#.............#........................#
+#.S.o..o......#........................#
+#........##...#........................#
+#...##.o.##...#....#################...#
+#...##........#....#.......#.......#...#
+#....o.o......#....#.o.o.o.#.......#...#
+#..o..........#....#.......#.......#...#
+#.............#....#.o.#.o.#....EE.#...#
+#.........##..#....#...#...#....EE.#...#
+#..o.##...##..#....#.o.#.o.#.......#...#
+#....##.......#....#...#...#.......#...#
+#..o.o.o......#....#...#...#.......#...#
+#.............#....#.o.#.o.#.......#...#
+#......o.##...#....#...#...........#...#
+#.##.....##...#....#.o.#.o..o.o....#...#
+#.##..........#....#...#...........#...#
+#......o...........#.o.#############...#
+#.........o............................#
+#...........o.o..o.o.o.................#
+#......................................#
 ########################################
 ```
 
 Added 2026-10-26 (console sector 5), with a new thing in the water: **cold lights** (`o`). Each glows (sensed within
 3.5 tiles, by line of sight, or in the lamp) until Robbie comes within 9 px of it; then it goes out for good
 (`lure_seen` / `lure_out` events; the scope draws them pale blue-white, the tape reports "A LIGHT · NOT ON THE
-CHART"). `move_towards light` takes the nearest one still burning. They lead from the start, between the pillars, into
-a zig-zag channel through a double wall (in at the bottom, out at the top) and on towards the exit, which floats in
-open water in the far chamber.
+CHART"). `move_towards light` takes the nearest one still burning. They lead from the start between the pillars, under
+the long wall, along the bottom, and into a floating island of rock: up one corridor, over a wall, down the next, into
+a hall where the exit is. The route: docs/art/station/lights-route.png (orange: lights; blue: the beacon at the end).
 
-**Teaches:** follow something you don't understand; the beacon and the wall both lie here. The zig-zag closes the
-first map's loopholes (a fixed south-east route, or sliding down the wall then taking the beacon), and the exit sits
-off every straight line from the channel's mouth: on the first zig-zag it lay on the mouth's south-east diagonal, so
-"north when a wall is ahead, otherwise south-east" climbed the channel and drifted onto it (20/20, found by the hunt).
+**Teaches:** follow something you don't understand; the beacon and the wall both lie here.
+
+Why this shape (the third map; the hunt broke the first two):
+
+- **The island floats**, so a wall-follower tracing the outer wall never goes in, and no straight line from outside
+  reaches the exit: "beacon when the battery gets low" after a wall tour or open water runs into rock.
+- **The S** needs the wall on the right going up and on the left coming down, so "beacon unless a wall is ahead,
+  otherwise follow the wall" fails with either hand.
+- **The battery** (3800) leaves the lights a third spare and starves the wanderers: "beacon unless a wall is ahead,
+  otherwise open water" does thread the S, but only after circling the island twice.
+- **The exit is off every compass line from the last light** (21 degrees, 2.5 tiles clear), so "lights, then a fixed
+  heading" misses.
+- History: the first map had a fixed south-east route and a slide-down-the-wall-then-beacon exploit; the second (a
+  zig-zag channel through a double wall) had its exit on the channel mouth's diagonal, then, moved, straight south of
+  the last light, and fell to wall tours and open water timed by the battery and to "beacon unless a wall is ahead".
 
 | Program | Survey fleet (20 seeds) | What happens |
 | --- | --- | --- |
-| `move_towards light` / `move_towards beacon` (intended) | 20/20 | Light to light through the channel, then the beacon in plain view |
+| `move_towards light` / `move_towards beacon` (intended) | 20/20 | Light to light into the island's hall, then the beacon; a third of the charge spare |
+| `move_towards light` / `move_towards open_water` | 20/20 | Also follows the lights; the hall's open water holds the exit. Accepted: it learned the lesson |
 | `move_towards beacon` | 0/20 | Into the long wall |
-| `follow_wall left` / `follow_wall right` | 0/20 | Tours the whole cave and never touches the floating exit; runs out of charge |
-| `move_towards light` | 0/20 | Reaches the last light and has nothing left to follow |
+| `follow_wall left` / `follow_wall right` | 0/20 | Tours the cave and the outer wall, never goes into the island; runs out of charge |
+| `move_towards open_water` | 0/20 | Wanders the open water outside; out of charge |
+| `move_towards light` | 0/20 | Reaches the last light in the hall and has nothing left to follow |
 | `move_towards light` / `follow_wall left` | 0/20 | Out of lights, back to the walls |
-| `move 135 if wall_ahead` / `move_towards beacon` | 0/20 | Slides down the outer wall, can't climb the channel |
-| `move 0 if wall_ahead` / `move 135` (and `move 45 if wall_ahead`) | 0/20 | Climbs the channel, crosses the far chamber on the diagonal, misses the exit and pins itself in the corner |
+| `move_towards light` / `move 180` (any fixed heading) | 0/20 | Misses the exit and hits rock |
+| `move_towards beacon if not wall_ahead` / `follow_wall left` or `right` | 0/20 | Bounces along the island until the hull gives out |
+| `move_towards beacon if not wall_ahead` / `move_towards open_water` | 0/20 | Threads the S the long way; out of charge |
+| `move_towards beacon if energy_below 50` / `follow_wall left` or `move_towards open_water` | 0/20 | When the switch comes, the beacon leads into rock |
+| `move 0 if wall_ahead` / `move 135` | 0/20 | Never gets past the long wall |

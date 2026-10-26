@@ -1,0 +1,6 @@
+# expect: fail
+# certify: no
+# The beginner robot's trick: head for the beacon, and lean on a wall when it blocks. The island
+# bounces it back until the hull gives out.
+move_towards beacon if not wall_ahead
+follow_wall left

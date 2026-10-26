@@ -1,0 +1,5 @@
+# expect: fail
+# certify: no
+# The battery as a clock: tour the walls, then take the beacon at half charge. The island is in the way.
+move_towards beacon if energy_below 50
+follow_wall left

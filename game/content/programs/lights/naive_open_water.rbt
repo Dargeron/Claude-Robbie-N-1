@@ -1,0 +1,6 @@
+# expect: fail
+# certify: no
+# Wander the open water, head for the beacon when it is clear. It threads the island the long way round
+# and runs out of charge first.
+move_towards beacon if not wall_ahead
+move_towards open_water
