@@ -28,7 +28,7 @@ var press: CardPress
 var counter: DebtCounter
 var ambience: Ambience
 var trials: SeaTrials
-var dispatch: PullChain
+var dispatch: DispatchLever
 var tube: Topside.Tube
 var dial: Topside.SectorDial
 var nixies: Topside.Nixies
@@ -150,7 +150,7 @@ func _build() -> void:
 	trials.lamp_tapped.connect(_on_trial_lamp)
 	trials.locked_tapped.connect(func() -> void: _flash_note("trials_locked", "No beacon on record for this deck. Get one hull to the beacon first.", Vector3(1128, 309, 64)))
 	add_child(trials)
-	dispatch = PullChain.new()
+	dispatch = DispatchLever.new()
 	_place(dispatch, Desk.r("dispatch"))
 	dispatch.dispatched.connect(_dispatch)
 	dispatch.refused.connect(_on_refused)
@@ -959,12 +959,12 @@ func _wanted_notes() -> Array:
 	var knob := Vector3(1229, 526, 22)
 	var tube_c := Desk.r("tube_window").get_center()
 	var tube_t := Vector3(tube_c.x, tube_c.y, 38)
-	var chain := dispatch.handle()
+	var grip := dispatch.handle()
 	if not _read().has("open0"):
 		out.append(["welcome", Vector2(372, 92), 236.0, [tube_t]])
 		return out
 	if not any_dive:
-		glass.call("dispatch", 236.0, [Vector3(chain.x, chain.y, 34)])
+		glass.call("dispatch", 236.0, [Vector3(grip.x, grip.y, 34)])
 		return out
 	if room_id == "dark" and not dark.certified:
 		if last_lost and not _scrubbed and not _did("rewound"):

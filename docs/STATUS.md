@@ -1,12 +1,10 @@
 # Status
 
-Updated 2026-10-26, session 41: **0.6.0, the pull chain.** From Albert's 0.5.0 playtest: FIRE LASER issued with
-the Jellyfish shift; dispatch is a pull chain hanging from the ceiling (console/dispatch.gd, `PullChain`: a Verlet
-chain, pull rod on a spring, steam whistle) in place of the lever, cover and ARMED plate; the press feeds the printed
-card out of its slot in jerks and drops it onto the platter; PRINT's plate on top and a heavier lever; the drums only
-turn by their wheels, the value drum has its own small wheel; sprites carry no baked shadows (Desk.draw_sprite draws a
-fixed silhouette shadow); the speed knob and the sector selector both take taps and drags. Before that, 0.5.0: the
-Admiralty desk. Waiting on Albert: his playtest of 0.6.0; his reaction to the Lab ideas (docs/design/hangar-ideas.md).
+Updated 2026-10-26, session 42: **0.7.0, the big lever.** Albert wasn't sold on the pull chain: dispatch is a big
+lever pulled down through a notched quadrant (console/dispatch.gd, `DispatchLever`: spring return, jams when the deck
+can't go, steam whistle kept), and printed cards come out of a visible bronze card slot over the platter. Albert:
+"that'll be all for the Station controls". Next: whatever he picks (the Lab ideas in docs/design/hangar-ideas.md are
+waiting). Before: 0.6.0 (laser in the Jellyfish, printing, fixed shadows, dials), 0.5.0 (the Admiralty desk).
 
 ## Where we are
 

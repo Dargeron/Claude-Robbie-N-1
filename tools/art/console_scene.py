@@ -763,9 +763,21 @@ def build_plate():
     slab("whistle_mouth", (wc - 9, wy + wh * 0.42, 18, 5), 0.2, 0.26, mats["recess"], r=2, bevel=0)
     disc("whistle_cap", wc, wy + 8, 12, 0.08, 0.2, mats["brass_dark"], bevel=0.01)
     disc("whistle_nut", wc, wy + 8, 5, 0.2, 0.26, mats["brass"], n=6)
-    # Where the chain hangs: a bronze guide eye on the panel's top lip.
-    cx_ = L["chain"]["x"]
-    ring_obj("chain_guide", cx_, di[1] + 6, 9, 5, 0.0, 0.12, mats["brass"], bevel=0.01)
+    # The dispatch lever's quadrant: a notched bronze arc it travels down, with stops at both ends.
+    dpx, dpy, dlen = L["dispatch_pivot"]
+    arc_o = [P(dpx + (dlen - 18) * math.cos(math.radians(a)), dpy + (dlen - 18) * math.sin(math.radians(a))) for a in range(-32, 33, 2)]
+    arc_i = [P(dpx + (dlen - 40) * math.cos(math.radians(a)), dpy + (dlen - 40) * math.sin(math.radians(a))) for a in range(32, -33, -2)]
+    prism("lever_quadrant", arc_o + arc_i, 0.0, 0.05, mats["brass_dark"], 0.008)
+    for a in range(-24, 25, 6):
+        r0, r1 = dlen - 36, dlen - 22
+        ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
+        n = slab("notch", (-1.5, 0, 3, r1 - r0), 0.05, 0.056, mats["recess"], r=0.5, bevel=0)
+        n.location = (P(dpx + r0 * ca, dpy + r0 * sa)[0], P(dpx + r0 * ca, dpy + r0 * sa)[1], 0)
+        n.rotation_euler = (0, 0, math.radians(90 - a))
+    for a in (-30, 30):
+        disc("lever_stop", dpx + (dlen - 29) * math.cos(math.radians(a)), dpy + (dlen - 29) * math.sin(math.radians(a)), 6, 0.05, 0.14,
+             mats["brass"], bevel=0.01)
+    disc("lever_boss", dpx, dpy, 26, 0.0, 0.06, mats["brass_dark"], bevel=0.012)
     plaque(L["plaques"]["dispatch"][:4])
 
     # The press: a split-flap readout, two selector wheels, the NOT switch and value wheel, the tray the
@@ -778,8 +790,16 @@ def build_plate():
           holes=[rr_outline(*L[k], 4) for k in ("order_drum", "cond_drum")])
     for key in ("order_drum", "cond_drum"):
         recess(key + "_well", L[key], r=3, depth=0.12)
+    # The card slot: a bronze mouth jutting out over the platter, its opening running along it; printed
+    # cards feed out of it and drop.
+    mx_, my_, mw_, mh_ = L["card_mouth"]
+    slab("card_mouth", (mx_, my_, mw_, mh_), 0.0, 0.16, mats["brass"], r=6, bevel=0.02)
+    slab("card_mouth_hood", (mx_ + 4, my_ + 2, mw_ - 8, 9), 0.16, 0.2, mats["brass_dark"], r=3, bevel=0.008)
     ex, ey, ew, eh = L["card_exit"]
-    recess("card_exit", (ex + 6, ey + 4, ew - 12, 5), r=2, depth=0.08)
+    slab("card_exit", (ex, ey, ew, eh), 0.16, 0.165, mats["recess"], r=2, bevel=0)
+    slab("card_exit_lip", (ex, ey + eh, ew, 3), 0.15, 0.16, mats["brass_dark"], r=1, bevel=0)
+    for sx in (mx_ + 9, mx_ + mw_ - 9):
+        screw(sx, my_ + mh_ / 2, mats["brass"], r=3.0, z=0.16, angle=0.8)
     nx2, ny2, nw2, nh2 = L["not_switch"]
     slab("not_plate", (nx2 + 2, ny2 + 2, nw2 - 4, nh2 - 4), 0.0, 0.02, mats["brass_dark"], r=4, bevel=0.005)
     ring_obj("not_bushing", nx2 + nw2 / 2, ny2 + nh2 / 2 - 6, 9, 5, 0.02, 0.05, mats["chrome"])

@@ -77,7 +77,7 @@
     "stamp": "SEALED"
   },
   "tally": "Operator 6,\n\n[b]{sector} is certified.[/b] The Analytical Engine passed your deck in [b]{passed} of 20[/b] trials.\n\nUnits dispatched this shift: {sent}\nUnits written off: {lost}  (at {hull_cost} scrip each, charged against your contract)\nCertification credit: {credit} scrip\nCards in the deck: {cards}\n\nBalance owing: [b]{debt} scrip[/b]\n\nCommendations: none.\n\nNOTICE: {notice}",
-  "regulations": "[b]STATION 9  ·  STANDING REGULATIONS[/b]\n\n1. Units are Company property. Damage to units is charged to the dispatching operator.\n\n2. Units do not feel. Operators who believe otherwise are to report to Welfare.\n\n3. Decks are to be composed only from issued type plates.\n\n4. The dispatch chain is to be pulled once, firmly, and released.  [i]nobody checks. — 5[/i]\n\n5. Last words are telemetry artefacts and are not to be transcribed, collected, or repeated.\n\n6. The Wall is not a memorial. It is a record.\n\n7. Operators will not descend.\n\n8. Signals originating below survey depth are to be logged as NOISE.\n\n9. The hangar is closed for audit.\n\n10. Spoiled cards are pulped, not kept. Card stock is charged to the operator.",
+  "regulations": "[b]STATION 9  ·  STANDING REGULATIONS[/b]\n\n1. Units are Company property. Damage to units is charged to the dispatching operator.\n\n2. Units do not feel. Operators who believe otherwise are to report to Welfare.\n\n3. Decks are to be composed only from issued type plates.\n\n4. The dispatch lever is to be thrown fully home and released.  [i]nobody checks. — 5[/i]\n\n5. Last words are telemetry artefacts and are not to be transcribed, collected, or repeated.\n\n6. The Wall is not a memorial. It is a record.\n\n7. Operators will not descend.\n\n8. Signals originating below survey depth are to be logged as NOISE.\n\n9. The hangar is closed for audit.\n\n10. Spoiled cards are pulped, not kept. Card stock is charged to the operator.",
   "hangar": {
     "ref": "DA-9/0099",
     "subject": "HANGAR: INVENTORY AUDIT",
@@ -86,7 +86,7 @@
   },
   "notes": {
     "welcome": "New one? Read these. Nobody else will tell you anything.\nAnything painted red, you can put your hands on.\nThe tube's got your orders. Tap the capsule.",
-    "dispatch": "He's already got a card in slot 1: swim to the beacon. Pull the chain, all the way down. Don't get attached to the first one.",
+    "dispatch": "He's already got a card in slot 1: swim to the beacon. Haul the big lever all the way down. Don't get attached to the first one.",
     "rewind": "Lost him. Drag the reels (or the wire) back and watch where it went wrong.",
     "tape": "The tape prints what he sensed. Tap a line, the wire jumps there.",
     "deck": "He reads the slots top to bottom and does the first card that fits, every think.\nThe beacon is a radio, not a road. It points through rock. Try FOLLOW WALL.",

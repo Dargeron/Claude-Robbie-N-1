@@ -20,15 +20,15 @@ func _process(_d: float) -> void:
 	_f += 1
 	for n: Node in console._notes.values():
 		(n as CanvasItem).visible = false
-	var ch: PullChain = console.dispatch
+	var lv: DispatchLever = console.dispatch
 	if _f == 20:
-		ch._grab = true
-		ch._finger = ch.handle()
-	elif _f > 20 and _f < 50:
-		ch._finger += Vector2(0.4, 3.4)
-	elif _f == 50:
-		ch._grab = false
-		ch._finger += Vector2(18, 0)
+		lv._drag = true
+	elif _f > 20 and _f < 46:
+		lv._angle = minf(lv._angle + 2.0, lv.PULLED)
+		if lv._angle >= lv.PULLED - 2.0 and not lv._fired:
+			lv._fire()
+	elif _f == 60:
+		lv._drag = false
 	elif _f == 150:
 		console.press._pulled = false
 		console.press._pull()
