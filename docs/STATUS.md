@@ -1,6 +1,6 @@
 # Status
 
-Updated 2026-10-26, session 43: **0.8.0, five sectors.** Station controls are done (0.7.0). Albert: the first two
+Updated 2026-10-26, session 43: **0.8.1, five sectors** (0.8.1 moves the Lights exit off a fixed-route exploit the hunt found). Station controls are done (0.7.0). Albert: the first two
 levels are fine; get three more that are fun with two cards. Brainstorm of ten in docs/design/levels-3-5.md; picked
 The Listeners (stop), The Gallery (back away; new room) and The Lights (follow the cold lights; new room and a new sim
 element, `o` in a room, that goes out when Robbie reaches it). One new type plate per sector. The Nursery, Valve and

@@ -1,18 +1,18 @@
-# 0.8.0-depths · Three new sectors
+# 0.8.1-depths · A shortcut closed in The Lights
 
-The station is done; now the sea. After The Dark and The Jellyfish come three new sectors, each solved with two
-cards, each bringing exactly one new type plate (the new card on the wheel is your hint), and each one's answer is
-the trap in the next.
+A small fix on top of 0.8.0. The exploit hunt found a way through **Sector 5 · The Lights** that never looked at a
+single light: swim south-east, and north whenever a wall is in the way. It climbed the channel and drifted straight
+onto the exit, every time. The exit now floats lower in the far chamber, off every straight line from the channel, and
+two more lights lead down to it. Following the lights still works; the shortcut doesn't.
 
-- **Sector 3 · The Listeners.** Blind eels patrol shafts across a corridor. They can't see Robbie; they *hear* him
-  swim. New plate: **STOP**.
-- **Sector 4 · The Gallery.** A corridor of alcoves, and things live in them. Their eyes light up, and a moment later
-  they strike where Robbie *was*. New plate: **KEEP DISTANCE**. (What worked in the Listeners will not work here.)
-- **Sector 5 · The Lights.** A dark cave, a long wall, and lights that aren't on the Company's chart. They glow ahead
-  of Robbie and go out behind him, one by one. New plate: **SWIM TOWARDS LIGHT**. (The beacon lies here. So do walls.)
+Everything else is as in 0.8.0: three new sectors after The Dark and The Jellyfish, each solved with two cards and
+each bringing one new type plate.
 
-The Company has memos for each, and Op. 5 has letters. The Nursery is set aside for now (the laser came with the
-Jellyfish in 0.6.0).
+- **Sector 3 · The Listeners.** Blind eels that hear Robbie swim. New plate: **STOP**.
+- **Sector 4 · The Gallery.** Things in the alcoves strike where Robbie *was*. New plate: **KEEP DISTANCE**.
+- **Sector 5 · The Lights.** Lights no chart shows, going out behind him one by one. New plate: **SWIM TOWARDS LIGHT**.
+
+The laser has been on the wheel since 0.6.0: it comes with the Jellyfish shift.
 
 Install as before: the `.apk` on the tablet (it updates the copy you have), or unzip the Windows build and run
-`RobbieN1.exe`. Your progress is kept: if you've certified the Jellyfish, the tube has your orders for Sector 3.
+`RobbieN1.exe`. Your progress is kept.

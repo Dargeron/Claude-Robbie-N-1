@@ -344,7 +344,7 @@ The exploit hunt's passing decks all keep distance (with the move in either orde
 
 ## 8. The Lights
 
-Two cards · energy 5600 · 33 cold lights
+Two cards · energy 5600 · 35 cold lights
 
 ```text
 ########################################
@@ -357,13 +357,13 @@ Two cards · energy 5600 · 33 cold lights
 #...........###........#...#....o......#
 #...###....o###...###..#.o.#...........#
 #...###...o.......###..#...#...........#
-#...###...........###..#.o.#.....EE....#
-#..........o.o.o.......#...#.....EE....#
-#......................#.o.#...........#
+#...###...........###..#.o.#....o......#
+#..........o.o.o.......#...#...........#
+#......................#.o.#...o.......#
 #......###......o##....#...#...........#
 #......###.......##....#.o.#...........#
-#...........##.o.......#...#...........#
-#..###......##..o......#...#...........#
+#...........##.o.......#...#...EE......#
+#..###......##..o......#...#...EE......#
 #..###......##.........#.o.#...........#
 #..###..........o.o........#...........#
 #...................o.o.oo.#...........#
@@ -379,7 +379,9 @@ a zig-zag channel through a double wall (in at the bottom, out at the top) and o
 open water in the far chamber.
 
 **Teaches:** follow something you don't understand; the beacon and the wall both lie here. The zig-zag closes the
-first map's loopholes (a fixed south-east route, or sliding down the wall then taking the beacon).
+first map's loopholes (a fixed south-east route, or sliding down the wall then taking the beacon), and the exit sits
+off every straight line from the channel's mouth: on the first zig-zag it lay on the mouth's south-east diagonal, so
+"north when a wall is ahead, otherwise south-east" climbed the channel and drifted onto it (20/20, found by the hunt).
 
 | Program | Survey fleet (20 seeds) | What happens |
 | --- | --- | --- |
@@ -389,3 +391,4 @@ first map's loopholes (a fixed south-east route, or sliding down the wall then t
 | `move_towards light` | 0/20 | Reaches the last light and has nothing left to follow |
 | `move_towards light` / `follow_wall left` | 0/20 | Out of lights, back to the walls |
 | `move 135 if wall_ahead` / `move_towards beacon` | 0/20 | Slides down the outer wall, can't climb the channel |
+| `move 0 if wall_ahead` / `move 135` (and `move 45 if wall_ahead`) | 0/20 | Climbs the channel, crosses the far chamber on the diagonal, misses the exit and pins itself in the corner |

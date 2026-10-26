@@ -3,7 +3,9 @@ extends SceneTree
 ## second rule is unconditional (and whose first rule can let the reading continue:
 ## a condition, a setting, or an order that only sometimes applies), within the room's CPU budget. Reports anything
 ## that passes on most of the seeds tried. Slow by design; run it in the background.
-##   godot --headless --path game --script res://tools/hunt.gd -- <room> [seeds=3] [progress_file]
+##   godot --headless --path game --script res://tools/hunt.gd -- <room> [seeds=3] [progress_file] [only]
+## `only` (comma-separated action prefixes, e.g. "move ,follow_wall") limits a quick sweep to decks
+## whose every order starts with one of them; pass "" as the progress file to skip resuming.
 ## With a progress file the hunt is resumable: it records how far it got and what passed,
 ## and a restarted hunt skips what is already done.
 
@@ -15,6 +17,7 @@ func _init() -> void:
 	var room := RoomLibrary.load_room(args[0])
 	var seeds := int(args[1]) if args.size() > 1 else 3
 	progress_path = args[2] if args.size() > 2 else ""
+	var only: PackedStringArray = args[3].split(",") if args.size() > 3 else PackedStringArray()
 	_load_progress()
 	var actions := _actions()
 	var conds := _conditions()
@@ -48,6 +51,8 @@ func _init() -> void:
 		_try(room, prog_text, seeds, still)
 		found.append_array(still)
 	for idx in range(done_index, candidates.size()):
+		if not only.is_empty() and not _only(candidates[idx], only):
+			continue
 		tried += _try(room, candidates[idx], seeds, found)
 		if progress_path != "" and idx % 50 == 0:
 			_save_progress(idx + 1, found, false)
@@ -90,6 +95,16 @@ func _try(room: Room, text: String, seeds: int, found: Array[String]) -> int:
 	if passed * 3 >= seeds * 2:
 		found.append("%s  (cpu %d, %d/%d)" % [text.replace("\n", " / "), p.cpu(), passed, seeds])
 	return 1
+
+
+func _only(text: String, prefixes: PackedStringArray) -> bool:
+	for rule in text.split("\n"):
+		var ok := false
+		for pre in prefixes:
+			ok = ok or rule.begins_with(pre)
+		if not ok:
+			return false
+	return true
 
 
 func _falls_through(rule: String) -> bool:
