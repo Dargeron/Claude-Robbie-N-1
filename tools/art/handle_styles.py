@@ -32,104 +32,7 @@ CY = 380
 
 # ------------------------------------------------------------------ materials with a pattern in them
 
-def pmat(name, base, metal=0.0, rough=0.7, kind=None, scale=30.0, strength=0.5, chip=None, chip_metal=1.0,
-         chip_amount=0.0, grime=0.8, axis="Z"):
-    """A worn hard-surface material. kind: None, 'knurl' (diamond knurling), 'wrap' (tape or leather wound round),
-    'crackle' (crackle enamel), 'flute' (vertical flutes), 'hammer' (hammered). chip: the colour under worn paint."""
-    if name in cs._mats:
-        return cs._mats[name]
-    m = bpy.data.materials.new(name)
-    m.use_nodes = True
-    t = m.node_tree
-    t.nodes.clear()
-    out = cs.node(t, "ShaderNodeOutputMaterial")
-    bsdf = cs.node(t, "ShaderNodeBsdfPrincipled")
-    cs.link(t, bsdf.outputs[0], out.inputs[0])
-    tc = cs.node(t, "ShaderNodeTexCoord")
-    noise = cs.node(t, "ShaderNodeTexNoise")
-    noise.inputs["Scale"].default_value = 18.0
-    noise.inputs["Detail"].default_value = 8.0
-    cs.link(t, tc.outputs["Object"], noise.inputs["Vector"])
-    bc = cs.lin(base)
-    col = cs.mix_color(t, noise.outputs["Fac"], tuple(c * 0.6 for c in bc[:3]) + (1.0,), bc)
-    metal_s = metal
-    # Paint worn through to what is under it, at the edges and in patches.
-    if chip is not None and chip_amount > 0:
-        n2 = cs.node(t, "ShaderNodeTexNoise")
-        n2.inputs["Scale"].default_value = 9.0
-        n2.inputs["Detail"].default_value = 12.0
-        n2.inputs["Roughness"].default_value = 0.7
-        cs.link(t, tc.outputs["Object"], n2.inputs["Vector"])
-        geo = cs.node(t, "ShaderNodeNewGeometry")
-        bev = cs.node(t, "ShaderNodeBevel")
-        bev.inputs["Radius"].default_value = 0.02
-        dot = cs.node(t, "ShaderNodeVectorMath", operation="DOT_PRODUCT")
-        cs.link(t, bev.outputs[0], dot.inputs[0])
-        cs.link(t, geo.outputs["Normal"], dot.inputs[1])
-        edge = cs.math_node(t, "MULTIPLY", cs.math_node(t, "SUBTRACT", 1.0, dot.outputs["Value"]), 14.0)
-        f = cs.math_node(t, "ADD", edge, cs.math_node(t, "MULTIPLY", cs.math_node(t, "SUBTRACT", n2.outputs["Fac"], 0.62 - 0.2 * chip_amount), 6.0))
-        f = cs.math_node(t, "MINIMUM", cs.math_node(t, "MAXIMUM", f, 0.0), 1.0)
-        col = cs.mix_color(t, f, col, cs.lin(chip))
-        mt = cs.math_node(t, "ADD", metal, cs.math_node(t, "MULTIPLY", f, chip_metal - metal))
-        cs.link(t, mt, bsdf.inputs["Metallic"])
-        cs.link(t, cs.math_node(t, "SUBTRACT", rough, cs.math_node(t, "MULTIPLY", f, 0.2)), bsdf.inputs["Roughness"])
-    else:
-        bsdf.inputs["Metallic"].default_value = metal_s
-        cs.link(t, cs.math_node(t, "ADD", rough, cs.math_node(t, "MULTIPLY", cs.math_node(t, "SUBTRACT", noise.outputs["Fac"], 0.5), 0.25)),
-                bsdf.inputs["Roughness"])
-    # Grime in the crevices.
-    ao = cs.node(t, "ShaderNodeAmbientOcclusion")
-    ao.inputs["Distance"].default_value = 0.06
-    col = cs.mix_color(t, cs.math_node(t, "MULTIPLY", cs.math_node(t, "SUBTRACT", 1.0, ao.outputs["AO"]), grime), col, (0.01, 0.008, 0.006, 1.0))
-    cs.link(t, col, bsdf.inputs["Base Color"])
-    # The pattern, as a bump.
-    height = None
-    if kind == "knurl":
-        a = cs.node(t, "ShaderNodeTexWave", wave_type="BANDS", bands_direction="DIAGONAL")
-        a.inputs["Scale"].default_value = scale
-        cs.link(t, tc.outputs["Object"], a.inputs["Vector"])
-        mp = cs.node(t, "ShaderNodeMapping")
-        mp.inputs["Scale"].default_value = (-1.0, 1.0, 1.0)
-        cs.link(t, tc.outputs["Object"], mp.inputs["Vector"])
-        b = cs.node(t, "ShaderNodeTexWave", wave_type="BANDS", bands_direction="DIAGONAL")
-        b.inputs["Scale"].default_value = scale
-        cs.link(t, mp.outputs[0], b.inputs["Vector"])
-        height = cs.math_node(t, "MULTIPLY", a.outputs["Fac"], b.outputs["Fac"])
-    elif kind == "wrap":
-        a = cs.node(t, "ShaderNodeTexWave", wave_type="BANDS", bands_direction=axis)
-        a.inputs["Scale"].default_value = scale
-        a.inputs["Distortion"].default_value = 1.5
-        a.inputs["Detail Scale"].default_value = 2.0
-        cs.link(t, tc.outputs["Object"], a.inputs["Vector"])
-        height = a.outputs["Fac"]
-    elif kind == "flute":
-        a = cs.node(t, "ShaderNodeTexWave", wave_type="RINGS", rings_direction="SPHERICAL")
-        a.inputs["Scale"].default_value = scale
-        cs.link(t, tc.outputs["Object"], a.inputs["Vector"])
-        height = a.outputs["Fac"]
-    elif kind == "crackle":
-        v = cs.node(t, "ShaderNodeTexVoronoi", feature="DISTANCE_TO_EDGE")
-        v.inputs["Scale"].default_value = scale
-        cs.link(t, tc.outputs["Object"], v.inputs["Vector"])
-        height = cs.math_node(t, "MINIMUM", cs.math_node(t, "MULTIPLY", v.outputs["Distance"], 12.0), 1.0)
-    elif kind == "hammer":
-        v = cs.node(t, "ShaderNodeTexVoronoi")
-        v.inputs["Scale"].default_value = scale
-        cs.link(t, tc.outputs["Object"], v.inputs["Vector"])
-        height = v.outputs["Distance"]
-    bev = cs.node(t, "ShaderNodeBevel")
-    bev.inputs["Radius"].default_value = 0.012
-    normal = bev.outputs[0]
-    if height is not None:
-        bump = cs.node(t, "ShaderNodeBump")
-        bump.inputs["Strength"].default_value = strength
-        bump.inputs["Distance"].default_value = 0.01
-        cs.link(t, height, bump.inputs["Height"])
-        cs.link(t, normal, bump.inputs["Normal"])
-        normal = bump.outputs[0]
-    cs.link(t, normal, bsdf.inputs["Normal"])
-    cs._mats[name] = m
-    return m
+pmat = cs.pmat
 
 
 # ------------------------------------------------------------------ helpers
@@ -150,18 +53,8 @@ def under(parent, objs, ox, oy):
     return objs
 
 
-def star(cx, cy, r_out, r_in, n, rot=0.0):
-    pts = []
-    for i in range(n * 2):
-        a = math.pi * i / n + rot
-        r = r_out if i % 2 == 0 else r_in
-        pts.append(cs.P(cx + r * math.cos(a), cy + r * math.sin(a)))
-    return pts
-
-
-def scallops(cx, cy, r, bumps, depth, n=128):
-    return [cs.P(cx + (r + depth * max(0.0, math.cos(bumps * 2 * math.pi * i / n)) ** 3) * math.cos(2 * math.pi * i / n),
-                 cy + (r + depth * max(0.0, math.cos(bumps * 2 * math.pi * i / n)) ** 3) * math.sin(2 * math.pi * i / n)) for i in range(n)]
+star = cs.star
+scallops = cs.scallops
 
 
 def spokes(cx, cy, r0, r1, n, w, z0, z1, mat, rot=0.0, name="spoke"):

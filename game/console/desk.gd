@@ -167,8 +167,10 @@ static func draw_odometer(ci: CanvasItem, win: Rect2, value: float, digits: int,
 ## A pilot lamp in its chrome socket with its name painted beside it (the name never changes;
 ## whether it is lit says the state). `side` is where the label goes: 1 right, -1 left.
 static func draw_lamp(ci: CanvasItem, at: Vector2, label: String, col: Color, lit: float, r: float = 5.0, side: int = 1, size: int = 11) -> void:
-	ci.draw_circle(at, r + 2.5, Color(0.55, 0.56, 0.55))
-	ci.draw_circle(at, r + 1.0, Color(0.12, 0.12, 0.11))
+	# A dark bronze bezel (the console's Admiralty style), rubbed lighter on its rim.
+	ci.draw_circle(at, r + 2.8, Color(0.3, 0.22, 0.12))
+	ci.draw_arc(at, r + 2.2, PI * 1.05, PI * 1.75, 10, Color(0.55, 0.42, 0.24, 0.8), 1.0)
+	ci.draw_circle(at, r + 1.0, Color(0.1, 0.08, 0.06))
 	if lit > 0.0:
 		draw_glow(ci, at, r * 4.0, Color(col, 0.6 * lit))
 	ci.draw_circle(at, r, Color(0.08, 0.07, 0.06).lerp(col, lit))

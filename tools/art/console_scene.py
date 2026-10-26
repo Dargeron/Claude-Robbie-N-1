@@ -190,8 +190,148 @@ def emission(name, color, strength):
     return m
 
 
+def pmat(name, base, metal=0.0, rough=0.7, kind=None, scale=30.0, strength=0.5, chip=None, chip_metal=1.0,
+         chip_amount=0.0, grime=0.8, axis="Z"):
+    """A worn hard-surface material. kind: None, 'knurl' (diamond knurling), 'wrap' (tape or leather wound round),
+    'crackle' (crackle enamel), 'flute' (vertical flutes), 'hammer' (hammered). chip: the colour under worn paint."""
+    if name in _mats:
+        return _mats[name]
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    t = m.node_tree
+    t.nodes.clear()
+    out = node(t, "ShaderNodeOutputMaterial")
+    bsdf = node(t, "ShaderNodeBsdfPrincipled")
+    link(t, bsdf.outputs[0], out.inputs[0])
+    tc = node(t, "ShaderNodeTexCoord")
+    noise = node(t, "ShaderNodeTexNoise")
+    noise.inputs["Scale"].default_value = 18.0
+    noise.inputs["Detail"].default_value = 8.0
+    link(t, tc.outputs["Object"], noise.inputs["Vector"])
+    bc = lin(base)
+    col = mix_color(t, noise.outputs["Fac"], tuple(c * 0.6 for c in bc[:3]) + (1.0,), bc)
+    metal_s = metal
+    # Paint worn through to what is under it, at the edges and in patches.
+    if chip is not None and chip_amount > 0:
+        n2 = node(t, "ShaderNodeTexNoise")
+        n2.inputs["Scale"].default_value = 9.0
+        n2.inputs["Detail"].default_value = 12.0
+        n2.inputs["Roughness"].default_value = 0.7
+        link(t, tc.outputs["Object"], n2.inputs["Vector"])
+        geo = node(t, "ShaderNodeNewGeometry")
+        bev = node(t, "ShaderNodeBevel")
+        bev.inputs["Radius"].default_value = 0.02
+        dot = node(t, "ShaderNodeVectorMath", operation="DOT_PRODUCT")
+        link(t, bev.outputs[0], dot.inputs[0])
+        link(t, geo.outputs["Normal"], dot.inputs[1])
+        edge = math_node(t, "MULTIPLY", math_node(t, "SUBTRACT", 1.0, dot.outputs["Value"]), 14.0)
+        f = math_node(t, "ADD", edge, math_node(t, "MULTIPLY", math_node(t, "SUBTRACT", n2.outputs["Fac"], 0.62 - 0.2 * chip_amount), 6.0))
+        f = math_node(t, "MINIMUM", math_node(t, "MAXIMUM", f, 0.0), 1.0)
+        col = mix_color(t, f, col, lin(chip))
+        mt = math_node(t, "ADD", metal, math_node(t, "MULTIPLY", f, chip_metal - metal))
+        link(t, mt, bsdf.inputs["Metallic"])
+        link(t, math_node(t, "SUBTRACT", rough, math_node(t, "MULTIPLY", f, 0.2)), bsdf.inputs["Roughness"])
+    else:
+        bsdf.inputs["Metallic"].default_value = metal_s
+        link(t, math_node(t, "ADD", rough, math_node(t, "MULTIPLY", math_node(t, "SUBTRACT", noise.outputs["Fac"], 0.5), 0.25)),
+                bsdf.inputs["Roughness"])
+    # Grime in the crevices.
+    ao = node(t, "ShaderNodeAmbientOcclusion")
+    ao.inputs["Distance"].default_value = 0.06
+    col = mix_color(t, math_node(t, "MULTIPLY", math_node(t, "SUBTRACT", 1.0, ao.outputs["AO"]), grime), col, (0.01, 0.008, 0.006, 1.0))
+    link(t, col, bsdf.inputs["Base Color"])
+    # The pattern, as a bump.
+    height = None
+    if kind == "knurl":
+        a = node(t, "ShaderNodeTexWave", wave_type="BANDS", bands_direction="DIAGONAL")
+        a.inputs["Scale"].default_value = scale
+        link(t, tc.outputs["Object"], a.inputs["Vector"])
+        mp = node(t, "ShaderNodeMapping")
+        mp.inputs["Scale"].default_value = (-1.0, 1.0, 1.0)
+        link(t, tc.outputs["Object"], mp.inputs["Vector"])
+        b = node(t, "ShaderNodeTexWave", wave_type="BANDS", bands_direction="DIAGONAL")
+        b.inputs["Scale"].default_value = scale
+        link(t, mp.outputs[0], b.inputs["Vector"])
+        height = math_node(t, "MULTIPLY", a.outputs["Fac"], b.outputs["Fac"])
+    elif kind == "wrap":
+        a = node(t, "ShaderNodeTexWave", wave_type="BANDS", bands_direction=axis)
+        a.inputs["Scale"].default_value = scale
+        a.inputs["Distortion"].default_value = 1.5
+        a.inputs["Detail Scale"].default_value = 2.0
+        link(t, tc.outputs["Object"], a.inputs["Vector"])
+        height = a.outputs["Fac"]
+    elif kind == "flute":
+        a = node(t, "ShaderNodeTexWave", wave_type="RINGS", rings_direction="SPHERICAL")
+        a.inputs["Scale"].default_value = scale
+        link(t, tc.outputs["Object"], a.inputs["Vector"])
+        height = a.outputs["Fac"]
+    elif kind == "crackle":
+        v = node(t, "ShaderNodeTexVoronoi", feature="DISTANCE_TO_EDGE")
+        v.inputs["Scale"].default_value = scale
+        link(t, tc.outputs["Object"], v.inputs["Vector"])
+        height = math_node(t, "MINIMUM", math_node(t, "MULTIPLY", v.outputs["Distance"], 12.0), 1.0)
+    elif kind == "hammer":
+        v = node(t, "ShaderNodeTexVoronoi")
+        v.inputs["Scale"].default_value = scale
+        link(t, tc.outputs["Object"], v.inputs["Vector"])
+        height = v.outputs["Distance"]
+    bev = node(t, "ShaderNodeBevel")
+    bev.inputs["Radius"].default_value = 0.012
+    normal = bev.outputs[0]
+    if height is not None:
+        bump = node(t, "ShaderNodeBump")
+        bump.inputs["Strength"].default_value = strength
+        bump.inputs["Distance"].default_value = 0.01
+        link(t, height, bump.inputs["Height"])
+        link(t, normal, bump.inputs["Normal"])
+        normal = bump.outputs[0]
+    link(t, normal, bsdf.inputs["Normal"])
+    _mats[name] = m
+    return m
+
+
+def star(cx, cy, r_out, r_in, n, rot=0.0):
+    pts = []
+    for i in range(n * 2):
+        a = math.pi * i / n + rot
+        r = r_out if i % 2 == 0 else r_in
+        pts.append(P(cx + r * math.cos(a), cy + r * math.sin(a)))
+    return pts
+
+
+def scallops(cx, cy, r, bumps, depth, n=128):
+    return [P(cx + (r + depth * max(0.0, math.cos(bumps * 2 * math.pi * i / n)) ** 3) * math.cos(2 * math.pi * i / n),
+                 cy + (r + depth * max(0.0, math.cos(bumps * 2 * math.pi * i / n)) ** 3) * math.sin(2 * math.pi * i / n)) for i in range(n)]
+
+
 def M():
-    if GRIMY:
+    """The console's materials: the base set, the lived-in overrides (GRIMY), and over both the Admiralty style
+    Albert chose on 2026-10-26: ship's bronze gone dark, navy grey-green enamel, and valve red, chipped to the bronze,
+    on everything the hand works. Matte throughout."""
+    return dict(_m_grimy() if GRIMY else _m_base(), **_m_admiralty())
+
+
+def _m_admiralty():
+    red = pmat("valve_red", "#74170e", metal=0.0, rough=0.72, chip="#6e5430", chip_amount=0.5)
+    return {
+        "enamel": pmat("navy", "#323a36", metal=0.0, rough=0.8, kind="hammer", scale=6, strength=0.12, chip="#55463a",
+                       chip_amount=0.18, grime=0.95),
+        "enamel_pale": pmat("navy_pale", "#3e4741", metal=0.0, rough=0.82, kind="hammer", scale=5, strength=0.14,
+                            chip="#5e4c3c", chip_amount=0.25, grime=0.95),
+        "enamel_dark": pmat("navy_dark", "#262c29", metal=0.0, rough=0.8, chip="#4a3d31", chip_amount=0.2),
+        "brass": pmat("bronze", "#5b4426", metal=1.0, rough=0.62, kind="hammer", scale=40, strength=0.12, chip="#3f5a48",
+                      chip_metal=0.0, chip_amount=0.3),
+        "brass_dark": pmat("bronze_dark", "#3e2e1a", metal=0.9, rough=0.68, kind="hammer", scale=40, strength=0.1),
+        "steel": pmat("galv", "#4d4b45", metal=0.8, rough=0.62, kind="hammer", scale=60, strength=0.08),
+        "chrome": pmat("nickel_dull", "#77736a", metal=1.0, rough=0.48),
+        # Name plates are kept rubbed bright, so their engraving can be read.
+        "plaque": pmat("bronze_rubbed", "#8a6a3c", metal=1.0, rough=0.45, chip="#4a3a22", chip_metal=1.0, chip_amount=0.15),
+        "red": red, "red_ball": red, "red_enamel": red, "red_bakelite": red,
+        "bakelite": pmat("bakelite_matte", "#24140d", rough=0.6),
+    }
+
+
+def _m_grimy():
         return dict(_m_base(), **{
             "enamel": material("enamel_g", "#232b26", rough=0.6, wear="#9a8e7a", grime=0.95, streaks=0.95, noise_scale=9,
                                coat=0.15, spots=1.8, bump=0.35),
@@ -203,7 +343,6 @@ def M():
             "wall": material("wall_g", "#0b0e0d", rough=0.8, grime=1.0, streaks=1.0, noise_scale=4, bump=0.5),
             "cloth": material("cloth", "#3c3a33", rough=0.95, grime=0.8, noise_scale=140, bump=0.7),
         })
-    return _m_base()
 
 
 def _m_base():
@@ -430,7 +569,7 @@ def recess(name, rect, r=4, depth=0.06, mat=None):
 def plaque(rect, mats=None):
     mats = mats or M()
     x, y, w, h = rect[:4]
-    slab("plaque", (x, y, w, h), 0.0, 0.025, mats["brass"], r=3, bevel=0.006)
+    slab("plaque", (x, y, w, h), 0.0, 0.025, mats.get("plaque", mats["brass"]), r=3, bevel=0.006)
     for px in (x + 5, x + w - 5):
         screw(px, y + h / 2, mats["brass_dark"], r=2.0, z=0.025, angle=0.7)
 
@@ -711,35 +850,36 @@ def build_reel(c):
 
 
 def build_knob(c, r, pointer="line", mat="red_bakelite"):
+    """A wing knob: a bronze hub with a valve-red wing across it, one end drawn to a point (the pointer, up)."""
     m = M()
-    disc("knob_skirt", 0, 0, r, 0.0, 0.04, m["brass_dark"], bevel=0.01, coll=c)
-    n = 36
-    pts = []
-    for i in range(n * 2):
-        a = math.pi * i / n
-        rr = (r - 4) * (1.0 if i % 2 == 0 else 0.94)
-        pts.append(P(rr * math.cos(a), rr * math.sin(a)))
-    prism("knob_body", pts, 0.04, 0.16, m[mat], 0.02, coll=c)
-    disc("knob_cap", 0, 0, r * 0.55, 0.16, 0.19, m["brass"], bevel=0.008, coll=c)
-    if pointer == "line":
-        slab("knob_pointer", (-1.5, -(r - 5), 3, r * 0.45), 0.19, 0.2, m["ivory"], r=1, bevel=0, coll=c)
-    else:
-        prism("knob_pointer", [P(0, -(r + 6)), P(5, -(r - 8)), P(-5, -(r - 8))], 0.04, 0.07, m["brass"], 0.004, coll=c)
-        slab("knob_line", (-1.5, -(r - 6), 3, r * 0.4), 0.19, 0.2, m["ivory"], r=1, bevel=0, coll=c)
+    disc("knob_skirt", 0, 0, r * 0.8, 0.0, 0.035, m["brass_dark"], bevel=0.008, coll=c)
+    disc("knob_hub", 0, 0, r * 0.46, 0.03, 0.15, m["brass"], bevel=0.015, coll=c)
+    w = r * 0.34
+    tip = r + (4 if pointer == "arrow" else 1)
+    wing = [P(0, -tip), P(w * 0.7, -r * 0.62), P(w, 0), P(w * 0.8, r * 0.78), P(0, r * 0.86),
+            P(-w * 0.8, r * 0.78), P(-w, 0), P(-w * 0.7, -r * 0.62)]
+    prism("knob_wing", wing, 0.08, 0.22, m[mat], 0.02, coll=c)
+    disc("knob_nut", 0, 0, r * 0.2, 0.22, 0.27, m["brass"], n=6, bevel=0.004, coll=c)
 
 
 def build_lever(c, length, ball=13):
-    """A lever pointing up (screen -y) from a pivot at the origin."""
+    """A lever pointing up (screen -y) from a pivot at the origin: a bronze rod with a valve-red T-handle."""
     m = M()
-    cylinder_y("lever_shaft", -length, 0, 0, 3.6, 0.08, m["chrome"], coll=c)
-    uv_sphere("lever_ball", 0, -length, 0.08, ball, m["red_ball"], 1.0, coll=c)
-    disc("lever_collar", 0, 0, 10, 0.06, 0.1, m["steel"], bevel=0.008, coll=c)
+    cylinder_y("lever_rod", -length + 4, 0, 0, 3.4, 0.09, m["brass"], coll=c)
+    ring_obj("lever_collar_t", 0, -length + 12, 5.5, 3.0, 0.04, 0.15, m["brass_dark"], coll=c)
+    cylinder_x("lever_t", -17, 17, -length, 6.2, 0.14, m["red"], coll=c)
+    for sx in (-18, 18):
+        disc("lever_t_cap", sx, -length, 3.2, 0.06, 0.2, m["brass_dark"], n=6, coll=c)
+    disc("lever_collar", 0, 0, 10, 0.06, 0.11, m["brass_dark"], bevel=0.008, coll=c)
+    disc("lever_nut", 0, 0, 5, 0.11, 0.15, m["brass"], n=6, coll=c)
 
 
 def build_punch_knob(c):
+    """The PRINT pull: a valve-red pull-knob with a scalloped edge, like a sea-cock's, on a bronze stem."""
     m = M()
-    slab("pk_stem", (-4, -4, 8, 26), 0.03, 0.07, m["chrome"], r=3, bevel=0.004, coll=c)
-    uv_sphere("pk_ball", 0, -6, 0.1, 15, m["red_ball"], 1.0, coll=c)
+    slab("pk_stem", (-3, -4, 6, 26), 0.03, 0.08, m["brass_dark"], r=2, bevel=0.004, coll=c)
+    prism("pk_pull", scallops(0, -6, 13, 6, 4), 0.06, 0.16, m["red"], 0.012, coll=c)
+    disc("pk_nut", 0, -6, 4.6, 0.16, 0.21, m["brass"], n=6, bevel=0.003, coll=c)
 
 
 def build_cover(c, open_):
@@ -755,11 +895,12 @@ def build_cover(c, open_):
 
 
 def build_toggle(c, up):
+    """A bronze toggle with a valve-red spoon on its end."""
     m = M()
-    disc("tg_nut", 0, 0, 8, 0.0, 0.04, m["chrome"], n=6, coll=c)
+    disc("tg_nut", 0, 0, 8, 0.0, 0.04, m["brass"], n=6, coll=c)
     d = -1 if up else 1
-    cylinder_y("tg_bat", min(0, d * 24), max(0, d * 24), 0, 3, 0.07, m["chrome"], coll=c)
-    uv_sphere("tg_tip", 0, d * 24, 0.08, 4.6, m["red_ball"], 1.0, coll=c)
+    cylinder_y("tg_bat", min(0, d * 18), max(0, d * 18), 0, 2.6, 0.07, m["brass"], coll=c)
+    slab("tg_spoon", (-5.5, d * 24 - 10, 11, 20), 0.05, 0.11, m["red"], r=5, bevel=0.01, coll=c)
 
 
 def build_capsule(c):
@@ -778,10 +919,11 @@ def build_crank(c):
 
 
 def build_key(c, down):
+    """A recorder key: a bronze bezel round a valve-red enamel button."""
     m = M()
     z = 0.02 if down else 0.07
-    slab("key_skirt", (-30, -16, 60, 32), 0.0, z, m["bakelite_black"], r=6, bevel=0.012, coll=c)
-    slab("key_top", (-27, -13, 54, 26), z, z + 0.02, m["red_bakelite"], r=5, bevel=0.012, coll=c)
+    slab("key_bezel", (-30, -16, 60, 32), 0.0, z, m["brass_dark"], r=6, bevel=0.01, coll=c)
+    slab("key_top", (-26, -12, 52, 24), z, z + 0.025, m["red"], r=5, bevel=0.01, coll=c)
 
 
 def build_platen(c):
@@ -796,21 +938,16 @@ def build_platen(c):
 
 
 def build_wheel(c, r, spokes, knob=True):
-    """A selector wheel seen face on: a rim, spokes, a hub, and a bakelite grip on the rim to turn it by."""
+    """A selector wheel like a valve handwheel: a valve-red rim knuckled for the fingers, three red spokes, a bronze
+    hub and nut. A bronze notch on the rim shows it turn."""
     m = M()
-    ring_obj("wheel_rim", 0, 0, r, r - 7, 0.0, 0.1, m["red_enamel"], bevel=0.02, coll=c)
-    for k in range(spokes):
-        a = 2 * math.pi * k / spokes
-        sp = slab("spoke", (-2.6, -(r - 5), 5.2, r - 10), 0.03, 0.08, m["brass_dark"], r=2, bevel=0.01, coll=c)
-        sp.rotation_euler = (0, 0, a)
-    disc("wheel_hub", 0, 0, r * 0.26, 0.04, 0.13, m["chrome"], bevel=0.02, coll=c)
-    disc("wheel_cap", 0, 0, r * 0.13, 0.13, 0.16, m["bakelite_black"], bevel=0.01, coll=c)
-    if knob:
-        disc("grip_base", 0, -(r - 3.5), 6, 0.1, 0.13, m["chrome"], coll=c)
-        cylinder_y("grip", -(r - 3.5) - 1, -(r - 3.5) + 1, 0, 5, 0.22, m["red_bakelite"], coll=c)
-        uv_sphere("grip_top", 0, -(r - 3.5), 0.26, 5.6, m["red_bakelite"], 0.9, coll=c)
-    # A pointer notch on the rim, so you can see it turn.
-    slab("wheel_mark", (-2, r - 7, 4, 7), 0.1, 0.105, m["ivory"], r=1, bevel=0, coll=c)
+    prism("wheel_rim", scallops(0, 0, r - 3, 6, 6), 0.0, 0.11, m["red"], 0.02, holes=[circle_pts(0, 0, r - 13, 96)], coll=c)
+    for k in range(3):
+        sp = slab("spoke", (-4.5, -(r - 8), 9, r - 14), 0.02, 0.08, m["red"], r=3, bevel=0.01, coll=c)
+        sp.rotation_euler = (0, 0, math.pi / 6 + 2 * math.pi * k / 3)
+    disc("wheel_hub", 0, 0, r * 0.3, 0.03, 0.15, m["brass"], bevel=0.02, coll=c)
+    disc("wheel_nut", 0, 0, r * 0.15, 0.15, 0.21, m["brass_dark"], n=6, bevel=0.006, coll=c)
+    slab("wheel_mark", (-2.5, r - 12, 5, 8), 0.11, 0.115, m["brass"], r=1, bevel=0, coll=c)
 
 
 def build_chute_flap(c):

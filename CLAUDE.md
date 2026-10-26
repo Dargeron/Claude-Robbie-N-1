@@ -158,7 +158,9 @@ it, look at it, update STATUS/BACKLOG/devlog, commit, and show Albert something 
   wrangler). `tools/bootstrap.sh` fetches Godot; `tools/export_setup.sh` fetches the export templates and the Android
   build tools.
 - **Art:** Blender (5.2.3 LTS, headless, Cycles on the CPU; no GPU in the cloud machine) for models and rendered
-  sprites. Unity was considered and set aside on 2026-10-24: this game stays on Godot.
+  sprites. The console's style (Albert, 2026-10-26) is **Admiralty**: dark ship's bronze, navy grey-green enamel,
+  lived-in and matte, and chipped valve red on everything the hand works (red means touchable); no glossy or round
+  "bubble" parts. See docs/design/art-direction.md and docs/art/handles/style_2.jpg. Unity was considered and set aside on 2026-10-24: this game stays on Godot.
 - **Waiting on Albert** (see docs/STATUS.md): his yes on `docs/design/progression.md` (currencies, goals, the Lab's
   shop), his reaction to the Lab sketch, and art references plus Vertex AI access for the art pass.
 - **Background searches:** `tools/hunt.sh <room>` and `tools/solve_all.sh <n>` write to `out/` (not in git). The

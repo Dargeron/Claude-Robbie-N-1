@@ -1,6 +1,8 @@
 # Art direction: three ways to make the console feel real (for Albert to choose)
 
-Status: **A or B, both playable in 0.3.0** (2026-10-25). Albert liked A and B; 0.3.0 plays the same game both
+Status: **decided** (2026-10-26): the flat 2D desk (B), lived-in, in the **Admiralty** style (handle sheet 2 in
+docs/art/handles/): dark ship's bronze, navy grey-green enamel, chipped valve red on what the hand works. The 3D view
+(A) felt clunky on the tablet and is set aside. History: **A or B, both playable in 0.3.0** (2026-10-25). Albert liked A and B; 0.3.0 plays the same game both
 ways with a switch, on B's weathered desk, so he can choose on the tablet. The mock-ups below came first: after playtesting 0.1.0 Albert found the desk "a bit too
 clean... bland" and wondered about 3D or another style. The scope stays Dead Air in all three; Bathy stays the only
 warm, cute thing. The mock-ups show the same moment (Sector 2, Robbie 004 running dark among the jellyfish) on the

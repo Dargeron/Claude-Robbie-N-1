@@ -1,11 +1,11 @@
 # Status
 
-Updated 2026-10-26, session 39: **0.4.0, back to the flat desk.** Albert found the 3D view clunky: the game opens
-flat again (the chair view stays in the code for the tools, ROBBIE_VIEW=chair). From his 0.3.0 playtest: the speed
-knob is ½ / 1 / 2 / AUTO (old 1, 2, 4), starts on 1, and reruns no longer skip ahead; no text on the machine changes
-by itself (lamps with fixed labels, number wheels); the glass lid is gone; Bathy hovers and paddles on the scope.
-Waiting on Albert: his pick of five handle styles (docs/art/handles/), which decides the next art pass; his
-reaction to the Lab ideas (docs/design/hangar-ideas.md).
+Updated 2026-10-26, session 40: **0.5.0, the Admiralty desk.** Albert picked handle style 2 (Admiralty) and asked
+for the whole machine to follow it: console_scene.py's materials are now bronze, navy grey-green enamel and chipped
+valve red (`_m_admiralty`), and the hand parts are rebuilt in that style (handwheels, T-handle lever, scalloped PRINT
+pull, wing knobs, spoon toggle, red keys in bronze bezels). Before that, 0.4.0 (session 39): flat desk only, speed
+knob ½ / 1 / 2 / AUTO, lamps instead of changing text, no lid, Bathy swims. Waiting on Albert: his playtest of 0.5.0;
+his reaction to the Lab ideas (docs/design/hangar-ideas.md).
 
 ## Where we are
 
