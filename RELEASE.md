@@ -1,23 +1,21 @@
-# 0.8.1-depths · The Lights, rebuilt
+# 0.9.0-induction · A title screen and a tour of the office
 
-A fix on top of 0.8.0. After it shipped, the exploit hunt found that **Sector 5 · The Lights** could be beaten
-without ever looking at a light: by a fixed route (swim south-east, north when a wall is in the way), by the old
-beginner's trick (head for the beacon, lean on a wall when it blocks), and by using the battery as a clock (tour the
-walls, then take the beacon at half charge). So the far half of the sector is new.
+The game now starts properly.
 
-The exit is now inside a **floating island of rock**, at the end of an S: in at the bottom, up one corridor, over a
-wall, down the next, into a hall. The cold lights lead the whole way. Walls don't go in, the beacon only hits rock
-from outside, and the battery is tighter, so a deck that wanders runs dry. Follow the lights, then the beacon: that
-still works, with a third of the charge to spare.
+- **A title screen.** The desk in the dark, the scope still sweeping, Bathy blinking in his porthole, and the
+  nameplate. BEGIN on a new game. On a game you've played: CONTINUE, SHOW ME THE OFFICE AGAIN, or NEW CONTRACT
+  (start over; it asks twice). Press **Esc** on the desk at any time to come back to it.
+- **A welcome.** One page in plain words: you're the new operator, you explore Jupiter's ocean with Robbies, you
+  can't steer them, you give them cards; make cards, send him, watch, fix them.
+- **A tour of the office.** Twelve short steps. Each machine is lit in turn while the rest of the desk is dark,
+  with a card saying what it's for: the scope, Robbie's face, the card reader, the press, the pulp chute and the
+  counter, the lever, the recorder, the teleprinter, the sea trials, orders and sectors, the binder and the Wall.
+  Then your first orders.
+- **Fewer notes.** The grease-pencil notes that explained the controls as you went are gone. Op. 5 now leaves only
+  his one hint for each sector. Before your first Robbie, the lever's grip glows instead.
 
-Everything else is as in 0.8.0: three new sectors after The Dark and The Jellyfish, each solved with two cards and
-each bringing one new type plate.
-
-- **Sector 3 · The Listeners.** Blind eels that hear Robbie swim. New plate: **STOP**.
-- **Sector 4 · The Gallery.** Things in the alcoves strike where Robbie *was*. New plate: **KEEP DISTANCE**.
-- **Sector 5 · The Lights.** Lights no chart shows, going out behind him one by one. New plate: **SWIM TOWARDS LIGHT**.
-
-The laser has been on the wheel since 0.6.0: it comes with the Jellyfish shift.
+To see it from the start on the tablet, choose NEW CONTRACT on the title (your old progress is torn up), or just
+SHOW ME THE OFFICE AGAIN to keep it.
 
 Install as before: the `.apk` on the tablet (it updates the copy you have), or unzip the Windows build and run
-`RobbieN1.exe`. Your progress is kept.
+`RobbieN1.exe`.

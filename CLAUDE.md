@@ -28,7 +28,7 @@ tools/godot.sh -e --path game                 # the Godot editor
 tools/web_artifact.sh && tools/site.sh        # web build in out/site; serve it: (cd out/site && python3 -m http.server 8765)
 ```
 
-Main scene since 2026-10-25: **the operator's console** (`game/console/console.tscn`, design in
+Since 2026-10-28 the game opens on a title and, for a new contract, the induction (`console/induction.gd`: welcome page, a tour of the office, the first orders); Esc brings the title back; only the game's own save shows it, never the tools'. Main scene since 2026-10-25: **the operator's console** (`game/console/console.tscn`, design in
 `docs/design/station-ui.md`): the whole game on one desk, the first three sectors only. The game's root is
 `game/console/operator.tscn`: the console flat, face on. The 3D chair view of 0.3.0 (`console/chair.gd`: the console
 drawn into a SubViewport mapped onto two faces, touches traced back onto it) was set aside on 2026-10-26 and is
@@ -53,6 +53,8 @@ The old station (`game/station/station.tscn`) still runs: Mission Control, the L
 | `tools/godot.sh --headless --path game --script res://tools/hunt.gd -- <room> 3 "" "move ,move_towards,follow_wall"` | Quick hunt over one family of orders (minutes, not hours) |
 | `tools/godot.sh --headless --path game --script res://tools/gauntlet.gd -- <room> <decks.txt> [seeds]` | Run a list of decks (one per line, rules split by " / ") against a room in one start; for map iteration |
 | `tools/rooms/lights_map.py [--write]` | Generate and check The Lights' map (light chain, exit off compass lines) |
+| `~/.cache/blender/blender-5.2.3-linux-x64/blender -b --factory-startup -P tools/art/lab_bathy.py -- <out.png> [stock\|all\|battery,laser,...] [samples] [size]` | Bathy for the Lab, with upgrade parts fitted (about 30 s at 720 px) |
+| `xvfb-run -a tools/godot.sh --path game --rendering-driver opengl3 res://tools/lab_drafts.tscn -- <bathy_dir> <out_dir>` | The three Lab mock-ups (needs bathy_stock/a/b/c.png from lab_bathy.py in bathy_dir) |
 | `tools/movie.sh <room> <prog.rbt> [seed] [out.mp4] [speed] [serial]` | Record the replay as MP4 (GIF=1 for a GIF too) under a virtual display |
 | `xvfb-run -a tools/godot.sh --path game --rendering-driver opengl3 --audio-driver Dummy res://tools/shots.tscn -- <out_dir>` | Scripted tour of the old station UI, saving screenshots to look at |
 | `tools/console_check.sh [out_dir]` | The console's smoke test: the scripted tour (screenshots, none blank) and the touch play-through (taps and drags only; every machine must answer), flat and again through the 3D chair view (out_dir/chair) |

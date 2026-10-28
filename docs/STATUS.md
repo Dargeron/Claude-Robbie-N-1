@@ -1,10 +1,12 @@
 # Status
 
-Updated 2026-10-26, session 43: **0.8.1, five sectors** (0.8.1 rebuilds the far half of The Lights after the hunt found decks that skip the lights). Station controls are done (0.7.0). Albert: the first two
-levels are fine; get three more that are fun with two cards. Brainstorm of ten in docs/design/levels-3-5.md; picked
-The Listeners (stop), The Gallery (back away; new room) and The Lights (follow the cold lights; new room and a new sim
-element, `o` in a room, that goes out when Robbie reaches it). One new type plate per sector. The Nursery, Valve and
-Lock stay for later. Waiting on Albert: his playtest of sectors 3-5; the Lab ideas (docs/design/hangar-ideas.md).
+Updated 2026-10-28, session 44: **0.9.0, a title screen and an induction.** Albert (on 0.8.1): the levels could be
+okay; next, (1) a title screen and a proper tutorial instead of notes that appear, (2) design the Lab, the parts and
+the rewards (cool and surprising equipment and instructions, for his review), (3) three drafts of the Lab screen.
+Done: (1) in the game (title, welcome page, a 12-step tour of the office under a work lamp, then the first orders;
+Op. 5's notes kept only as one hint per sector); (2) docs/design/lab-parts-and-pay.md (the pay by tries, 44 parts in
+six sockets, new cards, 24 sector ideas in four regions); (3) docs/design/lab-drafts.md with three mock-ups
+(docs/art/lab/). Waiting on Albert: his pick of Lab draft, and his answers on the pay and the parts.
 
 ## Where we are
 
