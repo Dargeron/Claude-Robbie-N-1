@@ -39,6 +39,7 @@ var notes_layer: Control
 var memo: MemoView
 var wall: WallView
 var stamp: Stamp
+var induction: Induction
 var deck_tab: Hotspot
 var _notes := {}                 # note id -> OpNote on the console
 var _transient := {}             # note id -> time it should peel
@@ -65,6 +66,9 @@ func _ready() -> void:
 	_refresh_plates(false)
 	_unread_seen = _unread().size()
 	tube.pending = _unread_seen
+	# The game (not the tools, which keep their own saves) opens on the title.
+	if state.save_path == SAVE:
+		induction.show_title(_has_progress())
 
 
 # ---------------------------------------------------------------- building the desk
@@ -208,6 +212,11 @@ func _build() -> void:
 	wall.entry_chosen.connect(_open_from_wall)
 	add_child(wall)
 
+	induction = Induction.new()
+	induction.fresh_start.connect(_start_over)
+	induction.done.connect(_on_induction_done)
+	add_child(induction)
+
 
 func _place(c: Control, r: Rect2) -> void:
 	c.position = r.position
@@ -350,6 +359,30 @@ func _show_memo(m: Dictionary) -> void:
 
 func _on_memo_closed() -> void:
 	pass
+
+
+## Has this contract been used: orders read or a Robbie sent?
+func _has_progress() -> bool:
+	return state.next_serial > 1 or not _read().is_empty()
+
+
+func _on_induction_done(read_orders: bool) -> void:
+	state.extra["induction_done"] = true
+	state.save()
+	if read_orders and not _read().has("open0"):
+		_open_next_memo()
+
+
+## The title screen again (Esc on the desk).
+func show_title() -> void:
+	if magnified:
+		_toggle_magnify()
+	induction.show_title(_has_progress())
+
+
+## Before the first Robbie: the lever's grip glows, once the orders are read. No words.
+func lever_hint() -> bool:
+	return _read().has("open0") and state.next_serial <= 1 and not memo.visible and not wall.visible and not induction.visible
 
 
 ## The contract torn up: a new operator, Shift 1, nothing on the Wall.
@@ -780,11 +813,13 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if memo.visible or wall.visible:
+	if memo.visible or wall.visible or induction.visible:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var rp := scope.replay
 		match event.keycode:
+			KEY_ESCAPE, KEY_BACK:
+				show_title()
 			KEY_SPACE:
 				rp.playing = not rp.playing
 			KEY_F:
@@ -909,7 +944,7 @@ func _update_mood() -> void:
 		porthole.mood = "idle"
 
 
-# ---------------------------------------------------------------- Op. 5's notes (the tutorial)
+# ---------------------------------------------------------------- Op. 5's notes (a hint per sector)
 
 func _done(id: String) -> bool:
 	return state.extra.get("notes_done", []).has(id)
@@ -937,17 +972,16 @@ func _did(what: String) -> bool:
 
 
 ## Which notes should be on the console now: [id, position, width, targets]. A target is a
-## console position, or a Vector3 with the size of the loop round it in z.
+## console position, or a Vector3 with the size of the loop round it in z. Since the induction
+## (2026-10-28) they are only Op. 5's hint for each sector; the how-to is on the tour.
 ## Most go on the reader's glass, one under another below the cards in use; the rest on the
 ## scope's glass.
 func _wanted_notes() -> Array:
 	var out: Array = []
 	var N: Dictionary = story["notes"]
 	var dark := state.room_state("dark")
-	var any_dive := state.next_serial > 1
 	var own := state.own_dives(room_id)
 	var last_lost: bool = not own.is_empty() and own.back()["result"] != "exit"
-	var made_it := state.program_made_it(room_id, program.to_text())
 	var rs := state.room_state(room_id)
 	var gy := [180.0 + 51.0 * rs.room.slots]
 	var glass := func(id: String, w: float, targets: Array, x := 712.0, advance := true) -> void:
@@ -956,44 +990,11 @@ func _wanted_notes() -> Array:
 			gy[0] += OpNote.height_of(N[id], w) + 14.0
 	var wv := Desk.v("order_wheel")
 	var wheel := Vector3(float(wv[0]), float(wv[1]), float(wv[2]) + 12.0)
-	var knob := Vector3(1229, 526, 22)
-	var tube_c := Desk.r("tube_window").get_center()
-	var tube_t := Vector3(tube_c.x, tube_c.y, 38)
-	var grip := dispatch.handle()
 	if not _read().has("open0"):
-		out.append(["welcome", Vector2(372, 92), 236.0, [tube_t]])
 		return out
-	if not any_dive:
-		glass.call("dispatch", 236.0, [Vector3(grip.x, grip.y, 34)])
-		return out
-	if room_id == "dark" and not dark.certified:
-		if last_lost and not _scrubbed and not _did("rewound"):
-			var ra := Desk.r("reel_a").get_center()
-			out.append(["rewind", Vector2(60, 232), 226.0, [Vector3(ra.x, ra.y, 46)]])
-			out.append(["tape", Vector2(322, 232), 226.0, [Vector3(230, 640, 44)]])
-		elif last_lost and not _did("printed"):
-			glass.call("deck", 240.0, [])
-			# How to print goes on the press itself, in the empty tray, if it is empty.
-			if table.tray_rules().is_empty():
-				out.append(["print", Vector2(674, 588), 236.0, [wheel, knob]])
-			else:
-				glass.call("print", 240.0, [wheel, knob])
-		elif _did("printed") and not _did("inserted"):
-			var s0 := table.slot_rect(0).get_center()
-			glass.call("insert", 240.0, [Vector3(s0.x, s0.y, 40)])
-		elif made_it and rs.survey.is_empty():
-			glass.call("trials", 230.0, [Vector3(float(Desk.v("crank")[0]), float(Desk.v("crank")[1]), 28)])
-	if not rs.certified and not rs.survey.is_empty() and not rs.survey.get("certified", false) and not _did("trial_lamp"):
-		glass.call("trial_fail", 230.0, [Vector3(1128, 309, 64)])
-	if room_id == "dark" and dark.certified and _unread().size() > 0:
-		out.append(["certified", Vector2(372, 92), 236.0, [tube_t]])
-	var next := SECTORS.find(room_id) + 1
-	if rs.certified and next < SECTORS.size() and state.own_dives(SECTORS[next]).is_empty() and _unread().is_empty():
-		var sk := Desk.r("sector_knob").get_center()
-		glass.call("next_sector", 230.0, [Vector3(sk.x, sk.y, 40)])
-	if any_dive and program.rules.size() >= 2 and current_dive != null and scope.replay.playing and not _did("lamps_seen"):
-		var lr: Dictionary = Desk.layout()["lamps"]
-		glass.call("lamps", 236.0, [Vector3(float(lr["rail_x"]), float(lr["first_y"]) + float(lr["pitch"]) * 0.5, 40)])
+	# Sector 1: after the first Robbie is lost, the one hint (until a new card is printed).
+	if room_id == "dark" and not dark.certified and last_lost and not _did("printed"):
+		glass.call("deck", 240.0, [])
 	if room_id == "jellyfish" and not rs.certified and _read().has("open1"):
 		var ns := Desk.r("not_switch").get_center()
 		if not _did("not"):
@@ -1121,6 +1122,11 @@ class Lights:
 		draw_string(Desk.font("plate"), lp + Vector2(9, 5), "LIVE", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(Desk.STENCIL, 0.7))
 		draw_string(Desk.font("plate"), Vector2(523, 395), "GAIN", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(Desk.STENCIL, 0.7))
 		Desk.engraved(self, Desk.plaque_rect("rack"), Desk.plaque("rack")[4], 13)
+		if console.lever_hint():
+			var g: Vector2 = console.dispatch.handle()
+			var pulse := 0.5 + 0.5 * sin(now * 3.2)
+			Desk.draw_glow(self, g, 50.0 + 10.0 * pulse, Color(Desk.RED_LAMP, 0.25 + 0.3 * pulse))
+			draw_arc(g, 30.0 + 8.0 * pulse, 0, TAU, 32, Color(Desk.RED_LAMP, 0.5 * (1.0 - pulse)), 2.0)
 
 
 ## The Company's rubber stamp, slammed across the scope when a sector is certified.

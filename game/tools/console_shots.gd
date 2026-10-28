@@ -28,9 +28,18 @@ func _ready() -> void:
 	console.state.reset()
 	console._select_sector("dark")
 	steps = [
+		["title", false], ["wait", 50], ["shot", "c00a-title"],
+		["welcome"], ["wait", 20], ["shot", "c00b-welcome"],
+		["tour", 0], ["wait", 24], ["shot", "c00c-tour-scope"],
+		["tour", 2], ["wait", 24], ["shot", "c00d-tour-reader"],
+		["tour", 3], ["wait", 24], ["shot", "c00e-tour-press"],
+		["tour", 5], ["wait", 24], ["shot", "c00f-tour-lever"],
+		["tour", 11], ["wait", 24], ["shot", "c00g-tour-orders"],
+		["induction_off"],
+		["title", true], ["wait", 50], ["shot", "c00h-title-continue"], ["induction_off"],
 		["wait", 30], ["shot", "c01-start"],
 		["memo"], ["wait", 12], ["shot", "c02-memo"], ["close"],
-		["wait", 4], ["shot", "c03-notes-dispatch"],
+		["wait", 4], ["shot", "c03-lever-glow"],
 		["dispatch"], ["seek", 0.45], ["wait", 8], ["shot", "c04-dark-naive"],
 		["seek", 1.0], ["wait", 30], ["shot", "c05-lost"],
 		["magnify"], ["wait", 20], ["shot", "c06-magnified"], ["magnify"], ["wait", 20],
@@ -71,6 +80,15 @@ func _process(_d: float) -> void:
 			await RenderingServer.frame_post_draw
 			get_viewport().get_texture().get_image().save_png("%s/%s.png" % [out_dir, s[1]])
 			print("shot ", s[1])
+		"title":
+			console.induction.show_title(s[1])
+		"welcome":
+			console.induction.show_welcome()
+		"tour":
+			console.induction.show_tour(s[1])
+		"induction_off":
+			console.induction.visible = false
+			console.induction.mode = ""
 		"memo":
 			console._open_next_memo()
 		"close":
