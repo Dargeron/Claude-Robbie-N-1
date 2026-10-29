@@ -1,0 +1,5 @@
+# expect: bonus 1
+# kit: battery_bank
+# The whole way round the cave on the left wall, to its bottom corner, takes more charge than
+# the stock cell holds.
+follow_wall left

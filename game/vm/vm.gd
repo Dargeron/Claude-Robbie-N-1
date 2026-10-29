@@ -92,6 +92,14 @@ func _cond(rule: Dictionary, i: int, w: World) -> Array:
 		"executing":
 			value = last_rule + 1
 			ok = last_rule == int(rule["cond_param"]) - 1
+		"beacon_seen":
+			ok = w.beacon_seen()
+		"stuck":
+			ok = w.stuck()
+		"hit":
+			ok = w.hit_recently()
+		"heard":
+			ok = w.heard()
 	if rule["negate"]:
 		ok = not ok
 	return [ok, value]
@@ -139,6 +147,15 @@ func _action(rule: Dictionary, i: int, w: World) -> Dictionary:
 				res["ok"] = true
 				res["value"] = t
 				res["decision"] = {"act": World.Act.SHOOT, "heading": w.robbie.angle, "target": t}
+		"turn":
+			res["ok"] = true
+			var q := -Fx.QUARTER if param == "left" else Fx.QUARTER
+			res["decision"] = {"act": World.Act.MOVE, "heading": Fx.norm(w.robbie.angle + q), "target": -1, "hold": World.TURN_HOLD}
+		"drop_flare":
+			if w.flares_left > 0:
+				res["ok"] = true
+				res["value"] = w.flares_left
+				res["decision"] = {"act": World.Act.FLARE, "heading": w.robbie.angle, "target": -1}
 		"lamp":
 			w.lamp_on = param == "on"
 			res["instant"] = true

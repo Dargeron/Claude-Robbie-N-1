@@ -10,21 +10,23 @@ var vm: Vm
 var rec: Recorder
 var seed_value := 0
 var calm := false
+var kit: Kit
 
 
-func _init(r: Room, p: Program, seed_v: int, calm_v: bool = false) -> void:
+func _init(r: Room, p: Program, seed_v: int, calm_v: bool = false, kit_v: Kit = null) -> void:
 	room = r
 	program = p
 	seed_value = seed_v
 	calm = calm_v
-	world = World.new(r, seed_v, calm_v)
+	kit = kit_v if kit_v != null else Kit.stock()
+	world = World.new(r, seed_v, calm_v, kit)
 	vm = Vm.new(p)
 	rec = Recorder.new(world)
 
 
 func run() -> Dictionary:
 	while world.result == World.Result.RUNNING:
-		if world.commit == 0 and world.tick % World.THINK_EVERY == 0:
+		if world.commit == 0 and world.hold == 0 and world.tick % World.THINK_EVERY == 0:
 			world.apply(vm.think(world))
 		world.step()
 		rec.capture(world)
@@ -56,7 +58,17 @@ func outcome() -> Dictionary:
 		"hits_taken": damage,
 		"rules_chosen": chosen,
 		"final_hash": world.state_hash(),
+		"bonus": bonuses_taken(),
 	}
+
+
+## The lost beacons this Robbie recovered (indices into room.bonuses).
+func bonuses_taken() -> Array[int]:
+	var out: Array[int] = []
+	for i in world.bonus_taken.size():
+		if world.bonus_taken[i] == 1:
+			out.append(i)
+	return out
 
 
 func succeeded() -> bool:

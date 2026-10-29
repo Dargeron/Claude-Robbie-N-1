@@ -1,0 +1,4 @@
+# expect: bonus 0
+# kit: silent_fins
+# Silent fins: the eels can't hear him, so the left wall can take him up every shaft.
+follow_wall left

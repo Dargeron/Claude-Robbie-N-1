@@ -1,0 +1,4 @@
+# expect: bonus 0
+# The other hand: the right wall tours the big bottom cave, past the lost beacon in its far
+# corner. Robbie runs out of charge on the way back, but the beacon's code is already home.
+follow_wall right

@@ -1,0 +1,15 @@
+{
+  "cause": "lurker",
+  "final_hash": 3865187536,
+  "hashes": [
+    744231956,
+    1525428498,
+    1159577800,
+    3865187536
+  ],
+  "program": "gallery/naive_laser.rbt",
+  "result": "destroyed",
+  "room": "gallery",
+  "seed": 1,
+  "ticks": 120
+}

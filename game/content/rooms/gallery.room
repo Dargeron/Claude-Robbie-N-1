@@ -1,4 +1,4 @@
-{"id": "gallery", "name": "The Gallery", "order": 4, "cpu": 12, "slots": 2, "energy": 5000, "start_heading": 90, "teaches": "Back away from what wakes; it strikes where you were."}
+{"id": "gallery", "name": "The Gallery", "order": 4, "cpu": 12, "slots": 2, "energy": 5000, "start_heading": 90, "teaches": "Back away from what wakes; it strikes where you were.", "bonus": [{"pay": 3000, "name": "BEHIND THE FIRST MOUTH"}]}
 ---
 ########################################
 ########################################
@@ -7,7 +7,7 @@
 ########################################
 ########################################
 #......#########################.......#
-#......#########################.......#
+#......###*#####################.......#
 #......###L##############L######.......#
 #....................................EE#
 #..S.................................EE#

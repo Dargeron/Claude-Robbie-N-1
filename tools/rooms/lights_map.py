@@ -50,6 +50,9 @@ clear(20, 17, 22, 17)          # the door, into corridor A
 wall(23, 8, 23, 16)            # W1: A goes up and over it (gap rows 5-7)
 wall(27, 5, 27, 13)            # W2: B comes down and under it (gap rows 14-16)
 EXIT = [(32, 8), (33, 8), (32, 9), (33, 9)]
+# Lost beacons (secondary goals, docs/design/lab-parts-and-pay.md): the far wall of the cave by
+# the long wall, and its bottom corner. Neither is on the way the lights lead.
+BONUS = [(12, 1), (1, 20)]
 for (x, y) in EXIT:
     grid[y][x] = "E"
 START = (2, 2)
@@ -98,6 +101,9 @@ for i, p in enumerate(lights):
             ok = False
 for (x, y) in lights:
     grid[y][x] = "o"
+for (x, y) in BONUS:
+    assert grid[y][x] == ".", (x, y)
+    grid[y][x] = "*"
 
 # The last light must not have the exit on a compass line.
 lx, ly = lights[-1][0] + 0.5, lights[-1][1] + 0.5

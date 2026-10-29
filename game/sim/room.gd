@@ -6,6 +6,9 @@ extends RefCounted
 ##   G  valve (gate)  J  jellyfish    L  lurker niche       p  glowing plant (decor)
 ##   H  eel ("listener"): patrols the vertical shaft it starts in
 ##   o  a cold light: glows in the dark, and goes out when Robbie reaches it (no one put it there)
+##   *  a lost beacon: a secondary goal, hidden until found; the header's "bonus" list says what
+##      each pays, in the order they appear (top to bottom, left to right)
+##   K  a shellback: a slow armoured grazer, harmless unless shot
 
 enum Tile { WATER = 0, ROCK = 1, GATE = 2 }
 
@@ -27,6 +30,9 @@ var lurker_spawns: Array[Vector2i] = []
 var eel_spawns: Array[Vector2i] = []
 var plants: Array[Vector2i] = []
 var lures: Array[Vector2i] = []
+var bonuses: Array[Vector2i] = []
+var bonus_info: Array[Dictionary] = []   # per lost beacon: {pay, name}
+var shell_spawns: Array[Vector2i] = []
 var gate_tiles: Array[Vector2i] = []
 var exit_cx := 0   # sub-pixel centre of the exit area (the beacon)
 var exit_cy := 0
@@ -101,10 +107,20 @@ func parse(text: String) -> void:
 					plants.append(Vector2i(x, y))
 				"o":
 					lures.append(Vector2i(x, y))
+				"*":
+					bonuses.append(Vector2i(x, y))
+				"K":
+					shell_spawns.append(Vector2i(x, y))
 			tiles[y * w + x] = t
 	if ecount == 0:
 		error = "room has no exit"
 		return
+	var info: Variant = header.get("bonus", [])
+	for i in bonuses.size():
+		var d: Dictionary = {}
+		if typeof(info) == TYPE_ARRAY and i < (info as Array).size() and typeof(info[i]) == TYPE_DICTIONARY:
+			d = info[i]
+		bonus_info.append({"pay": int(d.get("pay", 1000)), "name": str(d.get("name", "LOST BEACON"))})
 	# Beacon at the centre of the exit tiles (integer maths only).
 	exit_cx = (ex_sum * Fx.TILE + ecount * Fx.TILE / 2) / ecount
 	exit_cy = (ey_sum * Fx.TILE + ecount * Fx.TILE / 2) / ecount

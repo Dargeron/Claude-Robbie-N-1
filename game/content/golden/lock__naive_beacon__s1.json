@@ -1,0 +1,18 @@
+{
+  "cause": "valve",
+  "final_hash": 2399198975,
+  "hashes": [
+    3333831586,
+    517571244,
+    1531938748,
+    2438236754,
+    1781399409,
+    1477659365,
+    3319081896
+  ],
+  "program": "lock/naive_beacon.rbt",
+  "result": "destroyed",
+  "room": "lock",
+  "seed": 1,
+  "ticks": 228
+}

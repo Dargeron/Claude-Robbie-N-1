@@ -1,0 +1,15 @@
+{
+  "cause": "lurker",
+  "final_hash": 4116797128,
+  "hashes": [
+    744231956,
+    1525428498,
+    1159577800,
+    4116797128
+  ],
+  "program": "gallery/naive_beacon.rbt",
+  "result": "destroyed",
+  "room": "gallery",
+  "seed": 1,
+  "ticks": 120
+}

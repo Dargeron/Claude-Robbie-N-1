@@ -17,6 +17,8 @@ const ACTIONS := {
 	"stop": {"label": "Stop", "cpu": 1, "kind": "move"},
 	"shoot": {"label": "Shoot laser", "cpu": 3, "kind": "commit"},
 	"lamp": {"label": "Lamp", "param": ["on", "off"], "cpu": 1, "kind": "instant"},
+	"turn": {"label": "Turn", "param": ["left", "right"], "cpu": 1, "kind": "move"},
+	"drop_flare": {"label": "Drop flare", "cpu": 2, "kind": "commit"},
 }
 
 const CONDITIONS := {
@@ -27,6 +29,10 @@ const CONDITIONS := {
 	"valve_shut": {"label": "valve is shut", "cpu": 2},
 	"energy_below": {"label": "energy below", "param": ["25", "50", "75"], "unit": "%", "cpu": 1},
 	"executing": {"label": "executing rule", "param": "rule", "cpu": 2},
+	"beacon_seen": {"label": "beacon in sight", "cpu": 2},
+	"stuck": {"label": "stuck", "cpu": 1},
+	"hit": {"label": "hit", "cpu": 1},
+	"heard": {"label": "heard", "cpu": 2},
 }
 
 ## Plain-language help for the editor's tooltips and Robbie's manual. Keep these true
@@ -46,6 +52,12 @@ const HELP := {
 	"valve_shut": "Robbie senses the valve ahead, and it is closing or shut.",
 	"energy_below": "Robbie's energy is below this share of a full charge.",
 	"executing": "This rule was the one driving Robbie at its last think.",
+	"turn": "A quarter turn to the left or right of where Robbie faces, swimming on as he turns. He doesn't think again until he has turned.",
+	"drop_flare": "Leave a burning flare behind (the flare launcher carries three). For ten seconds, jellyfish nearby go to the flare instead of his lamp. With none left, the rule doesn't apply and Robbie reads on.",
+	"beacon_seen": "Nothing but water between Robbie and the beacon: a straight swim would get there.",
+	"stuck": "Robbie has got nowhere in the last two seconds (pushing at rock, or going round in a tiny circle).",
+	"hit": "Robbie was hurt in the last two seconds.",
+	"heard": "The hydrophone hears an eel or a shellback within 8 tiles, through rock. Without a hydrophone fitted, never true.",
 	"always": "No condition: the rule applies whenever Robbie reads it.",
 	"not": "Run the rule when the condition is NOT true (1 CPU).",
 }

@@ -1,0 +1,3 @@
+# expect: bonus 0
+# The left wall finds the top corner of the cave by the long wall, the first thing it reaches.
+follow_wall left

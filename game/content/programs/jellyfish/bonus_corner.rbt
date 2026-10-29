@@ -1,0 +1,4 @@
+# expect: bonus 1
+# Dark along the right wall, round the shellback's corner. Shoot it and it comes for him.
+lamp off
+follow_wall right

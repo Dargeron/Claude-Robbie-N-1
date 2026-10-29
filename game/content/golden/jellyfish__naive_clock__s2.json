@@ -1,12 +1,12 @@
 {
   "cause": "jellyfish",
-  "final_hash": 2456752142,
+  "final_hash": 730822366,
   "hashes": [
-    3423366094,
-    365035455,
-    3357372477,
-    925083412,
-    1800238106
+    982135300,
+    3657565509,
+    3639817533,
+    3451972946,
+    1317406738
   ],
   "program": "jellyfish/naive_clock.rbt",
   "result": "destroyed",

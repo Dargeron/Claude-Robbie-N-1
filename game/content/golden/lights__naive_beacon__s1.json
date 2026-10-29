@@ -1,0 +1,16 @@
+{
+  "cause": "wall",
+  "final_hash": 3355844955,
+  "hashes": [
+    1751501083,
+    345475283,
+    2643457611,
+    3226120811,
+    2203377911
+  ],
+  "program": "lights/naive_beacon.rbt",
+  "result": "destroyed",
+  "room": "lights",
+  "seed": 1,
+  "ticks": 162
+}

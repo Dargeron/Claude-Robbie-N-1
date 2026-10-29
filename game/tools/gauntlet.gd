@@ -2,6 +2,7 @@ extends SceneTree
 ## Gauntlet: run a list of decks against one room in a single start, for quick map iteration.
 ##   godot --headless --path game --script res://tools/gauntlet.gd -- <room id or path> <decks.txt> [seeds=5]
 ## decks.txt: one deck per line, rules separated by " / "; blank lines and "#" comments are skipped.
+## A line may start with "kit=part,part ;" to dive with those parts fitted (Kit.SOCKET has the ids).
 ## Prints the pass count for each deck, the least charge any passing dive had left, and what ended the
 ## dives that failed.
 
@@ -22,6 +23,11 @@ func _init() -> void:
 		var deck := line.strip_edges()
 		if deck == "" or deck.begins_with("#"):
 			continue
+		var kit := Kit.stock()
+		if deck.begins_with("kit="):
+			var semi := deck.find(";")
+			kit = Kit.from_text(deck.substr(4, semi - 4).strip_edges())
+			deck = deck.substr(semi + 1).strip_edges()
 		var p := Program.parse(deck.replace(" / ", "\n"))
 		if not p.is_valid():
 			print("  bad   %s  %s" % [deck, p.errors])
@@ -29,8 +35,11 @@ func _init() -> void:
 		var passed := 0
 		var causes := {}
 		var least := -1
+		var found := {}
 		for s in range(1, seeds + 1):
-			var r: Dictionary = Dive.new(room, p, s).run()
+			var r: Dictionary = Dive.new(room, p, s, false, kit).run()
+			for b: int in r["bonus"]:
+				found[b] = int(found.get(b, 0)) + 1
 			if r["result"] == "exit":
 				passed += 1
 				least = int(r["energy"]) if least < 0 else mini(least, int(r["energy"]))
@@ -38,5 +47,9 @@ func _init() -> void:
 				var c := str(r.get("cause", r["result"]))
 				causes[c] = int(causes.get(c, 0)) + 1
 		var left := ("left %5d" % least) if least >= 0 else "          "
-		print("%3d/%d  %-60s %s  %s" % [passed, seeds, deck, left, causes if not causes.is_empty() else ""])
+		var bonus := ""
+		for b: int in found:
+			bonus += " *%d:%d" % [b, found[b]]
+		var kt := ("[" + kit.to_text() + "] ") if not kit.is_stock() else ""
+		print("%3d/%d  %-60s %s  %s%s" % [passed, seeds, kt + deck, left, causes if not causes.is_empty() else "", bonus])
 	quit(0)

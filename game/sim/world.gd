@@ -11,7 +11,7 @@ extends RefCounted
 
 enum Result { RUNNING, EXIT, DESTROYED, ENERGY, TIMEOUT }
 enum GateState { OPEN, CLOSING, CLOSED }
-enum Act { IDLE, MOVE, STOP, SHOOT }
+enum Act { IDLE, MOVE, STOP, SHOOT, FLARE }
 
 const THINK_EVERY := 3
 const HASH_EVERY := 30
@@ -40,6 +40,15 @@ const RAY_STEP := 2 * 256
 const PLANT_GLOW := 40 * 256
 const LURE_GLOW := 56 * 256       # the cold lights: seen by their own glow this far, past rock no
 const LURE_REACH := 9 * 256       # ...and they go out when Robbie comes this close
+const BONUS_REACH := 10 * 256     # a lost beacon is recovered when Robbie comes this close
+const BONUS_GLOW := 32 * 256      # ...and it pings faintly: sensed (and "light") within two tiles
+const FLARE_TICKS := 300          # a flare burns for ten seconds
+const FLARE_PULL := 64 * 256      # jellyfish this close to a burning flare go to it
+const HEARD_RANGE := 128 * 256    # the hydrophone hears eels and shellbacks 8 tiles off, through rock
+const STUCK_TICKS := 60           # "stuck": got nowhere in two seconds...
+const STUCK_PX := 6 * 256         # ...nowhere meaning less than this
+const HIT_TICKS := 60             # "hit": hurt in the last two seconds
+const TURN_HOLD := 16             # a quarter turn takes about half a second, without thinking
 
 # Jellyfish
 const J_RADIUS := 4 * 256
@@ -67,7 +76,18 @@ const E_LUNGE_TICKS := 75
 const E_REST := 90
 const E_DAMAGE := 2
 
+# Shellback: a slow armoured grazer. Harmless unless shot: the laser glances off its shell and
+# it comes for him. (The scope shows it yellow, and red while it is angry.)
+const K_RADIUS := 8 * 256
+const K_GLOW := 40 * 256         # its shell has a faint sheen: sensed within 2.5 tiles
+const K_CRAWL := 77              # 0.3 px per tick
+const K_CHARGE := 307            # 1.2 px per tick: faster than Robbie
+const K_RAGE := 240              # angry for eight seconds
+const K_DAMAGE := 2
+const K_LEASH := 48 * 256        # it grazes within three tiles of where it lives
+
 var room: Room
+var kit: Kit
 var seed_value := 0
 var calm := false
 var tick := 0
@@ -97,10 +117,22 @@ var gate_state := GateState.OPEN
 var last_laser_target := -1
 var lure_out := PackedByteArray()  # per cold light: 1 once Robbie has reached it and it went dark
 var lure_seen := PackedByteArray()
+var bonus_taken := PackedByteArray()  # per lost beacon: 1 once Robbie has recovered it
+var bonus_seen := PackedByteArray()
+var flares_left := 0
+var flare_x: Array[int] = []           # flares dropped, where, and when (they burn FLARE_TICKS)
+var flare_y: Array[int] = []
+var flare_t: Array[int] = []
+var hold := 0                          # ticks Robbie keeps his order without thinking (a turn)
+var reserve_used := false
+var last_hit := -1
+var _trail_x: Array[int] = []          # where Robbie was every 30 ticks (for "stuck")
+var _trail_y: Array[int] = []
 
 
-func _init(r: Room, seed_v: int, calm_v: bool = false) -> void:
+func _init(r: Room, seed_v: int, calm_v: bool = false, kit_v: Kit = null) -> void:
 	room = r
+	kit = kit_v if kit_v != null else Kit.stock()
 	seed_value = seed_v
 	calm = calm_v
 	var eff_seed := 0 if calm else seed_v
@@ -113,11 +145,14 @@ func _init(r: Room, seed_v: int, calm_v: bool = false) -> void:
 	robbie.y = room.start_ty * Fx.TILE + Fx.TILE / 2
 	robbie.angle = Fx.from_deg(room.start_heading_deg)
 	robbie.radius = R_RADIUS
-	robbie.hp = R_HP
-	energy = room.energy
-	energy_max = room.energy
+	robbie.hp = kit.hp
+	energy = room.energy * kit.energy_pct / 100
+	energy_max = energy
+	flares_left = kit.flares
 	lure_out.resize(room.lures.size())
 	lure_seen.resize(room.lures.size())
+	bonus_taken.resize(room.bonuses.size())
+	bonus_seen.resize(room.bonuses.size())
 
 	gate_open_t = room.gate_param("open", 75)
 	gate_closing_t = room.gate_param("closing", 45)
@@ -170,6 +205,21 @@ func _init(r: Room, seed_v: int, calm_v: bool = false) -> void:
 		b.y = _eel_start_y(sp, vr)
 		b.rng = Rng.new(eff_seed, 300 + i)
 		b.angle = 0 if calm or vr.below(2) == 0 else Fx.HALF_TURN
+		bodies.append(b)
+	for i in room.shell_spawns.size():
+		var sp: Vector2i = room.shell_spawns[i]
+		var b := Body.new()
+		b.kind = Body.Kind.SHELLBACK
+		b.index = bodies.size()
+		b.radius = K_RADIUS
+		b.glow = K_GLOW
+		b.x = sp.x * Fx.TILE + Fx.TILE / 2
+		b.y = sp.y * Fx.TILE + Fx.TILE / 2
+		b.home_x = b.x
+		b.home_y = b.y
+		b.rng = Rng.new(eff_seed, 400 + i)
+		b.angle = b.rng.below(Fx.TURN)
+		b.timer = 40 + b.rng.below(60)
 		bodies.append(b)
 
 	seen.resize(room.w * room.h)
@@ -350,14 +400,14 @@ func los(ax: int, ay: int, bx: int, by: int) -> bool:
 
 func in_cone(tx_: int, ty_: int) -> bool:
 	var a := Fx.angle_of(tx_ - robbie.x, ty_ - robbie.y)
-	return absi(Fx.angle_diff(robbie.angle, a)) <= LAMP_HALF
+	return absi(Fx.angle_diff(robbie.angle, a)) <= kit.lamp_half
 
 
 ## The lamp lights this point (range, cone and line of sight).
 func lit(px_: int, py_: int) -> bool:
 	if not lamp_on:
 		return false
-	if Fx.dist(px_ - robbie.x, py_ - robbie.y) > LAMP_RANGE:
+	if Fx.dist(px_ - robbie.x, py_ - robbie.y) > kit.lamp_range:
 		return false
 	if not in_cone(px_, py_):
 		return false
@@ -374,7 +424,7 @@ func sensed(b: Body) -> bool:
 	# Cheap tests first: only bodies close enough to glow at Robbie, or inside the lamp's
 	# reach, need the (expensive) line-of-sight check. Same answer as before, much faster.
 	var by_glow := b.glow > 0 and d <= b.glow
-	var by_lamp := lamp_on and d <= LAMP_RANGE and not (b.kind == Body.Kind.LURKER and b.state != 1)
+	var by_lamp := lamp_on and d <= kit.lamp_range and not (b.kind == Body.Kind.LURKER and b.state != 1)
 	if not by_glow and not by_lamp:
 		return false
 	if not los(robbie.x, robbie.y, b.x, b.y):
@@ -390,21 +440,22 @@ func sensed(b: Body) -> bool:
 func sensed_from(rx_: int, ry_: int, ra_: int, lamp: bool, gstate: int, bx_: int, by_: int, kind: int, state: int, glowing: bool) -> bool:
 	var dx := bx_ - rx_
 	var dy := by_ - ry_
-	if absi(dx) > LAMP_RANGE or absi(dy) > LAMP_RANGE:   # beyond the lamp and every glow
+	var bound := maxi(kit.lamp_range, E_GLOW)
+	if absi(dx) > bound or absi(dy) > bound:   # beyond the lamp and every glow
 		return false   # far away: the common case, decided without a square root
 	var d := Fx.dist(dx, dy)
 	if d <= PROX:
 		return true
 	var g := glow_radius(kind) if glowing else 0
 	var by_glow := g > 0 and d <= g
-	var by_lamp := lamp and d <= LAMP_RANGE and not (kind == Body.Kind.LURKER and state != 1)
+	var by_lamp := lamp and d <= kit.lamp_range and not (kind == Body.Kind.LURKER and state != 1)
 	if not by_glow and not by_lamp:
 		return false
 	if not los_at_state(rx_, ry_, bx_, by_, gstate):
 		return false
 	if by_glow:
 		return true
-	return absi(Fx.angle_diff(ra_, Fx.angle_of(dx, dy))) <= LAMP_HALF
+	return absi(Fx.angle_diff(ra_, Fx.angle_of(dx, dy))) <= kit.lamp_half
 
 
 ## A glowing plant at this tile is sensed from (x, y) at this moment: its glow, or the lamp.
@@ -413,10 +464,11 @@ func plant_sensed_from(rx_: int, ry_: int, ra_: int, lamp: bool, gstate: int, p:
 	var cy := p.y * Fx.TILE + Fx.TILE / 2
 	var dx := cx - rx_
 	var dy := cy - ry_
-	if absi(dx) > LAMP_RANGE or absi(dy) > LAMP_RANGE:
+	var bound := maxi(kit.lamp_range, PLANT_GLOW)
+	if absi(dx) > bound or absi(dy) > bound:
 		return false
 	var d := Fx.dist(dx, dy)
-	var by_lamp := lamp and d <= LAMP_RANGE and absi(Fx.angle_diff(ra_, Fx.angle_of(dx, dy))) <= LAMP_HALF
+	var by_lamp := lamp and d <= kit.lamp_range and absi(Fx.angle_diff(ra_, Fx.angle_of(dx, dy))) <= kit.lamp_half
 	if d > PLANT_GLOW and not by_lamp:
 		return false
 	return los_at_state(rx_, ry_, cx, cy, gstate)
@@ -431,6 +483,8 @@ static func glow_radius(kind: int) -> int:
 			return E_GLOW
 		Body.Kind.LURKER:
 			return L_GLOW
+		Body.Kind.SHELLBACK:
+			return K_GLOW
 	return 0
 
 
@@ -554,6 +608,45 @@ func gate_shut_sensed() -> bool:
 	return gate_state != GateState.OPEN and valve_sensed()
 
 
+## "beacon in sight": nothing but water between Robbie and the beacon.
+func beacon_seen() -> bool:
+	return los(robbie.x, robbie.y, room.exit_cx, room.exit_cy)
+
+
+## "stuck": two seconds of pushing and getting nowhere.
+func stuck() -> bool:
+	if _trail_x.size() < 3:
+		return false
+	return Fx.dist(robbie.x - _trail_x[0], robbie.y - _trail_y[0]) < STUCK_PX
+
+
+## "hit": hurt in the last two seconds.
+func hit_recently() -> bool:
+	return last_hit >= 0 and tick - last_hit <= HIT_TICKS
+
+
+## "heard" (the hydrophone): an eel or a shellback within 8 tiles, rock or no rock.
+func heard() -> bool:
+	if not kit.hydrophone:
+		return false
+	for b in bodies:
+		if b.alive and (b.kind == Body.Kind.EEL or b.kind == Body.Kind.SHELLBACK) and dist_to(b) <= HEARD_RANGE:
+			return true
+	return false
+
+
+## A lost beacon Robbie senses now: in the lamp, or close enough to feel.
+func bonus_sensed(i: int) -> bool:
+	var cx := room.bonuses[i].x * Fx.TILE + Fx.TILE / 2
+	var cy := room.bonuses[i].y * Fx.TILE + Fx.TILE / 2
+	var d := Fx.dist(cx - robbie.x, cy - robbie.y)
+	if d <= PROX:
+		return true
+	if d <= BONUS_GLOW and los(robbie.x, robbie.y, cx, cy):
+		return true
+	return lit(cx, cy)
+
+
 func beacon_heading() -> int:
 	return Fx.angle_of(room.exit_cx - robbie.x, room.exit_cy - robbie.y)
 
@@ -585,6 +678,16 @@ func light_heading() -> int:
 		if best_d == -1 or d < best_d:
 			best_d = d
 			best_a = Fx.angle_of(cx - robbie.x, cy - robbie.y)
+	# A lost beacon's ping counts as light too: the way to home in on one.
+	for i in room.bonuses.size():
+		if bonus_taken[i] == 1 or not bonus_sensed(i):
+			continue
+		var cx := room.bonuses[i].x * Fx.TILE + Fx.TILE / 2
+		var cy := room.bonuses[i].y * Fx.TILE + Fx.TILE / 2
+		var d := Fx.dist(cx - robbie.x, cy - robbie.y)
+		if best_d == -1 or d < best_d:
+			best_d = d
+			best_a = Fx.angle_of(cx - robbie.x, cy - robbie.y)
 	return best_a
 
 
@@ -596,7 +699,8 @@ func lure_sensed(i: int) -> bool:
 	var cy := room.lures[i].y * Fx.TILE + Fx.TILE / 2
 	var dx := cx - robbie.x
 	var dy := cy - robbie.y
-	if absi(dx) > LAMP_RANGE or absi(dy) > LAMP_RANGE:
+	var bound := maxi(kit.lamp_range, LURE_GLOW)
+	if absi(dx) > bound or absi(dy) > bound:
 		return false
 	var d := Fx.dist(dx, dy)
 	if d <= LURE_GLOW and los(robbie.x, robbie.y, cx, cy):
@@ -669,10 +773,16 @@ func apply(decision: Dictionary) -> void:
 			var b := bodies[ti]
 			# Lurkers are armoured rock: the beam glances off. Robbie still pays for the
 			# shot and stands still while it fires, which is the worst place to be.
-			var bounced := b.kind == Body.Kind.LURKER or b.kind == Body.Kind.EEL   # eels slip aside
+			var bounced := b.kind == Body.Kind.LURKER or b.kind == Body.Kind.EEL or b.kind == Body.Kind.SHELLBACK   # eels slip aside
 			if not bounced:
 				b.alive = false
 				b.glow = 0
+			if b.kind == Body.Kind.SHELLBACK:
+				# It felt that. Now it comes for him.
+				if b.state != 1:
+					events.append({"t": tick, "type": "shell_angry", "src": ti})
+				b.state = 1
+				b.timer = K_RAGE
 			energy -= LASER_COST
 			commit = LASER_COMMIT
 			laser_cd = LASER_COOLDOWN
@@ -680,6 +790,16 @@ func apply(decision: Dictionary) -> void:
 			robbie.angle = Fx.angle_of(b.x - robbie.x, b.y - robbie.y)
 			events.append({"t": tick, "type": "laser", "target": ti, "kind": b.kind_name(), "bounced": bounced})
 		act = Act.STOP
+	elif act == Act.FLARE:
+		if flares_left > 0:
+			flares_left -= 1
+			flare_x.append(robbie.x)
+			flare_y.append(robbie.y)
+			flare_t.append(tick)
+			commit = 3
+			events.append({"t": tick, "type": "flare", "x": robbie.x, "y": robbie.y})
+		act = Act.STOP
+	hold = int(decision.get("hold", 0))
 
 
 # ---------------------------------------------------------------- step
@@ -692,7 +812,11 @@ func step() -> void:
 		_move_robbie()
 	if result == Result.RUNNING:
 		_update_creatures()
-	energy -= DRAIN_BASE + (DRAIN_MOVE if moving else 0)
+	energy -= DRAIN_BASE + (kit.drain_move if moving else 0)
+	if energy <= 0 and kit.reserve and not reserve_used and result == Result.RUNNING:
+		reserve_used = true
+		energy = energy_max * 15 / 100
+		events.append({"t": tick, "type": "reserve"})
 	if energy <= 0:
 		energy = 0
 		if result == Result.RUNNING:
@@ -702,6 +826,13 @@ func step() -> void:
 	if tick % THINK_EVERY == 0:
 		_update_seen()
 	_update_lures()
+	_update_bonuses()
+	if tick % 30 == 0:
+		_trail_x.append(robbie.x)
+		_trail_y.append(robbie.y)
+		if _trail_x.size() > 3:
+			_trail_x.pop_front()
+			_trail_y.pop_front()
 	if result == Result.RUNNING and room.is_exit(robbie.x / Fx.TILE, robbie.y / Fx.TILE):
 		result = Result.EXIT
 		cause = "exit"
@@ -711,6 +842,8 @@ func step() -> void:
 		invuln -= 1
 	if laser_cd > 0:
 		laser_cd -= 1
+	if hold > 0:
+		hold -= 1
 	if result == Result.RUNNING and tick >= MAX_TICKS:
 		result = Result.TIMEOUT
 		cause = "timeout"
@@ -729,6 +862,29 @@ func _update_lures() -> void:
 		if Fx.dist(cx - robbie.x, cy - robbie.y) <= LURE_REACH:
 			lure_out[i] = 1
 			events.append({"t": tick, "type": "lure_out", "i": i})
+
+
+## The lost beacons: noted the first time Robbie senses one, recovered when he reaches it. Once
+## recovered, its code is on the wire: it counts even if he's lost afterwards.
+func _update_bonuses() -> void:
+	for i in room.bonuses.size():
+		if bonus_taken[i] == 1 or result != Result.RUNNING:
+			continue
+		if bonus_seen[i] == 0 and bonus_sensed(i):
+			bonus_seen[i] = 1
+			events.append({"t": tick, "type": "bonus_seen", "i": i})
+		var cx := room.bonuses[i].x * Fx.TILE + Fx.TILE / 2
+		var cy := room.bonuses[i].y * Fx.TILE + Fx.TILE / 2
+		if Fx.dist(cx - robbie.x, cy - robbie.y) <= BONUS_REACH:
+			bonus_taken[i] = 1
+			if bonus_seen[i] == 0:
+				bonus_seen[i] = 1
+				events.append({"t": tick, "type": "bonus_seen", "i": i})
+			events.append({"t": tick, "type": "bonus", "i": i})
+
+
+func flare_burning(i: int) -> bool:
+	return tick - flare_t[i] < FLARE_TICKS
 
 
 func _update_gate(initial: bool) -> void:
@@ -763,13 +919,13 @@ func _move_robbie() -> void:
 	if act != Act.MOVE:
 		return
 	var travel := robbie.angle
-	var spd := R_SPEED
+	var spd := kit.speed
 	if act_face >= 0:
 		# Back away: turn to keep facing the threat, thrust along act_heading.
 		var df := clampi(Fx.angle_diff(robbie.angle, act_face), -R_TURN, R_TURN)
 		robbie.angle = Fx.norm(robbie.angle + df)
 		travel = act_heading
-		spd = R_REVERSE
+		spd = kit.reverse
 	else:
 		var d := clampi(Fx.angle_diff(robbie.angle, act_heading), -R_TURN, R_TURN)
 		robbie.angle = Fx.norm(robbie.angle + d)
@@ -780,11 +936,13 @@ func _move_robbie() -> void:
 	robbie.y += vy
 	moving = true
 	var push := _resolve_walls(robbie)
+	_push_off_shells()
 	if push != Vector2i.ZERO:
 		if _touching_shut_valve():
 			if invuln == 0:
 				events.append({"t": tick, "type": "valve_sting"})
-				_damage(1, "valve", -1, true)
+				if not kit.insulated:
+					_damage(1, "valve", -1, true)
 				invuln = VALVE_INVULN
 			return
 		var plen := Fx.dist(push.x, push.y)
@@ -792,6 +950,25 @@ func _move_robbie() -> void:
 		if plen > 0 and into * 100 > 85 * spd * plen:
 			events.append({"t": tick, "type": "crash"})
 			_damage(1, "wall", -1, true)
+
+
+## A shellback is solid: Robbie bumps off its shell (no harm done, unless it's angry).
+func _push_off_shells() -> void:
+	for b in bodies:
+		if b.kind != Body.Kind.SHELLBACK or not b.alive:
+			continue
+		var dx := robbie.x - b.x
+		var dy := robbie.y - b.y
+		var d := Fx.dist(dx, dy)
+		var need := b.radius + robbie.radius
+		if d >= need:
+			continue
+		if d <= 0:
+			dx = Fx.ONE
+			d = Fx.ONE
+		robbie.x = b.x + dx * need / d
+		robbie.y = b.y + dy * need / d
+		_resolve_walls(robbie)
 
 
 func _touching_shut_valve() -> bool:
@@ -814,15 +991,30 @@ func _update_creatures() -> void:
 				_step_lurker(b)
 			Body.Kind.EEL:
 				_step_eel(b)
+			Body.Kind.SHELLBACK:
+				_step_shell(b)
 
 
 func _step_jellyfish(b: Body) -> void:
 	var spd := J_DRIFT
-	var in_halo := lamp_on and dist_to(b) <= LAMP_HALO and los(robbie.x, robbie.y, b.x, b.y)
-	if in_halo or lit(b.x, b.y):
+	var seen_lamp := false
+	if not kit.red_lamp:   # a red lamp is dark to them
+		var in_halo := lamp_on and dist_to(b) <= kit.lamp_halo and los(robbie.x, robbie.y, b.x, b.y)
+		seen_lamp = in_halo or lit(b.x, b.y)
+	var flare := _flare_for(b) if not seen_lamp else -1
+	if seen_lamp:
 		b.state = 1
 		b.angle = Fx.angle_of(robbie.x - b.x, robbie.y - b.y)
 		spd = J_CHASE
+	elif flare >= 0:
+		b.state = 1
+		var fdx := flare_x[flare] - b.x
+		var fdy := flare_y[flare] - b.y
+		if Fx.dist(fdx, fdy) <= J_RADIUS:
+			spd = 0   # clustered on the flare
+		else:
+			b.angle = Fx.angle_of(fdx, fdy)
+			spd = J_CHASE
 	else:
 		b.state = 0
 		b.timer -= 1
@@ -842,6 +1034,51 @@ func _step_jellyfish(b: Body) -> void:
 	if b.timer2 == 0 and dist_to(b) < b.radius + robbie.radius:
 		b.timer2 = J_STING_COOLDOWN
 		_damage(1, "jellyfish", b.index, true)
+
+
+## The nearest burning flare a jellyfish can see, or -1.
+func _flare_for(b: Body) -> int:
+	var best := -1
+	var best_d := 0
+	for i in flare_x.size():
+		if not flare_burning(i):
+			continue
+		var d := Fx.dist(flare_x[i] - b.x, flare_y[i] - b.y)
+		if d <= FLARE_PULL and (best == -1 or d < best_d) and los(b.x, b.y, flare_x[i], flare_y[i]):
+			best = i
+			best_d = d
+	return best
+
+
+## state 0: crawls about, minding its own business; 1: angry (it was shot), charges him.
+func _step_shell(b: Body) -> void:
+	var spd := K_CRAWL
+	if b.state == 1:
+		b.angle = Fx.angle_of(robbie.x - b.x, robbie.y - b.y)
+		spd = K_CHARGE
+		b.timer -= 1
+		if b.timer <= 0:
+			b.state = 0
+			b.timer = 60
+	else:
+		b.timer -= 1
+		if b.timer <= 0:
+			b.angle = b.rng.below(Fx.TURN)
+			b.timer = 60 + b.rng.below(90)
+	var nx := b.x + Fx.mul_trig(spd, Fx.dir_x(b.angle))
+	var ny := b.y + Fx.mul_trig(spd, Fx.dir_y(b.angle))
+	var strays := b.state == 0 and Fx.dist(nx - b.home_x, ny - b.home_y) > K_LEASH
+	if _circle_hits_solid(nx, ny, b.radius) or strays:
+		if b.state == 0:
+			b.angle = Fx.angle_of(b.home_x - b.x, b.home_y - b.y) if strays else b.rng.below(Fx.TURN)
+	else:
+		b.x = nx
+		b.y = ny
+	if b.timer2 > 0:
+		b.timer2 -= 1
+	if b.state == 1 and b.timer2 == 0 and dist_to(b) < b.radius + robbie.radius + Fx.ONE * 2:
+		b.timer2 = 30
+		_damage(K_DAMAGE, "shellback", b.index, true)
 
 
 func _step_lurker(b: Body) -> void:
@@ -873,7 +1110,7 @@ func _step_lurker(b: Body) -> void:
 func _step_eel(b: Body) -> void:
 	match b.state:
 		0:
-			if moving and dist_to(b) <= E_HEAR and los(robbie.x, robbie.y, b.x, b.y):
+			if moving and dist_to(b) <= kit.eel_hear and los(robbie.x, robbie.y, b.x, b.y):
 				b.state = 1
 				b.timer = E_LUNGE_TICKS
 				events.append({"t": tick, "type": "eel_hears", "src": b.index})
@@ -920,6 +1157,7 @@ func _damage(n: int, why: String, src: int, respect_invuln: bool) -> void:
 		return
 	robbie.hp -= n
 	invuln = INVULN
+	last_hit = tick
 	events.append({"t": tick, "type": "damage", "n": n, "cause": why, "src": src, "hp": robbie.hp})
 	if robbie.hp <= 0:
 		robbie.hp = 0
@@ -937,10 +1175,10 @@ func _update_seen() -> void:
 	if not lamp_on:
 		return
 	for k in range(-4, 5):
-		var a := Fx.norm(robbie.angle + k * LAMP_HALF / 4)
+		var a := Fx.norm(robbie.angle + k * kit.lamp_half / 4)
 		var dxu := Fx.dir_x(a)
 		var dyu := Fx.dir_y(a)
-		var steps := LAMP_RANGE / (4 * Fx.ONE)
+		var steps := kit.lamp_range / (4 * Fx.ONE)
 		for i in range(1, steps + 1):
 			var dl := i * 4 * Fx.ONE
 			var tx := (robbie.x + Fx.mul_trig(dl, dxu)) / Fx.TILE
@@ -977,12 +1215,12 @@ func solid_at_state(tx: int, ty: int, gstate: int) -> bool:
 func lamp_ray_ends(x: int, y: int, angle: int, gstate: int, n: int) -> PackedInt32Array:
 	var out := PackedInt32Array()
 	for k in n:
-		var a := Fx.norm(angle - LAMP_HALF + (2 * LAMP_HALF * k) / maxi(n - 1, 1))
+		var a := Fx.norm(angle - kit.lamp_half + (2 * kit.lamp_half * k) / maxi(n - 1, 1))
 		var dxu := Fx.dir_x(a)
 		var dyu := Fx.dir_y(a)
-		var ex := x + Fx.mul_trig(LAMP_RANGE, dxu)
-		var ey := y + Fx.mul_trig(LAMP_RANGE, dyu)
-		var steps := LAMP_RANGE / RAY_STEP
+		var ex := x + Fx.mul_trig(kit.lamp_range, dxu)
+		var ey := y + Fx.mul_trig(kit.lamp_range, dyu)
+		var steps := kit.lamp_range / RAY_STEP
 		for i in range(1, steps + 1):
 			var dl := i * RAY_STEP
 			var px_ := x + Fx.mul_trig(dl, dxu)

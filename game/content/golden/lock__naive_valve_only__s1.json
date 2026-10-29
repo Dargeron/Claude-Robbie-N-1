@@ -1,0 +1,19 @@
+{
+  "cause": "eel",
+  "final_hash": 1066572615,
+  "hashes": [
+    3333831586,
+    517571244,
+    1531938748,
+    2438236754,
+    2501898420,
+    300558458,
+    3146303365,
+    3195922784
+  ],
+  "program": "lock/naive_valve_only.rbt",
+  "result": "destroyed",
+  "room": "lock",
+  "seed": 1,
+  "ticks": 249
+}

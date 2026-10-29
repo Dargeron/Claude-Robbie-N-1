@@ -1,0 +1,5 @@
+# expect: bonus 0
+# kit: plating
+# The lost beacon pings from behind the first mouth: follow its light in. Plating takes the bite.
+move_towards light
+move_towards beacon

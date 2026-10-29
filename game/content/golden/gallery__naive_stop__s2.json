@@ -1,0 +1,14 @@
+{
+  "cause": "lurker",
+  "final_hash": 3336692081,
+  "hashes": [
+    744231956,
+    1525428498,
+    1159577800
+  ],
+  "program": "gallery/naive_stop.rbt",
+  "result": "destroyed",
+  "room": "gallery",
+  "seed": 2,
+  "ticks": 117
+}

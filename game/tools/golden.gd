@@ -20,7 +20,8 @@ static func program_paths() -> Array[String]:
 
 
 static func record(room_id: String, program_path: String, seed_v: int) -> Dictionary:
-	var dive := Dive.new(RoomLibrary.load_room(room_id), ProgramFiles.load_program(program_path), seed_v)
+	var kit := Kit.from_text(str(ProgramFiles.metadata(program_path).get("kit", "")))
+	var dive := Dive.new(RoomLibrary.load_room(room_id), ProgramFiles.load_program(program_path), seed_v, false, kit)
 	var o := dive.run()
 	return {
 		"room": room_id,

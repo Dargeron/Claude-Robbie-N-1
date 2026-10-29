@@ -1,11 +1,11 @@
-{"id": "listeners", "name": "The Listeners", "order": 3, "cpu": 12, "slots": 2, "energy": 4000, "start_heading": 90, "teaches": "Some things hunt by sound: stop and let them pass"}
+{"id": "listeners", "name": "The Listeners", "order": 3, "cpu": 12, "slots": 2, "energy": 4000, "start_heading": 90, "teaches": "Some things hunt by sound: stop and let them pass", "bonus": [{"pay": 2500, "name": "THE THIRD SHAFT"}]}
 ---
 ########################################
 ########################################
 ########################################
 ########################################
 ########################################
-#########.p######..######..#####..######
+#########.p######..######*.#####..######
 #########H.######..######..#####..######
 #########..######..######H.#####..######
 #########..######..######..#####..######

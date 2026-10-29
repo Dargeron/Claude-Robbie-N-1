@@ -1,0 +1,17 @@
+{
+  "cause": "wall",
+  "final_hash": 1281702679,
+  "hashes": [
+    2083765990,
+    590982428,
+    1732768050,
+    951364712,
+    4074695457,
+    723653605
+  ],
+  "program": "gallery/bonus_mouth.rbt",
+  "result": "destroyed",
+  "room": "gallery",
+  "seed": 1,
+  "ticks": 202
+}

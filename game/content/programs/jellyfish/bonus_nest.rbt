@@ -1,0 +1,5 @@
+# expect: bonus 0
+# kit: plating
+# The nest above the exit: dark along the left wall, and plating to take the stings.
+lamp off
+follow_wall left

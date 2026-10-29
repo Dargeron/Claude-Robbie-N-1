@@ -1,0 +1,15 @@
+{
+  "cause": "eel",
+  "final_hash": 163588656,
+  "hashes": [
+    3662698438,
+    3956206854,
+    2135526499,
+    2234120938
+  ],
+  "program": "lock/naive_beacon.rbt",
+  "result": "destroyed",
+  "room": "lock",
+  "seed": 2,
+  "ticks": 131
+}

@@ -3,6 +3,8 @@ extends RefCounted
 ## Loads .rbt program files. Header comments may carry metadata used by tests:
 ##   # expect: exit            (or: fail)
 ##   # certify: yes            (or: no) - should the survey fleet pass?
+##   # expect: bonus 1         (recovers that lost beacon on the room's practice seed)
+##   # kit: plating,flares     (dive with these parts fitted)
 
 
 static func load_program(path: String) -> Program:
