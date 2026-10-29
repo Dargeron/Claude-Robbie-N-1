@@ -2,7 +2,6 @@
   "_doc": "The console's words: the Company's memos and tallies per shift, its regulations, and Op. 5's notes and letters. {placeholders} are filled in by the console. Bodies are BBCode.",
   "debt_start": 48000,
   "hull_cost": 1200,
-  "certify_credit": 4500,
   "sectors": {
     "dark": {
       "label": "SECTOR 1  ·  THE DARK  ·  412 M",
@@ -41,7 +40,7 @@
       "open": {
         "ref": "DA-9/0412  ·  SHIFT 1",
         "subject": "COMMENCEMENT OF DUTIES",
-        "body": "Operator 6,\n\nWelcome to Station 9. Your passage from Earth has been entered against your contract at the standard rate, together with oxygen, berth, and the training you did not receive. You will repay it in shifts. Your balance is [b]{debt} scrip[/b].\n\nYour duty is to chart the sectors beneath the station with Company survey units (type ROBBIE; hereafter \"units\"). A unit is dispatched with a deck of punched order cards and executes the deck. Units do not improvise. Units do not feel. Any appearance to the contrary is an artefact of the telemetry.\n\nThis shift: chart and certify [b]Sector 1, The Dark[/b]. Certification requires the Analytical Engine to pass your deck in sixteen trials of twenty.\n\nType plates issued: SWIM TOWARDS BEACON  ·  FOLLOW WALL  ·  SWIM (BEARING)  ·  IF WALL AHEAD.\n\nYour predecessor's effects have been removed. Notes left on Company equipment are Company property and are not to be read.\n\nProductivity is its own reward."
+        "body": "Operator 6,\n\nWelcome to Station 9. Your passage from Earth has been entered against your contract at the standard rate, together with oxygen, berth, and the training you did not receive. You will repay it in shifts. Your balance is [b]{debt} scrip[/b].\n\nYour duty is to chart the sectors beneath the station with Company survey units (type ROBBIE; hereafter \"units\"). A unit is dispatched with a deck of punched order cards and executes the deck. Units do not improvise. Units do not feel. Any appearance to the contrary is an artefact of the telemetry.\n\nThis shift: chart and certify [b]Sector 1, The Dark[/b]. Certification requires the Analytical Engine to pass your deck in sixteen trials of twenty.\n\nType plates issued: SWIM TOWARDS BEACON  ·  FOLLOW WALL  ·  SWIM (BEARING)  ·  IF WALL AHEAD.\n\nYour predecessor's effects have been removed. Notes left on Company equipment are Company property and are not to be read.\n\nYour survey fee is paid into your hand when a sector is certified, less a deduction for units lost beyond the allowance. Equipment may be requisitioned from the hangar against it, or it may be paid in against your contract.\n\nSurvey beacons were lost in these sectors in earlier surveys. Their positions were not recorded. The Company pays for every beacon a unit recovers.\n\nProductivity is its own reward."
       },
       "notice": "Operators are reminded that unit telemetry (\"last words\") is not speech and is not to be logged as such.",
       "letter": "They count the hulls. I counted the words.\n\nRobbie 31 said it's warm by the wall. There is nothing warm at four hundred metres. Unless something is.\n\nKeep a list of what they say. They'll tell you to burn it. Don't.\n\nThe Jellyfish is next. Lamp off. You'll see."
@@ -112,7 +111,7 @@
     "body": "Operator 6,\n\nSector 6 and below are sealed pending review. Your next shift will begin when the review is complete.\n\nThe hangar remains closed for audit. The audit is ongoing.\n\nThe Directorate notes your output and has no further comment at this time.\n\n[b](End of the prototype. Thank you for playtesting. Everything is still here: re-run any sector, try leaner decks, read the tapes.)[/b]",
     "stamp": "SEALED"
   },
-  "tally": "Operator 6,\n\n[b]{sector} is certified.[/b] The Analytical Engine passed your deck in [b]{passed} of 20[/b] trials.\n\nUnits dispatched this shift: {sent}\nUnits written off: {lost}  (at {hull_cost} scrip each, charged against your contract)\nCertification credit: {credit} scrip\nCards in the deck: {cards}\n\nBalance owing: [b]{debt} scrip[/b]\n\nCommendations: none.\n\nNOTICE: {notice}",
+  "tally": "Operator 6,\n\n[b]{sector} is certified.[/b] The Analytical Engine passed your deck in [b]{passed} of 20[/b] trials.\n\nSURVEY FEE: {fee}\n{deductions}{first_try}Paid to your hand: [b]{paid} scrip[/b]\n\nUnits dispatched this shift: {sent}\nUnits written off: {lost}  (at {hull_cost} scrip each, charged against your contract)\nCards in the deck: {cards}\nLost survey beacons recovered here: {found} of {beacons}\n\nBalance owing: [b]{debt} scrip[/b]\n\nNOTICE: {notice}",
   "regulations": "[b]STATION 9  ·  STANDING REGULATIONS[/b]\n\n1. Units are Company property. Damage to units is charged to the dispatching operator.\n\n2. Units do not feel. Operators who believe otherwise are to report to Welfare.\n\n3. Decks are to be composed only from issued type plates.\n\n4. The dispatch lever is to be thrown fully home and released.  [i]nobody checks. — 5[/i]\n\n5. Last words are telemetry artefacts and are not to be transcribed, collected, or repeated.\n\n6. The Wall is not a memorial. It is a record.\n\n7. Operators will not descend.\n\n8. Signals originating below survey depth are to be logged as NOISE.\n\n9. The hangar is closed for audit.\n\n10. Spoiled cards are pulped, not kept. Card stock is charged to the operator.",
   "hangar": {
     "ref": "DA-9/0099",
@@ -130,5 +129,11 @@
     "listeners": "They're blind. They hear him SWIM. STOP when one's near and it goes right past.",
     "gallery": "Things in the alcoves. Eyes light, then it bites where he WAS. KEEP DISTANCE, then go on.",
     "lights": "Those lights aren't on their chart. Follow them. When they run out, the beacon's right there."
+  },
+  "hangar_open": {
+    "ref": "DA-9/0100",
+    "subject": "HANGAR: AUDIT COMPLETE",
+    "body": "The inventory audit of the hangar is complete.\n\nUnits may now be fitted with Company equipment, requisitioned against the operator's wage. Type plates and card-reader slots are issued on the same terms.\n\nEquipment lost with a unit is not charged to the operator. This is a privilege.",
+    "stamp": "APPROVED"
   }
 }

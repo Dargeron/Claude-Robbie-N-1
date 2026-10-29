@@ -61,6 +61,12 @@ func _ready() -> void:
 		["tap_at", Vector2(1170, 40)], ["check", "BACK TO THE DESK closes it", func() -> bool: return not c.wall.visible],
 		["tap_at", Vector2(300, 200)], ["wait", 20], ["check", "tapping the scope magnifies it", func() -> bool: return c.magnified and c.scope.size.x > 1200],
 		["tap_at", Vector2(640, 360)], ["wait", 20], ["check", "and tapping again puts it back", func() -> bool: return not c.magnified and c.scope.size.x < 700],
+		["tap", _hangar], ["check", "the hangar's first tap brings the audit memo", func() -> bool: return c.memo.visible and c.memo.memo.get("subject", "").begins_with("HANGAR")],
+		["tap_at", Vector2(40, 40)], ["check", "which files away", func() -> bool: return not c.memo.visible],
+		["tap", _hangar], ["wait", 10], ["check", "then the hangar opens the Lab", func() -> bool: return c.lab.visible],
+		["tap_at", LabView.SOCKETS["lamp"][0]], ["check", "tapping the LAMP socket opens its drawer", func() -> bool: return c.lab.socket == "lamp"],
+		["tap_at", Vector2(540, 600)], ["check", "tapping a card looks at it", func() -> bool: return c.lab.preview != "-"],
+		["tap_at", Vector2(1248, 30)], ["wait", 10], ["check", "BACK TO THE DESK leaves the Lab", func() -> bool: return not c.lab.visible],
 		["done"],
 	]
 
@@ -126,6 +132,9 @@ func _binder() -> Vector2:
 
 func _wall() -> Vector2:
 	return Desk.r("wall").get_center()
+
+func _hangar() -> Vector2:
+	return Desk.r("hangar_view").get_center()
 
 
 func _screen(p: Vector2) -> Vector2:

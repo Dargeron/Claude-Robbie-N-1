@@ -11,6 +11,7 @@ const SECTORS := ["dark", "jellyfish", "listeners", "gallery", "lights"]
 const TICKS := World.TICKS_PER_SECOND
 
 var state := GameState.new()
+var accounts: Accounts
 var story: Dictionary = {}
 var room_id := "dark"
 var program: Program
@@ -46,6 +47,8 @@ var _transient := {}             # note id -> time it should peel
 var _scrubbed := false
 var _scope_rect := Rect2()
 var _unread_seen := -1
+var _pending_bonus: Array = []   # lost beacons in the dive on the scope, paid as the replay reaches them: [room, i, tick]
+var lab: LabView
 
 
 func _ready() -> void:
@@ -55,6 +58,8 @@ func _ready() -> void:
 	if state.save_path == GameState.SAVE_PATH:
 		state.save_path = SAVE   # tools set their own before the console starts
 	state.load_save()
+	accounts = Accounts.new(state)
+	_pay_old_certificates()
 	_build()
 	var start := SECTORS[0]
 	for id: String in SECTORS:
@@ -142,7 +147,7 @@ func _build() -> void:
 	add_child(porthole)
 	hangar = Topside.HangarWindow.new()
 	_place(hangar, Desk.r("hangar"))
-	hangar.tapped.connect(func() -> void: _show_memo(_memo_from(story["hangar"], "memo")))
+	hangar.tapped.connect(_open_lab)
 	add_child(hangar)
 
 	counter = DebtCounter.new()
@@ -212,6 +217,12 @@ func _build() -> void:
 	wall.entry_chosen.connect(_open_from_wall)
 	add_child(wall)
 
+	lab = LabView.new()
+	lab.visible = false
+	lab.console = self
+	lab.closed.connect(_on_lab_closed)
+	add_child(lab)
+
 	induction = Induction.new()
 	induction.fresh_start.connect(_start_over)
 	induction.done.connect(_on_induction_done)
@@ -242,7 +253,15 @@ func _plates() -> Array:
 	var p: Array = []
 	for i in _shift() + 1:
 		p.append_array(story["shifts"][i]["plates"])
+	for extra: Variant in accounts.plates():
+		if not p.has(extra):
+			p.append(extra)
 	return p
+
+
+## Card-reader slots for this sector: the room's, and the ones bought in the Lab.
+func _slots() -> int:
+	return mini(Accounts.MAX_SLOTS, state.room_state(room_id).room.slots + accounts.slots_bought())
 
 
 func _refresh_plates(fresh: bool) -> void:
@@ -282,16 +301,80 @@ func _lost_total() -> int:
 	return lost
 
 
+## What the operator owes: the passage, every hull lost, less what has been paid in.
 func _debt() -> int:
 	var lost := 0
-	var certs := 0
 	for i in SECTORS.size():
 		for e in state.own_dives(SECTORS[i]):
 			if e["result"] != "exit":
 				lost += 1
+	return int(story["debt_start"]) + lost * int(story["hull_cost"]) - accounts.paid_in()
+
+
+func _sector_losses(id: String) -> int:
+	var n := 0
+	for e in state.own_dives(id):
+		if e["result"] != "exit":
+			n += 1
+	return n
+
+
+func _first_try(id: String) -> bool:
+	var own := state.own_dives(id)
+	return not own.is_empty() and own[0]["result"] == "exit"
+
+
+## A sector certified: the Company pays its survey fee into the operator's hand.
+func _pay_certificate(id: String) -> void:
+	var slip := accounts.pay_sector(id, SECTORS.find(id), _sector_losses(id), _first_try(id))
+	if not slip.is_empty():
+		Sfx.play("relay", -6.0, 0.8)
+
+
+## Saves from before the pay: every sector already certified is paid now, once.
+func _pay_old_certificates() -> void:
+	for i in SECTORS.size():
 		if _certified(i):
-			certs += 1
-	return int(story["debt_start"]) + lost * int(story["hull_cost"]) - certs * int(story["certify_credit"])
+			accounts.pay_sector(SECTORS[i], i, _sector_losses(SECTORS[i]), _first_try(SECTORS[i]))
+
+
+## A lost beacon recovered: its pay drops into the hand.
+func _pay_bonus(id: String, i: int, loud: bool) -> void:
+	var info: Array = state.room_state(id).room.bonus_info
+	if i >= info.size():
+		return
+	if accounts.pay_bonus(id, i, int(info[i]["pay"])) and loud:
+		Sfx.play("stamp", -4.0, 1.2)
+		Sfx.play("relay", -8.0, 1.4)
+
+
+## Pay whatever the dive on the scope recovered and the replay hasn't reached yet.
+func _flush_bonus() -> void:
+	for pb: Array in _pending_bonus:
+		_pay_bonus(pb[0], pb[1], false)
+	_pending_bonus = []
+
+
+func _open_lab() -> void:
+	if not _certified(0):
+		_show_memo(_memo_from(story["hangar"], "memo"))
+		return
+	if not state.extra.get("lab_seen", false):
+		state.extra["lab_seen"] = true
+		state.save()
+		_show_memo(_memo_from(story["hangar_open"], "memo"))
+		return
+	if magnified:
+		_toggle_magnify()
+	scope.replay.playing = false
+	lab.open()
+	Sfx.play("lever", -8.0, 0.7)
+
+
+func _on_lab_closed() -> void:
+	# Parts, plates and slots may have changed: the press and the reader follow.
+	_select_sector(room_id)
+	_refresh_plates(false)
 
 
 func _memo_from(m: Dictionary, kind: String) -> Dictionary:
@@ -328,9 +411,18 @@ func _memo_for(id: String) -> Dictionary:
 		sent += 1
 		if e["result"] != "exit":
 			lost += 1
+	var slip := accounts.paid_for(rid)
+	var deduct := ""
+	if int(slip.get("deductions", 0)) > 0:
+		deduct = "Less %d units beyond the allowance, at %s each: [b]-%s[/b]\n" % [int(slip["over"]), _fmt(int(slip["per_loss"])), _fmt(int(slip["deductions"]))]
+	var first := ""
+	if int(slip.get("first_try", 0)) > 0:
+		first = "Commendation, first unit through: [b]+%s[/b]\n" % _fmt(int(slip["first_try"]))
 	var body := str(story["tally"]).format({
 		"sector": story["sectors"][rid]["short"], "passed": rs.survey.get("passed", 0), "sent": sent, "lost": lost,
-		"hull_cost": _fmt(int(story["hull_cost"])), "credit": _fmt(int(story["certify_credit"])), "cards": _deck_size(rid),
+		"hull_cost": _fmt(int(story["hull_cost"])), "cards": _deck_size(rid),
+		"fee": _fmt(int(slip.get("fee", 0))), "deductions": deduct, "first_try": first, "paid": _fmt(int(slip.get("total", 0))),
+		"found": accounts.found(rid).size(), "beacons": rs.room.bonuses.size(),
 		"debt": _fmt(_debt()), "notice": sh["notice"]})
 	return {"kind": "tally", "ref": "DA-9/T%02d  ·  END OF SHIFT %d" % [i + 1, i + 1], "subject": "SHIFT TALLY", "body": body, "stamp": "CERTIFIED"}
 
@@ -444,6 +536,7 @@ func _open_binder() -> void:
 # ---------------------------------------------------------------- sectors and the deck
 
 func _select_sector(id: String) -> void:
+	_flush_bonus()
 	room_id = id
 	var rs := state.room_state(id)
 	_load_deck(id)
@@ -495,6 +588,7 @@ func _losses(before_serial: int) -> Array:
 
 
 func _show_chart() -> void:
+	scope.bonus_found = accounts.found(room_id)
 	scope.show_chart(state.room_state(room_id).room, state.room_state(room_id).memory, _losses(1 << 30), _sector_label())
 	teleprinter.set_lines([])
 	teleprinter.header = "SECTOR %d READY  ·  NO HULL OUT" % (SECTORS.find(room_id) + 1)
@@ -519,9 +613,13 @@ func _load_deck(id: String) -> void:
 	else:
 		for r: Dictionary in Program.parse(rs.program_text).rules:
 			slot_rules.append(r)
-	table.setup(rs.room.slots, slot_rules, tray_rules)
-	press.slots = rs.room.slots
+	table.setup(_slots_for(id), slot_rules, tray_rules)
+	press.slots = _slots_for(id)
 	program = _program_from_table()
+
+
+func _slots_for(id: String) -> int:
+	return mini(Accounts.MAX_SLOTS, state.room_state(id).room.slots + accounts.slots_bought())
 
 
 static func _rule_of(text: String) -> Dictionary:
@@ -605,7 +703,7 @@ func _load_his_deck() -> void:
 	for r: Dictionary in table.deck():
 		if tray.size() < CardTable.TRAY_MAX:
 			tray.append(r)
-	table.setup(state.room_state(room_id).room.slots, his.rules, tray)
+	table.setup(_slots(), his.rules, tray)
 	Sfx.play("paper", -4.0)
 	_on_deck_changed()
 
@@ -635,8 +733,13 @@ func _dispatch() -> void:
 		return
 	Sfx.play("ui_launch", -6.0)
 	_scrubbed = false
-	var res := state.launch(room_id, program)
-	_show(res["dive"], res["entry"], res["history"])
+	_flush_bonus()
+	var res := state.launch(room_id, program, accounts.kit())
+	var dv: Dive = res["dive"]
+	for e in dv.world.events:
+		if e["type"] == "bonus":
+			_pending_bonus.append([room_id, int(e["i"]), int(e["t"])])
+	_show(dv, res["entry"], res["history"])
 	scope.warm_up()
 	_mark("dispatched")
 	_refresh()
@@ -648,6 +751,7 @@ func _show(dive: Dive, entry: Dictionary, history: Dictionary) -> void:
 	var serial := int(entry.get("serial", -1))
 	var memory := state.memory_before(room_id, entry)
 	var ghost := state.ghost_for(room_id, entry)
+	scope.bonus_found = accounts.found(room_id)
 	scope.play(dive, entry, history, memory, ghost, _losses(serial if serial > 0 else 1 << 30), _sector_label())
 	var lines := Tape.lines(dive, scope.sonar(), serial, _sector_label(), scope.replay.captions, str(entry.get("last_words", "")))
 	teleprinter.set_lines(lines)
@@ -656,6 +760,7 @@ func _show(dive: Dive, entry: Dictionary, history: Dictionary) -> void:
 
 
 func _play_entry(entry: Dictionary) -> void:
+	_flush_bonus()
 	var dive := state.redive(room_id, entry)
 	var history := {}
 	var own := state.own_dives(room_id)
@@ -691,7 +796,8 @@ func _on_torn() -> void:
 func _start_trials() -> void:
 	if survey_run != null:
 		return
-	survey_run = Survey.Run.new(state.room_state(room_id).room, Program.parse(program.to_text()))
+	_flush_bonus()
+	survey_run = Survey.Run.new(state.room_state(room_id).room, Program.parse(program.to_text()), Survey.FLEET, Survey.FIRST_SEED, accounts.kit())
 	trials.results = []
 	trials.running = true
 	dispatch.busy = true
@@ -705,6 +811,8 @@ func _step_trials() -> void:
 		survey_run.step()
 	for i in range(before, survey_run.dives.size()):
 		trials.results.append(survey_run.dives[i]["result"])
+		for b: int in survey_run.dives[i].get("bonus", []):
+			_pay_bonus(survey_run.room.id, b, true)
 		Sfx.play("relay", -10.0, 1.2 if survey_run.dives[i]["result"] == "exit" else 0.7)
 	if not survey_run.done():
 		return
@@ -717,6 +825,7 @@ func _step_trials() -> void:
 	if run.room.id != room_id:
 		return
 	if report["certified"] and not was:
+		_pay_certificate(run.room.id)
 		stamp.slam("CERTIFIED", _scope_rect)
 		Sfx.play("stamp", 0.0)
 		_select_sector(room_id)
@@ -813,7 +922,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if memo.visible or wall.visible or induction.visible:
+	if memo.visible or wall.visible or induction.visible or lab.visible:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var rp := scope.replay
@@ -854,10 +963,20 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(_delta: float) -> void:
 	if survey_run != null:
 		_step_trials()
+	if not _pending_bonus.is_empty() and current_dive != null and scope.has_dive():
+		var k := scope.replay.tick()
+		var keep: Array = []
+		for pb: Array in _pending_bonus:
+			if k >= int(pb[2]):
+				_pay_bonus(pb[0], pb[1], true)
+			else:
+				keep.append(pb)
+		_pending_bonus = keep
+	hangar.open = _certified(0)
 	_update_lamps()
 	_update_mood()
 	press.tray_full = table.tray_full()
-	counter.set_values(_debt(), _lost_total())
+	counter.set_values(_debt(), _lost_total(), accounts.wage())
 	_update_notes()
 
 
@@ -983,7 +1102,7 @@ func _wanted_notes() -> Array:
 	var own := state.own_dives(room_id)
 	var last_lost: bool = not own.is_empty() and own.back()["result"] != "exit"
 	var rs := state.room_state(room_id)
-	var gy := [180.0 + 51.0 * rs.room.slots]
+	var gy := [180.0 + 51.0 * _slots()]
 	var glass := func(id: String, w: float, targets: Array, x := 712.0, advance := true) -> void:
 		out.append([id, Vector2(x, gy[0]), w, targets])
 		if advance:

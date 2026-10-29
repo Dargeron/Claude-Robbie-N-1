@@ -408,3 +408,26 @@ Why this shape (the third map; the hunt broke the first two):
 | `move_towards beacon if not wall_ahead` / `move_towards open_water` | 0/20 | Threads the S the long way; out of charge |
 | `move_towards beacon if energy_below 50` / `follow_wall left` or `move_towards open_water` | 0/20 | When the switch comes, the beacon leads into rock |
 | `move 0 if wall_ahead` / `move 135` | 0/20 | Never gets past the long wall |
+
+
+## Lost beacons (secondary goals, 0.10.0)
+
+Albert, 2026-10-29: every sector has secondary beacons, hidden, each its own puzzle, some needing parts or cards bought
+later, so you come back for them. In a room they are `*`; the header's `bonus` list gives each a name and its pay.
+A lost beacon is hidden on the scope until Robbie senses it (lamp, touch, or its faint ping within two tiles, which
+also counts as light for SWIM TOWARDS LIGHT). Touching it recovers it, and it pays even if he is lost afterwards.
+Each has a reference deck (`programs/<room>/bonus_*.rbt`, `# expect: bonus N`, `# kit: ...`) the tests dive on the
+sector's practice seed.
+
+| Sector | Lost beacon | Pays | One way to get it |
+| --- | --- | --- | --- |
+| The Dark | The bottom cave (far corner) | 1,500 | FOLLOW WALL RIGHT (the other hand; he runs out of charge after, unless the battery bank is fitted) |
+| The Jellyfish | The nest (walled in above the exit, a jellyfish inside) | 3,000 | LAMP OFF · FOLLOW WALL LEFT with plating to take the stings |
+| The Jellyfish | The shellback's corner (bottom right) | 2,000 | LAMP OFF · FOLLOW WALL RIGHT, past the shellback; shoot it and it comes for him (17 of 20 die) |
+| The Listeners | The third shaft (its top, past an eel) | 2,500 | FOLLOW WALL LEFT with silent fins (or STOP IF HOSTILE NEAR 4 · FOLLOW WALL LEFT) |
+| The Gallery | Behind the first mouth (above the first lurker) | 3,000 | SWIM TOWARDS LIGHT · SWIM TOWARDS BEACON with plating (the Lights' plate, a part, and a lurker's bite) |
+| The Lights | The top corner (by the long wall) | 2,000 | FOLLOW WALL LEFT |
+| The Lights | The bottom corner | 4,000 | FOLLOW WALL LEFT with the battery bank |
+
+The Jellyfish gained the nest's wall (row 6, x 33 to 38) and a shellback (`K`) on a three-tile leash in the bottom
+right; its intended decks still pass as before (18, 20, 20, 20 of 20).

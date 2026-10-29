@@ -32,6 +32,7 @@ var eel_hear := 48 * Fx.ONE      # how far eels hear him swim
 var reserve := false             # a second wind when the charge runs out
 var insulated := false           # the shut valve doesn't sting
 var flares := 0
+var laser := true                # the stock tool; the flare launcher takes its socket
 var hydrophone := false
 
 
@@ -80,6 +81,7 @@ static func from_parts(ids: Array) -> Kit:
 				k.insulated = true
 			"flares":
 				k.flares = FLARE_COUNT
+				k.laser = false
 			"hydrophone":
 				k.hydrophone = true
 	if fitted.has("plating"):   # the armour's weight, after whatever drives him

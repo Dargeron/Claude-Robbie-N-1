@@ -742,7 +742,7 @@ func follow_wall_heading(side: int) -> int:
 
 
 func shoot_target() -> int:
-	if laser_cd > 0 or energy < LASER_COST:
+	if not kit.laser or laser_cd > 0 or energy < LASER_COST:
 		return -1
 	var nh := nearest_hostile()
 	if nh[0] == -1 or nh[1] > LASER_RANGE:

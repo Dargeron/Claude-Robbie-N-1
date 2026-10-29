@@ -34,7 +34,8 @@ func _ready() -> void:
 		["tour", 2], ["wait", 24], ["shot", "c00d-tour-reader"],
 		["tour", 3], ["wait", 24], ["shot", "c00e-tour-press"],
 		["tour", 5], ["wait", 24], ["shot", "c00f-tour-lever"],
-		["tour", 11], ["wait", 24], ["shot", "c00g-tour-orders"],
+		["tour", 11], ["wait", 24], ["shot", "c00g-tour-hangar"],
+		["tour", 12], ["wait", 24], ["shot", "c00g2-tour-orders"],
 		["induction_off"],
 		["title", true], ["wait", 50], ["shot", "c00h-title-continue"], ["induction_off"],
 		["wait", 30], ["shot", "c01-start"],
@@ -47,14 +48,21 @@ func _ready() -> void:
 		["dial_order", "follow_wall", "left"], ["wait", 30], ["shot", "c08a-drums"],
 		["print"], ["wait", 72], ["shot", "c08b-printing"], ["wait", 70], ["shot", "c08c-printed"],
 		["insert", 0, 1], ["wait", 20], ["pulp_slot", 0], ["wait", 8], ["shot", "c08e-pulping"], ["wait", 10], ["shot", "c08f-tossed"],
+		["program", "follow_wall right"], ["dispatch"], ["seek_event", "bonus", 12], ["wait", 8], ["shot", "c09a-lost-beacon"],
 		["program", "follow_wall left"], ["dispatch"], ["seek", 0.35], ["wait", 8], ["shot", "c09-dark-follow"],
 		["seek", 1.0], ["wait", 8], ["trials"], ["wait", 6], ["shot", "c10-trials-running"], ["await_trials"], ["wait", 10], ["shot", "c11-certified"],
 		["memo"], ["wait", 12], ["shot", "c12-tally"], ["close"], ["memo"], ["wait", 12], ["shot", "c13-letter"], ["close"],
 		["memo"], ["wait", 12], ["close"],
 		["binder"], ["wait", 10], ["shot", "c14-binder"], ["close"],
+		["lab"], ["wait", 10], ["close"], ["lab"], ["wait", 30], ["shot", "c14b-lab"],
+		["lab_socket", "lamp"], ["lab_preview", "spotlight"], ["wait", 6], ["shot", "c14c-lab-spotlight"],
+		["lab_act", "spotlight"], ["wait", 12], ["shot", "c14d-lab-bought"],
+		["lab_page", "plating"], ["wait", 6], ["shot", "c14e-lab-page"], ["lab_page", ""],
+		["lab_close"], ["wait", 10],
 		["sector", "jellyfish"], ["wait", 6], ["shot", "c15-jellyfish-chart"],
 		["program", "move_towards beacon"], ["dispatch"], ["seek_event", "damage", -10], ["wait", 8], ["shot", "c16-jelly-contact"],
 		["program", "lamp off\nmove_towards beacon"], ["dispatch"], ["seek", 0.4], ["wait", 8], ["shot", "c17-jelly-dark"],
+		["program", "lamp off\nfollow_wall right"], ["dispatch"], ["seek_event", "bonus", -40], ["wait", 8], ["shot", "c17b-shellback"],
 		["seek", 1.0], ["trials"], ["await_trials"], ["wait", 10], ["memo"], ["close"], ["memo"], ["close"], ["memo"], ["close"],
 		["sector", "listeners"], ["program", "stop if hostile_near 4\nmove_towards beacon"], ["dispatch"], ["seek", 0.4], ["wait", 8], ["shot", "c18-listeners"],
 		["unlock"], ["sector", "gallery"], ["program", "keep_distance 4\nmove_towards beacon"], ["dispatch"], ["seek_event", "lurker_wakes", 8], ["wait", 8], ["shot", "c18b-gallery"],
@@ -80,6 +88,18 @@ func _process(_d: float) -> void:
 			await RenderingServer.frame_post_draw
 			get_viewport().get_texture().get_image().save_png("%s/%s.png" % [out_dir, s[1]])
 			print("shot ", s[1])
+		"lab":
+			console._open_lab()
+		"lab_socket":
+			console.lab.socket = s[1]
+		"lab_preview":
+			console.lab.preview = s[1]
+		"lab_act":
+			console.lab._act(s[1])
+		"lab_page":
+			console.lab.page = s[1]
+		"lab_close":
+			console.lab._close()
 		"title":
 			console.induction.show_title(s[1])
 		"welcome":

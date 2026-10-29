@@ -53,10 +53,20 @@ static func reason(rule: Dictionary, code: String) -> String:
 				return "VALVE SHUT" if neg else "NOT SHUT"
 			"executing":
 				return "RUNNING" if neg else "NOT RUNNING"
+			"beacon_seen":
+				return "IN SIGHT" if neg else "NOT IN SIGHT"
+			"stuck":
+				return "STUCK" if neg else "MOVING"
+			"hit":
+				return "HURT" if neg else "NOT HURT"
+			"heard":
+				return "HEARD" if neg else "SILENCE"
 		return "FALSE"
 	match rule["action"]:
 		"shoot":
 			return "NO TARGET"
+		"drop_flare":
+			return "NO FLARES"
 		"keep_distance":
 			return "NOTHING NEAR"
 		"move_towards":

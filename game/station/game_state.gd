@@ -63,13 +63,13 @@ func own_dives(id: String) -> Array:
 	return room_state(id).dives.filter(func(e): return not e.get("survey", false))
 
 
-func launch(id: String, program: Program) -> Dictionary:
+func launch(id: String, program: Program, kit: Kit = null) -> Dictionary:
 	var rs := room_state(id)
 	var serial := next_serial
 	next_serial += 1
 	var history := history_for(id)
 	var seed_v := iterate_seed(id)
-	var dive := Dive.new(rs.room, program, seed_v)
+	var dive := Dive.new(rs.room, program, seed_v, false, kit)
 	dive.vm.record_senses = true
 	var o := dive.run()
 	var entry := {
@@ -78,6 +78,8 @@ func launch(id: String, program: Program) -> Dictionary:
 		"last_words": Voice.last_words(dive, serial, history),
 		"seen": Marshalls.raw_to_base64(dive.world.seen),
 		"path": GameState.encode_path(dive),
+		"kit": dive.kit.to_text(),
+		"bonus": dive.bonuses_taken(),
 	}
 	rs.program_text = program.to_text()
 	rs.dives.append(entry)
@@ -120,13 +122,13 @@ func finish_survey(id: String, program: Program, report: Dictionary) -> Dictiona
 		if d["result"] != "exit":
 			rs.dives.append({"serial": -1, "seed": d["seed"], "text": text, "result": d["result"],
 				"cause": d["cause"], "seconds": d["seconds"], "cpu": program.cpu(), "survey": true,
-				"last_words": ""})
+				"last_words": "", "kit": str(report.get("kit", ""))})
 	save()
 	return report
 
 
 func redive(id: String, entry: Dictionary) -> Dive:
-	var d := Dive.new(room_state(id).room, Program.parse(entry["text"]), int(entry["seed"]))
+	var d := Dive.new(room_state(id).room, Program.parse(entry["text"]), int(entry["seed"]), false, Kit.from_text(str(entry.get("kit", ""))))
 	d.vm.record_senses = true
 	d.run()
 	return d

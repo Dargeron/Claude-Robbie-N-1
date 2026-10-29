@@ -28,6 +28,8 @@ A program is an ordered list of rules: `ORDER [parameter] [if [not] CONDITION [p
 | `stop` | Stop | 1 | Saves movement energy |
 | `shoot` | Shoot laser | 3 | Nearest sensed hostile within 6 tiles and in line of sight; 200 energy; 1 s cooldown |
 | `lamp <on/off>` | Lamp off | 1 | Setting. Off: jellyfish don't come, but Robbie sees much less |
+| `turn <left/right>` | Turn left | 1 | A quarter turn from where he faces; he doesn't think again for about half a second (plate bought in the Lab) |
+| `drop_flare` | Drop flare | 2 | Needs the flare launcher (3 flares, no laser). Burns 10 s; jellyfish within 4 tiles that can see it gather on it instead of the lamp |
 
 `if` costs 1 more CPU, `not` 1 more, plus the condition's own cost.
 
@@ -41,6 +43,10 @@ A program is an ordered list of rules: `ORDER [parameter] [if [not] CONDITION [p
 | `valve_shut` | valve is shut | 2 | Robbie senses the valve ahead and it is closing or closed |
 | `energy_below <25/50/75>` | energy below | 1 | Energy under that percentage |
 | `executing <n>` | executing rule | 2 | Rule n was the one running at the last think |
+| `beacon_seen` | beacon in sight | 2 | Line of sight from Robbie to the beacon (plate bought in the Lab) |
+| `stuck` | stuck | 1 | Robbie moved less than 6 px in the last 2 s (plate bought in the Lab) |
+| `hit` | hit | 1 | Robbie was hurt in the last 2 s (plate bought in the Lab) |
+| `heard` | heard | 2 | Needs the hydrophone: an eel or a shellback within 8 tiles, through rock |
 
 ## Sensing: Robbie only knows what it senses
 
@@ -67,3 +73,13 @@ A program is an ordered list of rules: `ORDER [parameter] [if [not] CONDITION [p
 | Jellyfish | Drifts at 0.25 px/tick. When Robbie's lamp lights it, darts at the light at 1.1 px/tick, faster than Robbie | 1 per sting, 1 s apart |
 | Lurker | Hidden in a wall niche. When Robbie comes within 34 px, its eyes glow for 0.5–0.67 s, then it strikes everything within 38 px. Rests 4 s | 3 (lethal) |
 | Valve | Opens 2 s, trembles 1.5 s, stays shut 5 s; the phase varies per dive. Shut, it stings what touches it; closing on Robbie crushes it | 1 per sting; crush is lethal |
+| Shellback | A slow armoured grazer on a three-tile leash; solid (Robbie bumps off it). Shot, the laser glances off and it charges at 1.2 px/tick for 8 s. Shown yellow on the scope (red while angry); every other creature is red | 2 per hit while angry |
+
+## Parts (the Lab, 0.10.0)
+
+A hull's parts are a `Kit` (game/sim/kit.gd) passed to the dive; no parts is the stock hull above. Each dive's parts
+are saved with it, so replays match. One part per socket: lamp (spotlight 10 tiles and about 17 degrees; floodlight
+3.5 tiles and about 120 degrees; red lamp, which jellyfish ignore), drive (twin screws 1.5 px/tick, double drain,
+eels hear at 6 tiles; silent fins 0.7 px/tick, eels never hear), belly (battery bank +40%; reserve cell, 15% back
+once), hull (plating 5 knocks and 10% slower; insulated, valve stings do nothing), tool (the laser; or the flare
+launcher, which replaces it), hatch (the hydrophone, for IF HEARD).

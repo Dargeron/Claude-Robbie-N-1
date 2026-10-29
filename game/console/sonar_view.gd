@@ -17,6 +17,19 @@ var losses: Array = []        # [{pos: Vector2, serial: int}] where earlier Robb
 var chart_room: Room          # the room when there is no dive
 var contact_ids := {}         # body index -> contact number, in the order Robbie found them
 var dead := 0.0               # 0..1 how far the carrier has dropped (read by the scope)
+var bonus_found: Array = []   # lost beacons the station has already recovered here (shown on the chart)
+
+## Contacts by what they'll do (Albert, 2026-10-29): hostiles red; things that only fight back
+## (the shellback) yellow, red while angry.
+const HOSTILE := Color(1.0, 0.32, 0.24)
+const WARY := Color(1.0, 0.86, 0.32)
+const LOST_BEACON := Color(1.0, 0.78, 0.45)
+
+
+static func contact_color(kind: int, state: int) -> Color:
+	if kind == Body.Kind.SHELLBACK and state != 1:
+		return WARY
+	return HOSTILE
 
 
 func setup(d: Dive) -> void:
@@ -206,6 +219,8 @@ func _draw() -> void:
 	_draw_losses()
 	if dive == null:
 		_draw_drop_point(now)
+		_draw_chart_bonuses(now)
+		_draw_beacon_chart(now)
 		return
 	var rec := dive.rec
 	var k := clampi(int(t), 0, last_tick())
@@ -218,6 +233,8 @@ func _draw() -> void:
 		_draw_wedge(k, rpos)
 	_draw_plants_sonar(k, now)
 	_draw_lures(k, now)
+	_draw_bonuses(k, now)
+	_draw_flares(k, now)
 	_draw_beacon_sonar(k, now)
 	_draw_valve(k, now)
 	_draw_contacts(k, k2, f, now)
@@ -331,19 +348,91 @@ func _draw_lures(k: int, now: float) -> void:
 		_found_ring(pos, k, int(seen[i]), COLD, 12.0)
 
 
+## The beacon is on the scope from the start (Albert, 2026-10-29): its radio is what the
+## receiver is tuned to, so it is the one thing you know before anyone has been down there.
 func _draw_beacon_sonar(k: int, now: float) -> void:
 	var room := dive.room
-	var c := _p(room.exit_cx, room.exit_cy)
-	var font := Desk.font("crt")
+	_beacon_at(_p(room.exit_cx, room.exit_cy), now)
 	if exit_found <= k:
-		for j in 2:
-			var ping := fmod(now + j * 0.8, 1.6) / 1.6
-			draw_arc(c, 4.0 + ping * 26.0, 0, TAU, 36, Color(Desk.PHOSPHOR, 0.7 * (1.0 - ping)), 1.0)
-		draw_circle(c, 2.2, Desk.PHOSPHOR)
-		draw_string(font, c + Vector2(8, -6), "BEACON", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(Desk.PHOSPHOR, 0.85))
-		_found_ring(c, k, exit_found, Desk.PHOSPHOR, 30.0)
-	elif _in_station_memory(room.exit_cx / Fx.TILE, room.exit_cy / Fx.TILE):
-		draw_arc(c, 5.0, 0, TAU, 24, Color(Desk.PHOSPHOR, 0.25), 1.0)
+		_found_ring(_p(room.exit_cx, room.exit_cy), k, exit_found, Desk.PHOSPHOR, 30.0)
+
+
+func _draw_beacon_chart(now: float) -> void:
+	var r := _room()
+	if r != null:
+		_beacon_at(_p(r.exit_cx, r.exit_cy), now)
+
+
+func _beacon_at(c: Vector2, now: float) -> void:
+	for j in 2:
+		var ping := fmod(now + j * 0.8, 1.6) / 1.6
+		draw_arc(c, 4.0 + ping * 26.0, 0, TAU, 36, Color(Desk.PHOSPHOR, 0.7 * (1.0 - ping)), 1.0)
+	draw_circle(c, 2.2, Desk.PHOSPHOR)
+	draw_string(Desk.font("crt"), c + Vector2(8, -6), "BEACON", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(Desk.PHOSPHOR, 0.85))
+
+
+## A lost beacon: nothing on the scope until Robbie senses its faint ping; then a slow amber
+## diamond, and when he reaches it, a ring and RECOVERED.
+func _draw_bonuses(k: int, now: float) -> void:
+	var room := dive.room
+	if room.bonuses.is_empty():
+		return
+	var seen := {}
+	var taken := {}
+	for e in dive.world.events:
+		if e["type"] == "bonus_seen":
+			seen[int(e["i"])] = int(e["t"])
+		elif e["type"] == "bonus":
+			taken[int(e["i"])] = int(e["t"])
+	var font := Desk.font("crt")
+	for i in room.bonuses.size():
+		var pos := Vector2(room.bonuses[i].x * 16 + 8, room.bonuses[i].y * 16 + 8)
+		if taken.has(i) and int(taken[i]) <= k:
+			var age := k - int(taken[i])
+			if age < 60:
+				draw_arc(pos, 4.0 + age * 0.6, 0, TAU, 24, Color(LOST_BEACON, 0.8 * (1.0 - age / 60.0)), 1.5)
+			_diamond(pos, 3.0, Color(LOST_BEACON, 0.5))
+			draw_string(font, pos + Vector2(7, -5), "RECOVERED", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(LOST_BEACON, 0.7))
+		elif (seen.has(i) and int(seen[i]) <= k) or bonus_found.has(i):
+			var pulse := 0.6 + 0.4 * sin(now * 2.2 + i)
+			Desk.draw_glow(self, pos, 10.0 * pulse, Color(LOST_BEACON, 0.45))
+			_diamond(pos, 3.5, Color(LOST_BEACON, 0.95 if not bonus_found.has(i) else 0.45))
+			draw_string(font, pos + Vector2(7, -5), "LOST BEACON" if not bonus_found.has(i) else "RECOVERED", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(LOST_BEACON, 0.75))
+			if seen.has(i):
+				_found_ring(pos, k, int(seen[i]), LOST_BEACON, 14.0)
+
+
+## On the chart: the lost beacons the station has already recovered here (the rest stay hidden).
+func _draw_chart_bonuses(_now: float) -> void:
+	var r := _room()
+	if r == null:
+		return
+	var font := Desk.font("crt")
+	for i in r.bonuses.size():
+		if not bonus_found.has(i):
+			continue
+		var pos := Vector2(r.bonuses[i].x * 16 + 8, r.bonuses[i].y * 16 + 8)
+		_diamond(pos, 3.0, Color(LOST_BEACON, 0.5))
+		draw_string(font, pos + Vector2(7, -5), "RECOVERED", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(LOST_BEACON, 0.55))
+
+
+func _diamond(c: Vector2, r: float, col: Color) -> void:
+	draw_colored_polygon(PackedVector2Array([c + Vector2(0, -r), c + Vector2(r, 0), c + Vector2(0, r), c + Vector2(-r, 0)]), col)
+
+
+## Flares he dropped: a hot white-orange point while they burn.
+func _draw_flares(k: int, now: float) -> void:
+	for e in dive.world.events:
+		if e["type"] != "flare":
+			continue
+		var age := k - int(e["t"])
+		if age < 0 or age > World.FLARE_TICKS:
+			continue
+		var pos := _p(int(e["x"]), int(e["y"]))
+		var flick := 0.8 + 0.2 * sin(now * 23.0 + float(e["t"]))
+		var fade := 1.0 - float(age) / World.FLARE_TICKS
+		Desk.draw_glow(self, pos, 26.0 * flick, Color(1.0, 0.62, 0.3, 0.5 * fade))
+		draw_circle(pos, 1.8, Color(1.0, 0.92, 0.75, fade))
 
 
 ## The beacon's radio bearing: a small green tick beside Robbie.
@@ -374,13 +463,14 @@ func _draw_contacts(k: int, k2: int, f: float, now: float) -> void:
 			if ls >= 0 and k - ls < FADE_TICKS + SENSE_HOLD:
 				var fade := 1.0 - float(k - ls - SENSE_HOLD) / FADE_TICKS
 				var at := _p(rec.bx[i][ls], rec.by[i][ls])
-				draw_arc(at, 4.0 + (1.0 - fade) * 4.0, 0, TAU, 16, Color(Desk.PHOSPHOR, 0.3 * clampf(fade, 0.0, 1.0)), 1.0)
+				draw_arc(at, 4.0 + (1.0 - fade) * 4.0, 0, TAU, 16, Color(contact_color(kind, state), 0.3 * clampf(fade, 0.0, 1.0)), 1.0)
 			continue
 		var pos := _smooth_pos(i, k, f, 4) if kind == Body.Kind.JELLYFISH else _lerp_pos(rec.bx[i], rec.by[i], k, k2, f)
+		var tint := contact_color(kind, state)
 		if i < first_sensed.size():
-			_found_ring(pos, k, first_sensed[i], Desk.PHOSPHOR, 12.0)
+			_found_ring(pos, k, first_sensed[i], tint, 12.0)
 		var hot := state == 1
-		var col := Color(Desk.PHOSPHOR, 1.0 if hot else 0.8)
+		var col := Color(tint, 1.0 if hot else 0.8)
 		match kind:
 			Body.Kind.JELLYFISH:
 				var beat := sin(now * (8.0 if hot else 3.0) + i * 1.7)
@@ -392,7 +482,7 @@ func _draw_contacts(k: int, k2: int, f: float, now: float) -> void:
 					var sway := sin(now * 4.0 + i + tt) * 1.2
 					draw_line(Vector2(bx, pos.y + 1), Vector2(bx + sway, pos.y + 6.0 + 0.5 * beat), Color(col, 0.6), 1.0)
 				if hot:
-					draw_arc(pos, 7.0 + 2.0 * sin(now * 10.0), 0, TAU, 16, Color(Desk.PHOSPHOR, 0.5), 1.0)
+					draw_arc(pos, 7.0 + 2.0 * sin(now * 10.0), 0, TAU, 16, Color(tint, 0.5), 1.0)
 			Body.Kind.EEL:
 				var back := _p(rec.bx[i][maxi(k - 5, 0)], rec.by[i][maxi(k - 5, 0)])
 				var dir := (pos - back).normalized() if pos.distance_to(back) > 0.5 else Vector2(0, 1)
@@ -407,16 +497,27 @@ func _draw_contacts(k: int, k2: int, f: float, now: float) -> void:
 					var a := TAU * s / 12.0
 					spikes.append(pos + Vector2.from_angle(a) * (7.0 if s % 2 == 0 else 4.5) * (1.0 + (0.15 * sin(now * 18.0) if hot else 0.0)))
 				draw_polyline(spikes, col, 1.2)
+			Body.Kind.SHELLBACK:
+				# A domed shell with plates, and little legs going.
+				draw_arc(pos, 7.5, PI * 1.05, PI * 1.95, 14, col, 1.6)
+				draw_line(pos + Vector2(-7.3, 1), pos + Vector2(7.3, 1), col, 1.4)
+				for s in 3:
+					draw_line(pos + Vector2(-4 + s * 4, -6.5), pos + Vector2(-3 + s * 3, 0.5), Color(col, 0.6), 1.0)
+				for s in 4:
+					var lx := pos.x - 5.0 + s * 3.3
+					draw_line(Vector2(lx, pos.y + 1.5), Vector2(lx + sin(now * 6.0 + s) * 1.2, pos.y + 4.5), Color(col, 0.7), 1.0)
+				if hot:
+					draw_arc(pos, 10.0 + 2.0 * sin(now * 12.0), 0, TAU, 18, Color(tint, 0.6), 1.2)
 			_:
 				draw_circle(pos, 2.5, col)
 		var n: int = contact_ids.get(i, 0)
 		if n > 0:
-			draw_string(font, pos + Vector2(7, -5), "C-%d" % n, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(Desk.PHOSPHOR, 0.7))
+			draw_string(font, pos + Vector2(7, -5), "C-%d" % n, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(tint, 0.75))
 	for e in dive.world.events:
 		if e["type"] == "lurker_strikes" and k >= e["t"] and k < e["t"] + 8:
 			var b: int = e["src"]
 			draw_arc(_p(rec.bx[b][e["t"]], rec.by[b][e["t"]]), 10.0 + (k - e["t"]) * 4.0, 0, TAU, 24,
-				Color(Desk.PHOSPHOR, 1.0 - (k - e["t"]) / 8.0), 2.0)
+				Color(HOSTILE, 1.0 - (k - e["t"]) / 8.0), 2.0)
 
 
 ## How Bathy is drawn, not where he is: he never quite holds still. A slow hover, and while he

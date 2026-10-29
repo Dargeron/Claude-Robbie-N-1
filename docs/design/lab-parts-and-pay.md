@@ -1,6 +1,14 @@
 # The Lab, its parts, the pay, and what the deep could hold
 
-Status: **proposal for Albert to review, nothing built** (2026-10-28). Albert asked for: rewards from the Company after
+Status: **partly built in 0.10.0** (2026-10-29): Albert said yes to the pay and the debt and chose Lab draft C.
+Built: the pay as in section 1 (survey fee by tries, first-try commendation, lost beacons paying on recovery; IN HAND
+beside OWING; paying in against the debt), the six sockets, and these parts: spotlight, floodlight, red lamp, twin
+screws, silent fins, flare launcher (replaces the laser), hydrophone, battery bank, reserve cell, plating, insulated
+hull; the plates TURN LEFT/RIGHT, IF BEACON IN SIGHT, IF STUCK, IF HIT (and DROP FLARE, IF HEARD with their parts);
+card-reader slots 3 to 6; the shellback (a yellow contact: harmless unless shot); lost beacons in all five sectors.
+Prices and words: game/content/lab/parts.json; what parts do: game/sim/kit.gd. Not built yet: the other parts, the
+lean-deck and full-chart bonuses, caches, the ONCE / FOR n SECONDS / AND modifiers, the regions. First written
+2026-10-28 as a proposal: Albert asked for: rewards from the Company after
 each mission that depend on how many tries it took; a Lab where the pay buys new instructions and better equipment
 for Robbie (the obvious and the surprising); and a deeper brainstorm of level ideas and instructions. The Lab's
 screen layout is in three drafts, in `docs/design/lab-drafts.md`.

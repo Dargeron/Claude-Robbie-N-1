@@ -195,6 +195,7 @@ class HangarWindow:
 	extends Control
 	signal tapped
 	var hulls := 3
+	var open := false          # the audit is over once Sector 1 is certified: the Lab is through here
 
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_STOP
@@ -230,6 +231,16 @@ class HangarWindow:
 			draw_circle(body + Vector2(0, -1), 6.0, Color(0.05, 0.06, 0.07))
 			draw_arc(body + Vector2(0, -1), 6.0, 0, TAU, 16, Color(0.7 * lit, 0.55 * lit, 0.3 * lit), 1.2)
 			draw_string(Desk.font("plate"), body + Vector2(-8, 22), "N+%d" % (i + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.8, 0.7, 0.5, 0.35))
+		if open:
+			# Open: the lamp is on inside and a red pull says you may go through.
+			Desk.draw_glow(self, r.get_center(), 50.0, Color(1.0, 0.75, 0.4, 0.12 + 0.04 * sin(now * 2.0)))
+			draw_rect(Rect2(r.position + Vector2(4, 4), Vector2(r.size.x * 0.3, 3)), Color(1, 1, 1, 0.06))
+			var k := r.end - Vector2(12, 12)
+			draw_circle(k, 6.0, Color(0.36, 0.08, 0.05))
+			draw_circle(k, 4.5, Color(0.6, 0.14, 0.08))
+			var pr2 := Desk.plaque_rect("hangar")
+			Desk.engraved(self, Rect2(pr2.position - position, pr2.size), Desk.plaque("hangar")[4], 13)
+			return
 		# Sealed: stencilled tape across the glass.
 		draw_set_transform(r.get_center(), -0.18, Vector2.ONE)
 		draw_rect(Rect2(-70, -9, 140, 18), Color(0.75, 0.6, 0.12, 0.85))

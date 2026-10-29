@@ -7,7 +7,7 @@ config_version=5
 
 config/name="Robbie N+1"
 config/description="Program Robbie, send it into Jupiter's dark ocean, watch it die, send the next one."
-config/version="0.9.0-induction"
+config/version="0.10.0-hangar"
 run/main_scene="res://console/operator.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 

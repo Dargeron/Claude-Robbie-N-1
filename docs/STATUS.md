@@ -1,12 +1,12 @@
 # Status
 
-Updated 2026-10-28, session 44: **0.9.0, a title screen and an induction.** Albert (on 0.8.1): the levels could be
-okay; next, (1) a title screen and a proper tutorial instead of notes that appear, (2) design the Lab, the parts and
-the rewards (cool and surprising equipment and instructions, for his review), (3) three drafts of the Lab screen.
-Done: (1) in the game (title, welcome page, a 12-step tour of the office under a work lamp, then the first orders;
-Op. 5's notes kept only as one hint per sector); (2) docs/design/lab-parts-and-pay.md (the pay by tries, 44 parts in
-six sockets, new cards, 24 sector ideas in four regions); (3) docs/design/lab-drafts.md with three mock-ups
-(docs/art/lab/). Waiting on Albert: his pick of Lab draft, and his answers on the pay and the parts.
+Updated 2026-10-29, session 45: **0.10.0, the Lab and the pay.** Albert chose Lab draft C (in A's room, with B's
+catalogue page on a long press) and said yes to the pay and the debt. He also asked for secondary missions (hidden
+lost beacons that pay, each its own puzzle, some needing parts), hostiles red on the scope and things that only fight
+back yellow, and the final beacon visible from the start. All built: the Kit (parts in the sim), lost beacons in all
+five sectors (seven in all, each with a reference deck), the shellback, new cards, the survey fee by tries with IN
+HAND beside OWING, the Lab (game/console/lab_view.gd) with Bathy drawn in layers. Waiting on Albert: his playtest of
+the Lab and the lost beacons; which further parts and cards to build next (docs/design/lab-parts-and-pay.md).
 
 ## Where we are
 

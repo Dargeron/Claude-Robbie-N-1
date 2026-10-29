@@ -1,21 +1,26 @@
-# 0.9.0-induction · A title screen and a tour of the office
+# 0.10.0-hangar · The Lab, pay, and lost beacons
 
-The game now starts properly.
+The hangar is open, and the Company pays.
 
-- **A title screen.** The desk in the dark, the scope still sweeping, Bathy blinking in his porthole, and the
-  nameplate. BEGIN on a new game. On a game you've played: CONTINUE, SHOW ME THE OFFICE AGAIN, or NEW CONTRACT
-  (start over; it asks twice). Press **Esc** on the desk at any time to come back to it.
-- **A welcome.** One page in plain words: you're the new operator, you explore Jupiter's ocean with Robbies, you
-  can't steer them, you give them cards; make cards, send him, watch, fix them.
-- **A tour of the office.** Twelve short steps. Each machine is lit in turn while the rest of the desk is dark,
-  with a card saying what it's for: the scope, Robbie's face, the card reader, the press, the pulp chute and the
-  counter, the lever, the recorder, the teleprinter, the sea trials, orders and sectors, the binder and the Wall.
-  Then your first orders.
-- **Fewer notes.** The grease-pencil notes that explained the controls as you went are gone. Op. 5 now leaves only
-  his one hint for each sector. Before your first Robbie, the lever's grip glows instead.
+- **You get paid.** Certify a sector and the Company pays its survey fee into your hand: 3,000 for Sector 1, up to
+  7,000 for Sector 5. Every Robbie lost after the first two costs a little of it, and a first-try success earns 1,000
+  more. The counter now has two wheels: what you OWE, and what you have IN HAND. The tally reads like a payslip.
+  (If you already certified sectors, you're paid for them when you open this version.)
+- **Lost beacons.** Every sector hides lost survey beacons: seven in all, worth 1,500 to 4,000 each. They're not on
+  the scope until a Robbie finds one. Each is its own puzzle: some want a different deck, some want a part from the
+  Lab or a card from a later sector. A Robbie who touches one sends its code home, even if he's lost after.
+- **The Lab.** Tap the hangar window (top right) once Sector 1 is certified. Bathy hangs in the middle with his six
+  sockets round him: tap one, and the parts that fit it slide up from the bench. Tap a part to see him wearing it and
+  what changes; tap its stamp to buy it or fit it. Hold a part (or tap its "i") for its catalogue page. On the right:
+  new type plates (TURN, IF BEACON IN SIGHT, IF STUCK, IF HIT) and extra card slots. At the top you can pay scrip in
+  against your debt.
+- **Parts:** spotlight, floodlight, red lamp (jellyfish can't see it), twin screws, silent fins (eels can't hear
+  them), flare launcher (DROP FLARE; jellyfish go to the flare), hydrophone (IF HEARD), battery bank, reserve cell,
+  plating, insulated hull. Some go on sale only after later sectors.
+- **The scope:** hostiles are red now. The new **shellback** is yellow: it's harmless unless you shoot it. The final
+  beacon is on the scope from the start.
 
-To see it from the start on the tablet, choose NEW CONTRACT on the title (your old progress is torn up), or just
-SHOW ME THE OFFICE AGAIN to keep it.
+Where to look first: Sector 1's lost beacon (try the other hand), then the Lab.
 
 Install as before: the `.apk` on the tablet (it updates the copy you have), or unzip the Windows build and run
 `RobbieN1.exe`.

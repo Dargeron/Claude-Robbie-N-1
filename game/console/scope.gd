@@ -18,6 +18,7 @@ var room: Room
 var sector_label := ""
 var serial := 0
 var entry: Dictionary = {}
+var bonus_found: Array = []    # lost beacons this sector's station already recovered (set before show_chart/play)
 var _power := 0.0
 
 
@@ -80,6 +81,7 @@ func show_chart(r: Room, memory: PackedByteArray, losses: Array, label: String) 
 		replay.view = null
 	chart.visible = true
 	chart.losses = losses
+	chart.bonus_found = bonus_found
 	chart.setup_chart(r, memory)
 
 
@@ -95,6 +97,7 @@ func play(dive: Dive, e: Dictionary, history: Dictionary, memory: PackedByteArra
 	var v := replay.view as SonarView
 	v.ghost = ghost
 	v.losses = losses
+	v.bonus_found = bonus_found
 	v.set_memory(memory)
 
 
@@ -137,7 +140,11 @@ class ScopeHud:
 		var gd := Color(Desk.PHOSPHOR, 0.55)
 		var now := Time.get_ticks_msec() / 1000.0
 		draw_string(f, Vector2(46, 58), scope.sector_label, HORIZONTAL_ALIGNMENT_LEFT, -1, 34, gd)
+		var lb := SonarView.LOST_BEACON
+		var total := scope.room.bonuses.size() if scope.room != null else 0
 		if not scope.has_dive():
+			if total > 0:
+				draw_string(f, Vector2(1020, 58), "LOST BEACONS %d/%d" % [scope.bonus_found.size(), total], HORIZONTAL_ALIGNMENT_LEFT, -1, 28, Color(lb, 0.8))
 			var msg := "NO CARRIER"
 			if fmod(now, 1.6) < 1.1:
 				Desk.centred(self, Rect2(0, 600, 1280, 60), msg, f, 44, Color(Desk.PHOSPHOR, 0.7))
@@ -154,13 +161,27 @@ class ScopeHud:
 		draw_string(f, Vector2(1020, 58), "T+%02d:%04.1f" % [int(secs) / 60, fmod(secs, 60.0)], HORIZONTAL_ALIGNMENT_LEFT, -1, 38, g)
 		# Hull and charge.
 		draw_string(f, Vector2(1020, 96), "HULL", HORIZONTAL_ALIGNMENT_LEFT, -1, 28, gd)
-		for h in World.R_HP:
+		for h in d.kit.hp:
 			var on := h < rec.rhp[k]
-			draw_rect(Rect2(1080 + h * 30, 76, 22, 16), Desk.AMBER if on else Color(Desk.AMBER, 0.15))
+			draw_rect(Rect2(1080 + h * (150.0 / d.kit.hp), 76, 150.0 / d.kit.hp - 8.0, 16), Desk.AMBER if on else Color(Desk.AMBER, 0.15))
 		var e := float(rec.ren[k]) / float(d.world.energy_max)
 		draw_string(f, Vector2(1020, 128), "CHG", HORIZONTAL_ALIGNMENT_LEFT, -1, 28, gd)
 		draw_rect(Rect2(1080, 112, 150, 12), Color(Desk.PHOSPHOR, 0.15))
 		draw_rect(Rect2(1080, 112, 150.0 * e, 12), g if e > 0.25 else Color(Desk.RED_LAMP, 0.9))
+		# Lost beacons: how many the station has here, and a banner as one comes home.
+		if total > 0:
+			var got := scope.bonus_found.duplicate()
+			for ev in d.world.events:
+				if ev["type"] == "bonus" and int(ev["t"]) <= k:
+					if not got.has(int(ev["i"])):
+						got.append(int(ev["i"]))
+					if k - int(ev["t"]) < 90:
+						var info: Dictionary = d.room.bonus_info[int(ev["i"])]
+						var line := "LOST BEACON RECOVERED  ·  %s  ·  +%s SCRIP" % [info["name"], Accounts.fmt(int(info["pay"]))]
+						var lw := f.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 32).x
+						draw_rect(Rect2(640 - lw / 2 - 16, 160, lw + 32, 44), Color(0, 0, 0, 0.6))
+						draw_string(f, Vector2(640 - lw / 2, 192), line, HORIZONTAL_ALIGNMENT_LEFT, -1, 32, lb)
+			draw_string(f, Vector2(1020, 160), "LOST %d/%d" % [got.size(), total], HORIZONTAL_ALIGNMENT_LEFT, -1, 28, Color(lb, 0.8))
 		# Robbie's voice, as he sends it.
 		var cap: String = rp.caption_at(k)
 		if cap != "":

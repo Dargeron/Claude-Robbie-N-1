@@ -15,6 +15,9 @@ const ORDERS := [
 	["move_towards", "light", "towards_light"],
 	["shoot", "", "shoot"],
 	["move_towards", "open_water", "towards_open_water"],
+	["turn", "left", "turn"], ["turn", "right", "turn"],
+	["drop_flare", "", "flare"],
 ]
-const CONDS := ["", "wall_ahead", "wall_behind", "hostile_near", "energy_below", "executing", "valve_open", "valve_shut"]
+const CONDS := ["", "wall_ahead", "wall_behind", "hostile_near", "energy_below", "executing", "valve_open", "valve_shut",
+	"beacon_seen", "stuck", "hit", "heard"]
 const COND_VALUES := {"hostile_near": ["2", "4", "6"], "energy_below": ["25", "50", "75"], "executing": ["1", "2", "3", "4", "5", "6"]}

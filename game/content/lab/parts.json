@@ -1,0 +1,62 @@
+{
+  "_doc": "The Lab's catalogue (docs/design/lab-parts-and-pay.md): what each part and plate is called, costs, and says, and when the Company starts selling it (unlock = sectors certified). What a part does in the water is game/sim/kit.gd. The pay is here too.",
+  "sockets": ["hatch", "lamp", "drive", "tool", "belly", "hull"],
+  "socket_names": {"hatch": "HATCH", "lamp": "LAMP", "drive": "DRIVE", "tool": "TOOL", "belly": "BELLY", "hull": "HULL"},
+  "stock": {
+    "hatch": {"name": "ANTENNA", "text": "Telemetry home. Nothing more."},
+    "lamp": {"name": "STANDARD LAMP", "text": "Six tiles ahead, a 70 degree cone."},
+    "drive": {"name": "STANDARD PODS", "text": "A tile a second."},
+    "tool": {"name": "LASER", "text": "The Company's patent. SHOOT, once the plate is issued."},
+    "belly": {"name": "STANDARD CELL", "text": "The sector's charge."},
+    "hull": {"name": "STANDARD HULL", "text": "Three knocks."}
+  },
+  "parts": [
+    {"id": "spotlight", "socket": "lamp", "name": "SPOTLIGHT", "price": 3000, "unlock": 1,
+      "text": "Ten tiles, a narrow cone. Sees far; is seen far.",
+      "story": "A narrow beam for long corridors: it reaches ten tiles, but the cone is less than half as wide. Jellyfish see it from as far away as he sees them."},
+    {"id": "floodlight", "socket": "lamp", "name": "FLOODLIGHT", "price": 3000, "unlock": 1,
+      "text": "Three and a half tiles, almost all the way round.",
+      "story": "Light everywhere close by and nowhere far: it sees round corners and what waits at his side, and never down a corridor."},
+    {"id": "red_lamp", "socket": "lamp", "name": "RED LAMP", "price": 5000, "unlock": 2,
+      "text": "Jellyfish can't see red. The lamp stays on; they don't come.",
+      "story": "Most things in the deep can't see red light at all. The jellyfish don't come to it. The Company's engineers say this is a coincidence."},
+    {"id": "twin_screws", "socket": "drive", "name": "TWIN SCREWS", "price": 4000, "unlock": 1,
+      "text": "Half again as fast. Loud: eels hear him twice as far.",
+      "story": "Two four-bladed screws: half as fast again, and thirstier. The eels hear him six tiles off instead of three."},
+    {"id": "silent_fins", "socket": "drive", "name": "SILENT FINS", "price": 4000, "unlock": 2,
+      "text": "Slower. Eels can't hear him at all.",
+      "story": "Soft fins instead of screws. He swims at seven tenths, and makes no sound the eels can hear."},
+    {"id": "flares", "socket": "tool", "name": "FLARE LAUNCHER", "price": 5000, "unlock": 2, "plates": ["flare"],
+      "text": "New card: DROP FLARE. Jellyfish go to the flare, not his lamp.",
+      "story": "Three flares in a rack. Each burns for ten seconds where he drops it, and jellyfish nearby gather on it instead of him. Replaces the laser while fitted."},
+    {"id": "hydrophone", "socket": "hatch", "name": "HYDROPHONE", "price": 4000, "unlock": 2, "plates": ["heard"],
+      "text": "New card: IF HEARD. Eels and shellbacks, eight tiles, through rock.",
+      "story": "An ear trumpet on the hatch. It hears eels and shellbacks eight tiles away, rock or no rock. It doesn't hear jellyfish: they make no sound."},
+    {"id": "battery_bank", "socket": "belly", "name": "BATTERY BANK", "price": 4000, "unlock": 1,
+      "text": "Forty per cent more charge.",
+      "story": "Two spare cells slung under his belly. Forty per cent more charge for long sectors."},
+    {"id": "reserve_cell", "socket": "belly", "name": "RESERVE CELL", "price": 3500, "unlock": 1,
+      "text": "When the charge runs out, he gets 15% back. Once.",
+      "story": "A sealed cell that wakes when the main one dies: a second wind of fifteen per cent, once per dive."},
+    {"id": "plating", "socket": "hull", "name": "PLATING", "price": 4000, "unlock": 1,
+      "text": "Two more knocks. A tenth slower.",
+      "story": "A riveted belt of armour round his middle: five knocks instead of three, and a tenth slower for the weight."},
+    {"id": "insulated", "socket": "hull", "name": "INSULATED HULL", "price": 2500, "unlock": 3,
+      "text": "A shut valve doesn't sting. Its crush still kills.",
+      "story": "Rubberised seams. The valves' stings don't get through; nothing stops a valve closing on him."}
+  ],
+  "plates": [
+    {"id": "turn", "name": "TURN LEFT / RIGHT", "price": 1500, "unlock": 1, "text": "A quarter turn from where he faces."},
+    {"id": "beacon_seen", "name": "IF BEACON IN SIGHT", "price": 2500, "unlock": 1, "text": "Water all the way to the beacon."},
+    {"id": "stuck", "name": "IF STUCK", "price": 2500, "unlock": 2, "text": "He's got nowhere in two seconds."},
+    {"id": "hit", "name": "IF HIT", "price": 2000, "unlock": 2, "text": "He was hurt in the last two seconds."}
+  ],
+  "slots": [6000, 10000, 14000, 18000],
+  "pay": {
+    "fee": [3000, 4000, 5000, 6000, 7000],
+    "per_loss": [250, 300, 350, 400, 450],
+    "free_losses": 2,
+    "floor_pct": 40,
+    "first_try": 1000
+  }
+}
